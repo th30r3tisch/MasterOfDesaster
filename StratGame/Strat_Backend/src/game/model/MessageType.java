@@ -1,5 +1,0 @@
-package game.model;
-
-public enum MessageType {
-    PLAYER, DISCONNECTED, CONNECTED, SERVER, NOTIFICATION, ATTACK, REMOVE_ATTACK, INIT, CHANGE_OWNER
-}

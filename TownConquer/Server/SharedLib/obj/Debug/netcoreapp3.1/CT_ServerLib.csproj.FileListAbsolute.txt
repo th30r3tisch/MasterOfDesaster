@@ -1,0 +1,8 @@
+C:\Users\theoretisch\source\repos\CT_ServerLib\bin\Debug\netcoreapp3.1\CT_ServerLib.deps.json
+C:\Users\theoretisch\source\repos\CT_ServerLib\bin\Debug\netcoreapp3.1\CT_ServerLib.dll
+C:\Users\theoretisch\source\repos\CT_ServerLib\obj\Debug\netcoreapp3.1\CT_ServerLib.csprojAssemblyReference.cache
+C:\Users\theoretisch\source\repos\CT_ServerLib\obj\Debug\netcoreapp3.1\CT_ServerLib.AssemblyInfoInputs.cache
+C:\Users\theoretisch\source\repos\CT_ServerLib\obj\Debug\netcoreapp3.1\CT_ServerLib.AssemblyInfo.cs
+C:\Users\theoretisch\source\repos\CT_ServerLib\bin\Debug\netcoreapp3.1\CT_ServerLib.pdb
+C:\Users\theoretisch\source\repos\CT_ServerLib\obj\Debug\netcoreapp3.1\CT_ServerLib.dll
+C:\Users\theoretisch\source\repos\CT_ServerLib\obj\Debug\netcoreapp3.1\CT_ServerLib.pdb
