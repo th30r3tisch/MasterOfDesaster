@@ -1,5 +1,9 @@
 ﻿using SharedLibrary;
+using SharedLibrary.Models;
+using System.Collections.Generic;
+using System.IO;
 using System.Net;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 public class ClientHandle : MonoBehaviour
@@ -16,14 +20,14 @@ public class ClientHandle : MonoBehaviour
         Client.instance.udp.Connect(((IPEndPoint)Client.instance.tcp.socket.Client.LocalEndPoint).Port);
     }
 
-    public static void SpawnPlayer(Packet _packet) {
+    public static void CreateWorld(Packet _packet) {
         int _id = _packet.ReadInt();
         string _username = _packet.ReadString();
-        System.Numerics.Vector3 _postition = _packet.ReadVector3();
-        Vector3 _postitionUnity = new Vector3(_postition.X, _postition.Y, _postition.Z);
-        System.Numerics.Quaternion _rotation = _packet.ReadQuaternion();
-        Quaternion _rotationUnity = new Quaternion(_rotation.X, _rotation.Y, _rotation.Z, _rotation.W);
+        int _seed = _packet.ReadInt();
 
-        GameManager.instance.SpawnPlayer(_id, _username, _postitionUnity, _rotationUnity);
+        //System.Numerics.Vector3 _postition = _packet.ReadVector3();
+        //Vector3 _postitionUnity = new Vector3(_postition.X, _postition.Y, _postition.Z);
+
+        GameManager.instance.InitTowns(_id, _seed);
     }
 }

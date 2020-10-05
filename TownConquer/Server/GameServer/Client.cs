@@ -1,8 +1,9 @@
-﻿using SharedLibrary;
+﻿using GameServer.Models;
+using SharedLibrary;
 using System;
+using System.Drawing;
 using System.Net;
 using System.Net.Sockets;
-using System.Numerics;
 
 namespace GameServer {
     class Client {
@@ -150,21 +151,21 @@ namespace GameServer {
             }
         }
 
-        public void SendIntoGame(string _playerName) {
-            player = new Player(id, _playerName, new Vector3(0, 0, 0), new Quaternion(0,0,0,0));
+        public void SendIntoGame(string _playerName, Color _color) {
+            player = new Player(id, _playerName, _color);
 
             // send every already connected player to the new player
             foreach (Client _client in Server.clients.Values) {
                 if (_client.player != null) {
                     if (_client.id != id) {
-                        ServerSend.SpawnPlayer(id, _client.player);
+                        ServerSend.CreateWorld(id, _client.player);
                     }
                 }
             }
              // send the new players info to all connected players
             foreach (Client _client in Server.clients.Values) {
                 if (_client.player != null) {
-                    ServerSend.SpawnPlayer(_client.id, player);
+                    ServerSend.CreateWorld(_client.id, player);
                 }
             }
         }

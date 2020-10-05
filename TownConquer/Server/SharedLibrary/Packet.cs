@@ -1,20 +1,22 @@
-﻿using System;
+﻿using SharedLibrary.Models;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Numerics;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace SharedLibrary {
     /// <summary>Sent from server to client.</summary>
     public enum ServerPackets {
         welcome = 1,
-        spawnPlayer,
-        playerPosition
+        createWorld
     }
 
     /// <summary>Sent from client to server.</summary>
     public enum ClientPackets {
-        welcomeReceived = 1,
-        playerMovement
+        welcomeReceived = 1
     }
 
     public class Packet : IDisposable {
@@ -151,6 +153,14 @@ namespace SharedLibrary {
             Write(_value.Y);
             Write(_value.Z);
             Write(_value.W);
+        }
+        /// <summary>Adds a Color to the packet.</summary>
+        /// <param name="_value">The Color to add.</param>
+        public void Write(Color _value) {
+            Write((int)_value.A);
+            Write((int)_value.R);
+            Write((int)_value.G);
+            Write((int)_value.B);
         }
         #endregion
 
@@ -302,6 +312,12 @@ namespace SharedLibrary {
         /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
         public Quaternion ReadQuaternion(bool _moveReadPos = true) {
             return new Quaternion(ReadFloat(_moveReadPos), ReadFloat(_moveReadPos), ReadFloat(_moveReadPos), ReadFloat(_moveReadPos));
+        }
+
+        /// <summary>Reads a Color from the packet.</summary>
+        /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
+        public Color ReadColor(bool _moveReadPos = true) {
+            return Color.FromArgb(ReadInt(_moveReadPos), ReadInt(_moveReadPos), ReadInt(_moveReadPos), ReadInt(_moveReadPos));
         }
         #endregion
 

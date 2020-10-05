@@ -1,4 +1,5 @@
-﻿using SharedLibrary;
+﻿using GameServer.Models;
+using SharedLibrary;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -6,6 +7,8 @@ using System.Net.Sockets;
 
 namespace GameServer {
     class Server {
+
+        public static World world { get; private set; }
         public static int MaxPlayers { get; private set; }
         public static int Port { get; private set; }
         public static Dictionary<int, Client> clients = new Dictionary<int, Client>();
@@ -91,6 +94,8 @@ namespace GameServer {
         }
 
         private static void InitializeServerData() {
+
+            world = GameLogic.GenereateInitialMap();
             for (int i = 1; i <= MaxPlayers; i++) {
                 clients.Add(i, new Client(i));
             }

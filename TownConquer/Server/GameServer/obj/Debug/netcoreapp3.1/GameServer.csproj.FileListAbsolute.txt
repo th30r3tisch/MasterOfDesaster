@@ -44,3 +44,5 @@ C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\GameServer\bin\
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\GameServer\bin\Debug\netcoreapp3.1\SharedLibrary.pdb
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\GameServer\obj\Debug\netcoreapp3.1\GameServer.genruntimeconfig.cache
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\GameServer\obj\Debug\netcoreapp3.1\GameServer.csproj.CoreCompileInputs.cache
+C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\GameServer\bin\Debug\netcoreapp3.1\MathNet.Numerics.dll
+C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\GameServer\bin\Debug\netcoreapp3.1\MathNet.Spatial.dll

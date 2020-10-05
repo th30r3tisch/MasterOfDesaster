@@ -1,5 +1,4 @@
 ﻿using SharedLibrary;
-using System;
 using UnityEngine;
 
 public class ClientSend : MonoBehaviour
@@ -18,6 +17,12 @@ public class ClientSend : MonoBehaviour
         using (Packet _packet = new Packet((int)ClientPackets.welcomeReceived)) {
             _packet.Write(Client.instance.myId);
             _packet.Write(UIManager.instance.usernameField.text);
+            if (UIManager.instance.redColor.isOn) {
+                _packet.Write(System.Drawing.Color.FromArgb(1, 255, 0, 0));
+            }
+            else if(UIManager.instance.greenColor.isOn) {
+                _packet.Write(System.Drawing.Color.FromArgb(1, 0, 255, 0 ));
+            }
 
             SendTCPData(_packet);
         }

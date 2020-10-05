@@ -1,4 +1,9 @@
-﻿using SharedLibrary;
+﻿using GameServer.Models;
+using SharedLibrary;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace GameServer {
     class ServerSend {
@@ -11,12 +16,18 @@ namespace GameServer {
             }
         }
 
-        public static void SpawnPlayer(int _toClient, Player _player) {
-            using (Packet _packet = new Packet((int)ServerPackets.spawnPlayer)) {
+        public static void CreateWorld(int _toClient, Player _player) {
+            using (Packet _packet = new Packet((int)ServerPackets.createWorld)) {
+                List<TreeNode> _t = Server.world.GetQuadtree().GetAllContent(Server.world.GetQuadtree(), 0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
                 _packet.Write(_player.id);
                 _packet.Write(_player.username);
-                _packet.Write(_player.position);
-                _packet.Write(_player.rotation);
+                _packet.Write(_player.color);
+
+                MemoryStream memorystream = new MemoryStream();
+                BinaryFormatter bf = new BinaryFormatter();
+                bf.Serialize(memorystream, _t);
+                byte[] yourBytesToDb = memorystream.ToArray();
+                _packet.Write(yourBytesToDb);
 
                 SendTCPData(_toClient, _packet);
             }

@@ -45,6 +45,10 @@
       "frameworks": {
         "netcoreapp3.1": {
           "dependencies": {
+            "MathNet.Spatial": {
+              "target": "Package",
+              "version": "[0.6.0, )"
+            },
             "System.Numerics.Vectors": {
               "target": "Package",
               "version": "[4.5.0, )"

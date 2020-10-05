@@ -6,6 +6,8 @@ public class UIManager : MonoBehaviour
     public static UIManager instance;
     public GameObject startMenu;
     public InputField usernameField;
+    public Toggle redColor;
+    public Toggle greenColor;
 
     private void Awake() {
         if (instance == null) {
