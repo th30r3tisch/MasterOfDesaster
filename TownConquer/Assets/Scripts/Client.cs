@@ -12,7 +12,12 @@ public class Client : MonoBehaviour
 
     public string ip = "127.0.0.1";
     public int port = Constants.SERVER_PORT;
+
     public int myId = 0;
+    public string username;
+    public Color color;
+    public int townNumber;
+
     public TCP tcp;
     public UDP udp;
 

@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public void InitMap(int _id, int _seed) {
+    public void InitMap(int _seed) {
         GameObject _ground;
         Random.InitState(_seed);
 

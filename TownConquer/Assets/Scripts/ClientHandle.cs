@@ -17,13 +17,12 @@ public class ClientHandle : MonoBehaviour
     }
 
     public static void CreateWorld(Packet _packet) {
-        int _id = _packet.ReadInt();
-        string _username = _packet.ReadString();
+        Client.instance.myId = _packet.ReadInt();
+        Client.instance.username = _packet.ReadString();
+        System.Drawing.Color c = _packet.ReadColor();
+        Client.instance.color = new Color( c.R, c.G, c.B, c.A);
         int _seed = _packet.ReadInt();
 
-        //System.Numerics.Vector3 _postition = _packet.ReadVector3();
-        //Vector3 _postitionUnity = new Vector3(_postition.X, _postition.Y, _postition.Z);
-
-        GameManager.instance.InitMap(_id, _seed);
+        GameManager.instance.InitMap(_seed);
     }
 }

@@ -157,10 +157,10 @@ namespace SharedLibrary {
         /// <summary>Adds a Color to the packet.</summary>
         /// <param name="_value">The Color to add.</param>
         public void Write(Color _value) {
-            Write((int)_value.A);
-            Write((int)_value.R);
-            Write((int)_value.G);
-            Write((int)_value.B);
+            Write(_value.A);
+            Write(_value.R);
+            Write(_value.G);
+            Write(_value.B);
         }
         #endregion
 
@@ -317,7 +317,7 @@ namespace SharedLibrary {
         /// <summary>Reads a Color from the packet.</summary>
         /// <param name="_moveReadPos">Whether or not to move the buffer's read position.</param>
         public Color ReadColor(bool _moveReadPos = true) {
-            return Color.FromArgb(ReadInt(_moveReadPos), ReadInt(_moveReadPos), ReadInt(_moveReadPos), ReadInt(_moveReadPos));
+            return Color.FromArgb(ReadByte(_moveReadPos), ReadByte(_moveReadPos), ReadByte(_moveReadPos), ReadByte(_moveReadPos));
         }
         #endregion
 

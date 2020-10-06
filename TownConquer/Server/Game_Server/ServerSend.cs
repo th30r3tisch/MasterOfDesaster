@@ -16,6 +16,7 @@ namespace Game_Server {
             using (Packet _packet = new Packet((int)ServerPackets.createWorld)) {
                 _packet.Write(_player.id);
                 _packet.Write(_player.username);
+                _packet.Write(_player.color);
                 _packet.Write(_seed);
 
                 SendTCPData(_toClient, _packet);

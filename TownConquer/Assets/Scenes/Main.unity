@@ -625,6 +625,9 @@ MonoBehaviour:
   ip: 127.0.0.1
   port: 26950
   myId: 0
+  username: 
+  color: {r: 0, g: 0, b: 0, a: 0}
+  townNumber: 0
 --- !u!4 &518833092
 Transform:
   m_ObjectHideFlags: 0
@@ -1386,6 +1389,9 @@ MonoBehaviour:
   usernameField: {fileID: 1371380274}
   redColor: {fileID: 1600507579}
   greenColor: {fileID: 1055395359}
+  blueColor: {fileID: 1474440985}
+  yellowColor: {fileID: 276776226}
+  lightBlueColor: {fileID: 2053707642}
 --- !u!114 &1099792523
 MonoBehaviour:
   m_ObjectHideFlags: 0
