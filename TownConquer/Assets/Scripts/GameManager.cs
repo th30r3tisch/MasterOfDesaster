@@ -9,8 +9,11 @@ public class GameManager : MonoBehaviour {
     public static Dictionary<int, TownManager> towns = new Dictionary<int, TownManager>();
 
     public GameObject townPrefab;
+    public GameObject landPrefab;
+    public GameObject obstaclePrefab;
 
     private static World world;
+    private Quaternion horizontalOrientation = new Quaternion(0, 0, 0, 0);
 
     private void Awake() {
         if (instance == null) {
@@ -22,13 +25,17 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public void InitTowns(int _id, int _seed) {
+    public void InitMap(int _id, int _seed) {
+        GameObject _ground;
         Random.InitState(_seed);
+
         world = new World(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
+        _ground = Instantiate(landPrefab, new Vector3(Constants.MAP_WIDTH / 2, 0, Constants.MAP_HEIGHT / 2), horizontalOrientation);
+        _ground.transform.localScale = new Vector3(Constants.MAP_WIDTH/10, 1, Constants.MAP_HEIGHT/10);
+
         CreateObstacles();
         CreateTowns();
 
-        //_town.GetComponent<TownManager>().id = _id;
         //_town.GetComponent<TownManager>().ownerid = _ownerId;
         //_town.GetComponent<TownManager>().ownerName = _ownername;
         //towns.Add(_id, _town.GetComponent<TownManager>());
@@ -41,7 +48,6 @@ public class GameManager : MonoBehaviour {
     }
 
     private Town CreateTown(int _i) {
-        Quaternion _horizontalOrientation = new Quaternion(0, 0, 0, 0);
         GameObject _town;
         Town _t = null;
         while (_t == null) {
@@ -57,7 +63,8 @@ public class GameManager : MonoBehaviour {
                     (_z - Constants.OBSTACLE_MAX_LENGTH),
                     (_x + Constants.TOWN_MIN_DISTANCE),
                     (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check for overlapping obstacles
-                    _town = Instantiate(townPrefab, new Vector3(_x, 0, _z), _horizontalOrientation);
+                    _town = Instantiate(townPrefab, new Vector3(_x, 0, _z), horizontalOrientation);
+                    _town.GetComponent<TownManager>().id = _i;
                     _t = new Town(new System.Numerics.Vector3(_x, 0, _z), _i);
                 }
             }
@@ -67,14 +74,19 @@ public class GameManager : MonoBehaviour {
     }
 
     private void CreateObstacles() {
+        GameObject _obstacle;
+        Obstacle _o;
         for (int i = 0; i < Constants.OBSTACLE_NUMBER; i++) {
-            world.Insert(new Obstacle(
-                    new System.Numerics.Vector3(
+            System.Numerics.Vector3 _position = new System.Numerics.Vector3(
                         Random.Range(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES),
-                        Random.Range(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES),
-                        0),
-                    Random.Range(0, 1),
-                    Random.Range(Constants.OBSTACLE_MIN_LENGTH, Constants.OBSTACLE_MAX_LENGTH)));
+                        0,
+                        Random.Range(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES));
+            int _orientation = Random.Range(0, 2);
+            int _length = Random.Range(Constants.OBSTACLE_MIN_LENGTH, Constants.OBSTACLE_MAX_LENGTH);
+            _o = new Obstacle(_position, _orientation, _length);
+            world.Insert(_o);
+            _obstacle = Instantiate(obstaclePrefab, new Vector3(_position.X, _position.Y, _position.Z), transform.rotation * Quaternion.Euler(0f, _o.orientation, 0f));
+            _obstacle.transform.localScale = new Vector3(_o.length, 8, _o.width);
         }
     }
 

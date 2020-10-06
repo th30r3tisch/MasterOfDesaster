@@ -17,6 +17,7 @@ public class Client : MonoBehaviour
     public TCP tcp;
     public UDP udp;
 
+    private bool isConnected = false;
     private delegate void PacketHandler(Packet _packet);
     private static Dictionary<int, PacketHandler> packetHandlers;
 
@@ -35,8 +36,23 @@ public class Client : MonoBehaviour
         udp = new UDP();
     }
 
+    private void OnApplicationQuit() {
+        Disconnect();
+    }
+
+    private void Disconnect() {
+        if (isConnected) {
+            isConnected = false;
+            tcp.socket.Close();
+            udp.socket.Close();
+
+            Debug.Log("Disconnected from server.");
+        }
+    }
+
     public void ConnectToServer() {
         InitializeClientData();
+        isConnected = true;
         tcp.Connect();
     }
 
@@ -53,6 +69,14 @@ public class Client : MonoBehaviour
             };
             receiveBuffer = new byte[dataBufferSize];
             socket.BeginConnect(instance.ip, instance.port, ConnectCallback, socket);
+        }
+
+        private void Disconnect() {
+            instance.Disconnect();
+            stream = null;
+            receivedData = null;
+            receiveBuffer = null;
+            socket = null;
         }
 
         private void ConnectCallback(IAsyncResult _result) {
@@ -84,6 +108,7 @@ public class Client : MonoBehaviour
             try {
                 int _byteLength = stream.EndRead(_result);
                 if (_byteLength <= 0) {
+                    instance.Disconnect();
                     return;
                 }
 
@@ -94,7 +119,7 @@ public class Client : MonoBehaviour
                 stream.BeginRead(receiveBuffer, 0, dataBufferSize, ReceiveCallback, null);
             }
             catch {
-
+                Disconnect();
             }
         }
 
@@ -161,6 +186,12 @@ public class Client : MonoBehaviour
             }
         }
 
+        private void Disconnect() {
+            instance.Disconnect();
+            endPoint = null;
+            socket = null;
+        }
+
         public void SendData(Packet _packet) {
             try {
                 _packet.InsertInt(instance.myId);
@@ -179,13 +210,14 @@ public class Client : MonoBehaviour
                 socket.BeginReceive(ReceiveCallback, null);
 
                 if (_data.Length < 4) {
+                    instance.Disconnect();
                     return;
                 }
 
                 HandleData(_data);
             }
             catch (Exception _e) {
-
+                Disconnect();
             }
 
         }

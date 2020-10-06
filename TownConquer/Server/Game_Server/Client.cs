@@ -8,7 +8,7 @@ using System.Net.Sockets;
 namespace Game_Server {
     class Client {
         public static int dataBufferSize = 4096;
-        public Player _player;
+        public Player player;
         public int id;
         public TCP tcp;
         public UDP udp;
@@ -61,6 +61,7 @@ namespace Game_Server {
                 try {
                     int _byteLength = stream.EndRead(_result);
                     if(_byteLength <= 0) {
+                        Server.clients[id].Disconnect();
                         return;
                     }
 
@@ -72,6 +73,7 @@ namespace Game_Server {
                 }
                 catch (Exception _e){
                     Console.WriteLine($"Error receiving TCP data: {_e}");
+                    Server.clients[id].Disconnect();
                 }
             }
 
@@ -119,6 +121,14 @@ namespace Game_Server {
 
                 return false;
             }
+
+            public void Disconnect() {
+                socket.Close();
+                stream = null;
+                receivedData = null;
+                receiveBuffer = null;
+                socket = null;
+            }
         }
 
         public class UDP {
@@ -149,25 +159,36 @@ namespace Game_Server {
                     }
                 });
             }
+
+            public void Disconnect() {
+                endPoint = null;
+            }
         }
 
         public void SendIntoGame(string _playerName, Color _color) {
-            _player = new Player(id, _playerName, _color);
+            player = new Player(id, _playerName, _color);
 
             // send every already connected player to the new player
             foreach (Client _client in Server.clients.Values) {
-                if (_client._player != null) {
+                if (_client.player != null) {
                     if (_client.id != id) {
-                        ServerSend.CreateWorld(id, _client._player, Constants.RANDOM_SEED);
+                        ServerSend.CreateWorld(id, _client.player, Constants.RANDOM_SEED);
                     }
                 }
             }
              // send the new players info to all connected players
             foreach (Client _client in Server.clients.Values) {
-                if (_client._player != null) {
-                    ServerSend.CreateWorld(_client.id, _player, Constants.RANDOM_SEED);
+                if (_client.player != null) {
+                    ServerSend.CreateWorld(_client.id, player, Constants.RANDOM_SEED);
                 }
             }
+        }
+
+        public void Disconnect() {
+            Console.WriteLine($"{tcp.socket.Client.RemoteEndPoint} has disconnected.");
+            player = null;
+            tcp.Disconnect();
+            udp.Disconnect();
         }
     }
 }

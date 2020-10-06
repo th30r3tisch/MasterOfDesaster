@@ -28,6 +28,6 @@ public class ClientHandle : MonoBehaviour
         //System.Numerics.Vector3 _postition = _packet.ReadVector3();
         //Vector3 _postitionUnity = new Vector3(_postition.X, _postition.Y, _postition.Z);
 
-        GameManager.instance.InitTowns(_id, _seed);
+        GameManager.instance.InitMap(_id, _seed);
     }
 }
