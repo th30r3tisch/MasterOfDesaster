@@ -8,6 +8,9 @@ public class UIManager : MonoBehaviour
     public InputField usernameField;
     public Toggle redColor;
     public Toggle greenColor;
+    public Toggle blueColor;
+    public Toggle yellowColor;
+    public Toggle lightBlueColor;
 
     private void Awake() {
         if (instance == null) {

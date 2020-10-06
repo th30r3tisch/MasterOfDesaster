@@ -1,9 +1,5 @@
 ﻿using SharedLibrary;
-using SharedLibrary.Models;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
-using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 public class ClientHandle : MonoBehaviour

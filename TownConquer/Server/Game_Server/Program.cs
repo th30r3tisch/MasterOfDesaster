@@ -14,7 +14,7 @@ namespace Game_Server {
             Thread mainThread = new Thread(new ThreadStart(MainThread));
             mainThread.Start();
 
-            Server.Start(5, 26950);
+            Server.Start(Constants.MAX_PLAYERS, Constants.SERVER_PORT);
         }
 
         private static void MainThread() {

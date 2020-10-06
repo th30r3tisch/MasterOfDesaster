@@ -1,7 +1,6 @@
 ﻿using SharedLibrary;
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
@@ -12,7 +11,7 @@ public class Client : MonoBehaviour
     public static int dataBufferSize = 4096;
 
     public string ip = "127.0.0.1";
-    public int port = 26950;
+    public int port = Constants.SERVER_PORT;
     public int myId = 0;
     public TCP tcp;
     public UDP udp;
@@ -216,7 +215,7 @@ public class Client : MonoBehaviour
 
                 HandleData(_data);
             }
-            catch (Exception _e) {
+            catch {
                 Disconnect();
             }
 
