@@ -47,6 +47,7 @@ MonoBehaviour:
   id: 0
   ownerid: 0
   ownerName: 
+  life: 0
 --- !u!1 &3856721044521242215
 GameObject:
   m_ObjectHideFlags: 0
@@ -58,9 +59,9 @@ GameObject:
   - component: {fileID: 7858796201116279475}
   - component: {fileID: 4773162309360735874}
   - component: {fileID: 3254896440313586749}
-  - component: {fileID: 1616649151481096031}
+  - component: {fileID: 1906977376381042234}
   m_Layer: 0
-  m_Name: Cylinder
+  m_Name: Town
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -127,8 +128,8 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!136 &1616649151481096031
-CapsuleCollider:
+--- !u!64 &1906977376381042234
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -137,7 +138,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}

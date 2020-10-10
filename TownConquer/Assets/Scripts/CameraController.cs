@@ -3,8 +3,8 @@
 public class CameraController : MonoBehaviour {
     public float dragSpeed = 2;
     public float scrollspeed = 10;
-    public float minY = 4; // min scroll height
-    public float maxY = 20; // max scroll height
+    public float minY = 200; // min scroll height
+    public float maxY = 900; // max scroll height
     public LayerMask mask;
 
     private RaycastHit oldMousePos;
@@ -12,12 +12,12 @@ public class CameraController : MonoBehaviour {
 
     void Update() {
 
-        Vector3 pos = transform.position;
+        Vector3 _pos = transform.position;
 
-        pos = DragWorld(pos);
-        //pos = ZoomWorld(pos);
+        _pos = DragWorld(_pos);
+        _pos = ZoomWorld(_pos);
 
-        transform.position = pos;
+        transform.position = _pos;
     }
 
 
@@ -31,21 +31,16 @@ public class CameraController : MonoBehaviour {
         if (Input.GetKey(KeyCode.LeftAlt)) {
             // on mouse btn click
             if (Input.GetMouseButtonDown(0)) {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                Physics.Raycast(ray, out oldMousePos, Mathf.Infinity, mask);
+                Ray _ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                Physics.Raycast(_ray, out oldMousePos, Mathf.Infinity, mask);
             }
 
 
             // during mouse button hold down
             if (Input.GetMouseButton(0)) {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                Ray _ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 RaycastHit currentMousePos;
-                if (Physics.Raycast(ray, out currentMousePos, Mathf.Infinity, mask)) {
-                    Debug.DrawLine(ray.origin, currentMousePos.point, Color.red);
-                }
-                else {
-                    Debug.DrawLine(ray.origin, ray.origin + ray.direction * 200, Color.green);
-                }
+                Physics.Raycast(_ray, out currentMousePos, Mathf.Infinity, mask);
 
                 _pos.z += oldMousePos.point.z - currentMousePos.point.z;
                 _pos.x += oldMousePos.point.x - currentMousePos.point.x;
@@ -63,8 +58,8 @@ public class CameraController : MonoBehaviour {
     /// <param name="_pos">current position of the camera</param>
     /// <returns>new position of the camera</returns>
     Vector3 ZoomWorld(Vector3 _pos) {
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        _pos.y -= scroll * scrollspeed * 50f * Time.deltaTime;
+        float _scroll = Input.GetAxis("Mouse ScrollWheel");
+        _pos.y -= _scroll * scrollspeed * 50f * Time.deltaTime;
         _pos.y = Mathf.Clamp(_pos.y, minY, maxY);
 
         return _pos;
