@@ -1,4 +1,6 @@
 ﻿using SharedLibrary;
+using SharedLibrary.Models;
+using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
 
@@ -10,6 +12,8 @@ public class ClientHandle : MonoBehaviour
 
         Debug.Log($"Message from server: {_msg}");
         Client.instance.myId = _myId;
+        Client.instance.towns = new List<Town>();
+        Client.instance.enemies = new List<Player>();
         ClientSend.WelcomeReceived();
 
         //udp
@@ -17,12 +21,26 @@ public class ClientHandle : MonoBehaviour
     }
 
     public static void CreateWorld(Packet _packet) {
-        Client.instance.myId = _packet.ReadInt();
-        Client.instance.username = _packet.ReadString();
-        System.Drawing.Color c = _packet.ReadColor();
-        Client.instance.color = new Color( c.R, c.G, c.B, c.A);
+        int _myId = _packet.ReadInt();
+        string _username = _packet.ReadString();
+        System.Drawing.Color _color = _packet.ReadColor();
+        Client.instance.me = new Player(_myId, _username, _color);
         int _seed = _packet.ReadInt();
 
-        GameManager.instance.InitMap(_seed);
+        System.Numerics.Vector3 v = _packet.ReadVector3();
+        Vector3 _townPos = new Vector3(v.X, v.Y, v.Z);
+
+        GameManager.instance.InitMap(_seed, _townPos, Client.instance.me); //TODO add player towns
+    }
+
+    public static void UpdateWorld(Packet _packet) {
+        int _enemyId = _packet.ReadInt();
+        string _enemyname = _packet.ReadString();
+        System.Drawing.Color _enemyColor = _packet.ReadColor();
+        System.Numerics.Vector3 _v = _packet.ReadVector3();
+
+        Player _enemy = new Player(_enemyId, _enemyname, _enemyColor);
+        Vector3 _townPos = new Vector3(_v.X, _v.Y, _v.Z);
+        GameManager.instance.AddEnemies(_enemy, _townPos);
     }
 }

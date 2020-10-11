@@ -1,17 +1,15 @@
-﻿using SharedLibrary.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Numerics;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace SharedLibrary {
     /// <summary>Sent from server to client.</summary>
     public enum ServerPackets {
         welcome = 1,
-        createWorld
+        createWorld,
+        updateWorld,
     }
 
     /// <summary>Sent from client to server.</summary>

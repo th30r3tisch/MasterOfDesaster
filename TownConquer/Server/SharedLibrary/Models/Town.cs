@@ -4,14 +4,12 @@ using System.Numerics;
 namespace SharedLibrary.Models {
 
     public class Town : TreeNode {
-        public int id;
         public Player player;
         public int life;
         public List<Town> attackerTowns;
 
-        public Town(Vector3 _spawnPos, int _id) {
+        public Town(Vector3 _spawnPos) {
             position = _spawnPos;
-            id = _id;
             life = Constants.TOWN_INITIAL_LIFE;
             attackerTowns = new List<Town>();
         }

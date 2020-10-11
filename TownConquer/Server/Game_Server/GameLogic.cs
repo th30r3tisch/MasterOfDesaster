@@ -25,11 +25,11 @@ namespace Game_Server {
 
         private static void CreateTowns() {
             for (int _i = 0; _i < Constants.TOWN_NUMBER; _i++) {
-                CreateTown(_i);
+                CreateTown();
             }
         }
 
-        public static Town CreateTown(int _i) {
+        public static Town CreateTown() {
             Town _t = null;
             while (_t == null) {
                 int _x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
@@ -44,7 +44,7 @@ namespace Game_Server {
                         (_z - Constants.OBSTACLE_MAX_LENGTH), 
                         (_x + Constants.TOWN_MIN_DISTANCE), 
                         (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check for overlapping obstacles
-                        _t = new Town(new Vector3(_x, 0, _z), _i);
+                        _t = new Town(new Vector3(_x, 0, _z));
                     }
                 }
             }

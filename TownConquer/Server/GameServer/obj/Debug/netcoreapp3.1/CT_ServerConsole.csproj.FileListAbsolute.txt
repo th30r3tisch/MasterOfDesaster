@@ -1,5 +1,0 @@
-C:\Users\theoretisch\source\repos\CT_ServerConsole\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
-C:\Users\theoretisch\source\repos\CT_ServerConsole\bin\Debug\netcoreapp3.1\CT_ServerLib.dll
-C:\Users\theoretisch\source\repos\CT_ServerConsole\obj\Debug\netcoreapp3.1\CT_ServerConsole.csprojAssemblyReference.cache
-C:\Users\theoretisch\source\repos\CT_ServerConsole\obj\Debug\netcoreapp3.1\CT_ServerConsole.AssemblyInfoInputs.cache
-C:\Users\theoretisch\source\repos\CT_ServerConsole\obj\Debug\netcoreapp3.1\CT_ServerConsole.AssemblyInfo.cs

@@ -48,7 +48,7 @@ namespace Game_Server {
 
             public void SendData(Packet _packet) {
                 try {
-                    if(socket != null) {
+                    if (socket != null) {
                         stream.BeginWrite(_packet.ToArray(), 0, _packet.Length(), null, null);
                     }
                 }
@@ -60,7 +60,7 @@ namespace Game_Server {
             private void ReceiveCallback(IAsyncResult _result) {
                 try {
                     int _byteLength = stream.EndRead(_result);
-                    if(_byteLength <= 0) {
+                    if (_byteLength <= 0) {
                         Server.clients[id].Disconnect();
                         return;
                     }
@@ -71,7 +71,7 @@ namespace Game_Server {
                     receivedData.Reset(HandleData(_data));
                     stream.BeginRead(receiveBuffer, 0, dataBufferSize, ReceiveCallback, null);
                 }
-                catch (Exception _e){
+                catch (Exception _e) {
                     Console.WriteLine($"Error receiving TCP data: {_e}");
                     Server.clients[id].Disconnect();
                 }
@@ -166,22 +166,25 @@ namespace Game_Server {
         }
 
         public void SendIntoGame(string _playerName, Color _color) {
+            Town _t = GameLogic.CreateTown();
+            _t.player = player;
             player = new Player(id, _playerName, _color);
+            player.addTown(_t);
 
-            // send every already connected player to the new player
+            ServerSend.CreateWorld(id, Server.clients[id].player, Constants.RANDOM_SEED, _t); // create the world for new player
+
             foreach (Client _client in Server.clients.Values) {
+                //if (_client.id == id) {
+                //    ServerSend.CreateWorld(id, _client.player, Constants.RANDOM_SEED, _t); // create the world for new player
+                //}
                 if (_client.player != null) {
                     if (_client.id != id) {
-                        ServerSend.CreateWorld(id, _client.player, Constants.RANDOM_SEED);
+                        ServerSend.UpdateWorld(id, _client.player, _client.player.towns[0]);// send every already connected player to the new player
+                        ServerSend.UpdateWorld(_client.id, player, _t);// send the new players info to all connected players
                     }
                 }
             }
-             // send the new players info to all connected players
-            foreach (Client _client in Server.clients.Values) {
-                if (_client.player != null) {
-                    ServerSend.CreateWorld(_client.id, player, Constants.RANDOM_SEED);
-                }
-            }
+
         }
 
         public void Disconnect() {

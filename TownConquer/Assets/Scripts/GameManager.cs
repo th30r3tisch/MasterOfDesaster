@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour {
     public GameObject obstaclePrefab;
 
     private static World world;
+    private static Player game;
     private Quaternion horizontalOrientation = new Quaternion(0, 0, 0, 0);
 
     private void Awake() {
@@ -25,32 +26,35 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public void InitMap(int _seed) {
+    public void AddEnemies( Player _enemy, Vector3 _townPos) {
+        CreateTown(towns.Count, _townPos, _enemy);
+        Client.instance.enemies.Add(_enemy);
+    }
+
+    public void InitMap(int _seed, Vector3 _townPos, Player _player) {
         GameObject _ground;
         Random.InitState(_seed);
 
         world = new World(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
-        _ground = Instantiate(landPrefab, new Vector3(Constants.MAP_WIDTH / 2, 0, Constants.MAP_HEIGHT / 2), horizontalOrientation);
+        game = new Player(-1, "game", System.Drawing.Color.FromArgb(100,100,100));
+        _ground = Instantiate(landPrefab, new Vector3(Constants.MAP_WIDTH/2, 0, Constants.MAP_HEIGHT/2), horizontalOrientation);
         _ground.transform.localScale = new Vector3(Constants.MAP_WIDTH/10, 1, Constants.MAP_HEIGHT/10);
 
         CreateObstacles();
         CreateTowns();
 
-        //_town.GetComponent<TownManager>().ownerid = _ownerId;
-        //_town.GetComponent<TownManager>().ownerName = _ownername;
-        //towns.Add(_id, _town.GetComponent<TownManager>());
+        CreateTown(towns.Count, _townPos, _player);
     }
 
     private void CreateTowns() {
         for (int _i = 0; _i < Constants.TOWN_NUMBER; _i++) {
-            CreateTown(_i);
+            SearchTownPos(_i);
         }
     }
 
-    private Town CreateTown(int _i) {
-        GameObject _town;
-        Town _t = null;
-        while (_t == null) {
+    private void SearchTownPos(int _i) {
+        bool flag = false;
+        while (flag == false) {
             int _x = Random.Range(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
             int _z = Random.Range(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
             if (GetAreaContent(
@@ -63,14 +67,28 @@ public class GameManager : MonoBehaviour {
                     (_z - Constants.OBSTACLE_MAX_LENGTH),
                     (_x + Constants.TOWN_MIN_DISTANCE),
                     (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check for overlapping obstacles
-                    _town = Instantiate(townPrefab, new Vector3(_x, 0, _z), horizontalOrientation);
-                    _town.GetComponent<TownManager>().id = _i;
-                    _t = new Town(new System.Numerics.Vector3(_x, 0, _z), _i);
+                    CreateTown(_i, new Vector3(_x, 0, _z), game);
+                    flag = true;
                 }
             }
         }
+    }
+
+    private void CreateTown(int _i, Vector3 _position, Player owner) {
+        GameObject _town;
+        Town _t;
+
+        _t = new Town(new System.Numerics.Vector3(_position.x, _position.y, _position.z));
+        _t.player = owner;
+        owner.addTown(_t);
         world.Insert(_t);
-        return _t;
+
+        _town = Instantiate(townPrefab, _position, horizontalOrientation);
+        _town.GetComponent<TownManager>().id = _i;
+        _town.GetComponent<TownManager>().ownerName = owner.username;
+        _town.GetComponent<TownManager>().ownerid = owner.id;
+        _town.GetComponent<TownManager>().life = _t.life;
+        towns.Add(_i, _town.GetComponent<TownManager>());
     }
 
     private void CreateObstacles() {

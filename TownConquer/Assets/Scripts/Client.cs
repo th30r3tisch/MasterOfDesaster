@@ -1,4 +1,5 @@
 ﻿using SharedLibrary;
+using SharedLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -14,9 +15,9 @@ public class Client : MonoBehaviour
     public int port = Constants.SERVER_PORT;
 
     public int myId = 0;
-    public string username;
-    public Color color;
-    public int townNumber;
+    public Player me;
+    public List<Town> towns;
+    public List<Player> enemies;
 
     public TCP tcp;
     public UDP udp;
@@ -245,6 +246,7 @@ public class Client : MonoBehaviour
         packetHandlers = new Dictionary<int, PacketHandler>() {
             { (int)ServerPackets.welcome, ClientHandle.Welcome },
             { (int)ServerPackets.createWorld, ClientHandle.CreateWorld },
+            { (int)ServerPackets.updateWorld, ClientHandle.UpdateWorld }
         };
 
         Debug.Log("Initialized packets.");
