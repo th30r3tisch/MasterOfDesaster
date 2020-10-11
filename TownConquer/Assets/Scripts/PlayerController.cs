@@ -49,13 +49,15 @@ public class PlayerController : MonoBehaviour {
         MeshFilter _meshFilter = _atkLine.AddComponent<MeshFilter>();
         Mesh _mesh = new Mesh();
 
+        Vector3 _direction = lineEnd - lineStart;
+
         Vector3[] _vertices = new Vector3[4]
             {
-                            new Vector3(lineStart.x - Constants.ATTACK_LINE_WIDTH, lineStart.y, lineStart.z),
-                            new Vector3(lineStart.x + Constants.ATTACK_LINE_WIDTH, lineStart.y, lineStart.z),
-                            new Vector3(lineEnd.x - Constants.ATTACK_LINE_WIDTH, lineEnd.y, lineEnd.z),
-                            new Vector3(lineEnd.x + Constants.ATTACK_LINE_WIDTH, lineEnd.y, lineEnd.z)
-            };
+                            Vector3.Cross(_direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + lineStart,
+                            Vector3.Cross(_direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + lineStart,
+                            Vector3.Cross(_direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + lineEnd,
+                            Vector3.Cross(_direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + lineEnd
+    };
         int[] _tris = new int[6]
             {
                 // lower left triangle

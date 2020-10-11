@@ -625,9 +625,6 @@ MonoBehaviour:
   ip: 127.0.0.1
   port: 26950
   myId: 0
-  username: 
-  color: {r: 0, g: 0, b: 0, a: 0}
-  townNumber: 0
 --- !u!4 &518833092
 Transform:
   m_ObjectHideFlags: 0
@@ -1663,7 +1660,6 @@ MonoBehaviour:
     m_Bits: 1
   lineWidth: 100
   material: {fileID: 2100000, guid: 823aad69faeef2745baaa9319da4ace4, type: 2}
-  atkWidth: 20
 --- !u!4 &1147183115
 Transform:
   m_ObjectHideFlags: 0
