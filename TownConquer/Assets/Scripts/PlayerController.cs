@@ -9,10 +9,12 @@ public class PlayerController : MonoBehaviour {
 
     private Vector3 lineStart;
     private Vector3 lineEnd;
-    
+    private bool startCondition = false;
+    int? startTownId = null;
+
 
     void Update() {
-        AttackTown();
+        CheckIfAttackIsHappening();
     }
 
 
@@ -21,72 +23,30 @@ public class PlayerController : MonoBehaviour {
     /// </summary>
     /// <param name="_pos">current position of the camera</param>
     /// <returns>new position of the camera</returns>
-    void AttackTown() {
-        int? _startTownId = null;
+    private void CheckIfAttackIsHappening() {
         if (!Input.GetKey(KeyCode.LeftAlt)) {
             if (Input.GetMouseButtonDown(0)) {
                 RaycastHit _hitInfo = GetRayCastHitInfo();
-                if (_hitInfo.collider.gameObject.name.StartsWith("Town")) {
+                int test = _hitInfo.collider.gameObject.GetComponentInParent<TownManager>().ownerid;
+                int test2 = Client.instance.myId;
+                if (_hitInfo.collider.gameObject.name.StartsWith("Town") &&
+                    _hitInfo.collider.gameObject.GetComponentInParent<TownManager>().ownerid == Client.instance.myId) {
                     lineStart = _hitInfo.collider.gameObject.transform.position;
-                    _startTownId = _hitInfo.collider.gameObject.GetInstanceID();
+                    startTownId = _hitInfo.collider.gameObject.GetInstanceID();
+                    startCondition = true;
                 }
             }
-            if (Input.GetMouseButtonUp(0)) {
+            if (Input.GetMouseButtonUp(0) && startCondition) {
                 RaycastHit _hitInfo = GetRayCastHitInfo();
                 if (_hitInfo.collider.gameObject.name.StartsWith("Town") &&
-                    _hitInfo.collider.gameObject.GetInstanceID() != _startTownId) {
+                    _hitInfo.collider.gameObject.GetInstanceID() != startTownId) {
                     lineEnd = _hitInfo.collider.gameObject.transform.position;
-                    CreateLineMesh(_hitInfo);
+                    ClientSend.AttackRequest(lineStart, lineEnd);
+                    startCondition = false;
+                    startTownId = null;
                 }
             }
         }
-    }
-
-    private void CreateLineMesh(RaycastHit _hitInfo) {
-        GameObject _atkLine = new GameObject();
-        MeshRenderer _meshRenderer = _atkLine.AddComponent<MeshRenderer>();
-        _meshRenderer.sharedMaterial = new Material(Shader.Find("Standard"));
-        MeshFilter _meshFilter = _atkLine.AddComponent<MeshFilter>();
-        Mesh _mesh = new Mesh();
-
-        Vector3 _direction = lineEnd - lineStart;
-
-        Vector3[] _vertices = new Vector3[4]
-            {
-                            Vector3.Cross(_direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + lineStart,
-                            Vector3.Cross(_direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + lineStart,
-                            Vector3.Cross(_direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + lineEnd,
-                            Vector3.Cross(_direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + lineEnd
-    };
-        int[] _tris = new int[6]
-            {
-                // lower left triangle
-                0, 2, 1,
-                // upper right triangle
-                2, 3, 1
-            };
-        Vector3[] normals = new Vector3[4]
-            {
-                -Vector3.forward,
-                -Vector3.forward,
-                -Vector3.forward,
-                -Vector3.forward
-            };
-        Vector2[] uv = new Vector2[4]
-        {
-            new Vector2(0, 0),
-            new Vector2(1, 0),
-            new Vector2(0, 1),
-            new Vector2(1, 1)
-        };
-
-        _mesh.vertices = _vertices;
-        _mesh.triangles = _tris;
-        _mesh.normals = normals;
-        _mesh.uv = uv;
-        _meshFilter.mesh = _mesh;
-        _atkLine.name = "atk";
-        _atkLine.transform.parent = _hitInfo.collider.gameObject.transform;
     }
 
     private RaycastHit GetRayCastHitInfo() {

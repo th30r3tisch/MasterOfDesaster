@@ -1,6 +1,7 @@
 ﻿using SharedLibrary;
 using System;
 using System.Drawing;
+using System.Numerics;
 
 namespace Game_Server {
     class ServerHandle {
@@ -15,6 +16,16 @@ namespace Game_Server {
             }
 
             Server.clients[_fromClient].SendIntoGame(_username, _color);
+        }
+
+        public static void AttackRequest(int _fromClient, Packet _packet) {
+            int _clientIdCheck = _packet.ReadInt();
+            Vector3 _atkTown = _packet.ReadVector3();
+            Vector3 _deffTown = _packet.ReadVector3();
+
+            Console.WriteLine($"{Server.clients[_fromClient].tcp.socket.Client.RemoteEndPoint} requested an attack at town {_deffTown}.");
+
+            Server.clients[_fromClient].AttackTown(_atkTown, _deffTown);
         }
     }
 }

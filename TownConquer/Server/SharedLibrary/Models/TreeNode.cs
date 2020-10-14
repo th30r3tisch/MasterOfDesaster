@@ -10,11 +10,11 @@ namespace SharedLibrary.Models {
 
         public bool InRange(int _startX, int _startY, int _endX, int _endY) {
             return (position.X >= _startX && position.X <= _endX
-                    && position.Y >= _startY && position.Y <= _endY);
+                    && position.Z >= _startY && position.Z <= _endY);
         }
 
         public bool IsNode(float _x, float _y) {
-            return (position.X == _x && position.Y == _y);
+            return (position.X == _x && position.Z == _y);
         }
     }
 }

@@ -36,4 +36,14 @@ public class ClientSend : MonoBehaviour
             SendTCPData(_packet);
         }
     }
+
+    public static void AttackRequest(Vector3 atkTown, Vector3 deffTown) {
+        using (Packet _packet = new Packet((int)ClientPackets.attackRequest)) {
+            _packet.Write(Client.instance.myId);
+            _packet.Write(new System.Numerics.Vector3(atkTown.x, atkTown.y, atkTown.z));
+            _packet.Write(new System.Numerics.Vector3(deffTown.x, deffTown.y, deffTown.z));
+
+            SendTCPData(_packet);
+        }
+    }
 }

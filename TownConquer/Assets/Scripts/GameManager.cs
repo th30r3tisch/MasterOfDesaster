@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour {
     private static World world;
     private static Player game;
     private Quaternion horizontalOrientation = new Quaternion(0, 0, 0, 0);
+    private static System.Random r;
 
     private void Awake() {
         if (instance == null) {
@@ -33,7 +34,7 @@ public class GameManager : MonoBehaviour {
 
     public void InitMap(int _seed, Vector3 _townPos, Player _player) {
         GameObject _ground;
-        Random.InitState(_seed);
+        r = new System.Random(_seed);
 
         world = new World(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
         game = new Player(-1, "game", System.Drawing.Color.FromArgb(100,100,100));
@@ -55,8 +56,8 @@ public class GameManager : MonoBehaviour {
     private void SearchTownPos(int _i) {
         bool flag = false;
         while (flag == false) {
-            int _x = Random.Range(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
-            int _z = Random.Range(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
+            int _x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
+            int _z = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
             if (GetAreaContent(
                 (_x - Constants.TOWN_MIN_DISTANCE),
                 (_z - Constants.TOWN_MIN_DISTANCE),
@@ -65,8 +66,8 @@ public class GameManager : MonoBehaviour {
                 if (GetAreaContent(
                     (_x - Constants.OBSTACLE_MAX_LENGTH),
                     (_z - Constants.OBSTACLE_MAX_LENGTH),
-                    (_x + Constants.TOWN_MIN_DISTANCE),
-                    (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check for overlapping obstacles
+                    (_x + Constants.OBSTACLE_MAX_LENGTH),
+                    (_z + Constants.OBSTACLE_MAX_LENGTH)).Count == 0) { // check for overlapping obstacles
                     CreateTown(_i, new Vector3(_x, 0, _z), game);
                     flag = true;
                 }
@@ -96,82 +97,69 @@ public class GameManager : MonoBehaviour {
         Obstacle _o;
         for (int i = 0; i < Constants.OBSTACLE_NUMBER; i++) {
             System.Numerics.Vector3 _position = new System.Numerics.Vector3(
-                        Random.Range(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES),
+                        RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES),
                         0,
-                        Random.Range(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES));
-            int _orientation = Random.Range(0, 2);
-            int _length = Random.Range(Constants.OBSTACLE_MIN_LENGTH, Constants.OBSTACLE_MAX_LENGTH);
+                        RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES));
+            int _orientation = RandomNumber(0, 1);
+            int _length = RandomNumber(Constants.OBSTACLE_MIN_LENGTH, Constants.OBSTACLE_MAX_LENGTH);
             _o = new Obstacle(_position, _orientation, _length);
             world.Insert(_o);
-            _obstacle = Instantiate(obstaclePrefab, new Vector3(_position.X, _position.Y, _position.Z), transform.rotation * Quaternion.Euler(0f, _o.orientation, 0f));
-            _obstacle.transform.localScale = new Vector3(_o.length, 8, _o.width);
+            _obstacle = Instantiate(obstaclePrefab, new Vector3(_position.X, _position.Y, _position.Z), horizontalOrientation);
+            _obstacle.transform.localScale = new Vector3(_o.width, 8, _o.length);
         }
-    }
-
-    public bool IsIntersecting(List<TreeNode> _towns) {
-        List<TreeNode> intersectionObjs = new List<TreeNode>();
-        int t1x = (int)_towns[0].position.X;
-        int t1z = (int)_towns[0].position.Z;
-        int t2x = (int)_towns[1].position.X;
-        int t2z = (int)_towns[1].position.Z;
-        int startX = System.Math.Min(t1x, t2x);
-        int startZ = System.Math.Min(t1z, t2z);
-        int endX = System.Math.Max(t1x, t2x);
-        int endZ = System.Math.Max(t1z, t2z);
-        //rectangle between towns
-        intersectionObjs.AddRange(GetAreaContent(startX, startZ, endX, endZ));
-        //rectangle around town one
-        intersectionObjs.AddRange(GetAreaContent(
-            t1x - Constants.OBSTACLE_MAX_LENGTH,
-            t1z - Constants.OBSTACLE_MAX_LENGTH,
-            t1x + Constants.OBSTACLE_MAX_LENGTH,
-            t1z + Constants.OBSTACLE_MAX_LENGTH));
-        //rectangle around town two
-        intersectionObjs.AddRange(GetAreaContent(
-            t2x - Constants.OBSTACLE_MAX_LENGTH,
-            t2z - Constants.OBSTACLE_MAX_LENGTH,
-            t2x + Constants.OBSTACLE_MAX_LENGTH,
-            t2z + Constants.OBSTACLE_MAX_LENGTH));
-        if (intersectionObjs.Count != 0) {
-            foreach (TreeNode _node in intersectionObjs) {
-                if (_node.GetType() == typeof(Obstacle)) {
-                    bool? _isIntersecting = LineSegmentsIntersection(
-                        new Vector2(_towns[0].position.X, _towns[0].position.Z),
-                        new Vector2(_towns[1].position.X, _towns[0].position.Z),
-                        new Vector2(_node.position.X, _node.position.Z),
-                        new Vector2(_node.position.X + ((Obstacle)_node).width, _node.position.Z + ((Obstacle)_node).length),
-                        out Vector2 intersection);
-                    if (_isIntersecting != null) return true;
-                }
-            }
-        }
-        return false;
     }
 
     private List<TreeNode> GetAreaContent(int _startX, int _startY, int _endX, int _endY) {
         return world.GetAreaContent(_startX, _startY, _endX, _endY);
     }
 
-    // https://github.com/setchi/Unity-LineSegmentsIntersection/blob/master/Assets/LineSegmentIntersection/Scripts/Math2d.cs
-    private bool LineSegmentsIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, out Vector2 intersection) {
-        intersection = Vector2.zero;
+    public void AttackTown(Vector3 lineStart, Vector3 lineEnd) {
+        CreateLineMesh(lineStart, lineEnd);
+    }
 
-        var d = (p2.x - p1.x) * (p4.y - p3.y) - (p2.y - p1.y) * (p4.x - p3.x);
+    private void CreateLineMesh(Vector3 lineStart, Vector3 lineEnd) {
+        GameObject _atkLine = new GameObject();
+        MeshRenderer _meshRenderer = _atkLine.AddComponent<MeshRenderer>();
+        _meshRenderer.sharedMaterial = Resources.Load("Line", typeof(Material)) as Material;
+        MeshFilter _meshFilter = _atkLine.AddComponent<MeshFilter>();
+        Mesh _mesh = new Mesh();
 
-        if (d == 0.0f) {
-            return false;
-        }
+        Vector3 _direction = lineEnd - lineStart;
 
-        var u = ((p3.x - p1.x) * (p4.y - p3.y) - (p3.y - p1.y) * (p4.x - p3.x)) / d;
-        var v = ((p3.x - p1.x) * (p2.y - p1.y) - (p3.y - p1.y) * (p2.x - p1.x)) / d;
+        Vector3[] _vertices = new Vector3[4]{
+            Vector3.Cross(_direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + lineStart,
+            Vector3.Cross(_direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + lineStart,
+            Vector3.Cross(_direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + lineEnd,
+            Vector3.Cross(_direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + lineEnd
+        };
+        int[] _tris = new int[6]{
+            // lower left triangle
+            0, 2, 1,
+            // upper right triangle
+            2, 3, 1
+        };
+        Vector3[] normals = new Vector3[4]{
+            -Vector3.forward,
+            -Vector3.forward,
+            -Vector3.forward,
+            -Vector3.forward
+        };
+        Vector2[] uv = new Vector2[4]{
+            new Vector2(0, 0),
+            new Vector2(1, 0),
+            new Vector2(0, 1),
+            new Vector2(1, 1)
+        };
 
-        if (u < 0.0f || u > 1.0f || v < 0.0f || v > 1.0f) {
-            return false;
-        }
+        _mesh.vertices = _vertices;
+        _mesh.triangles = _tris;
+        _mesh.normals = normals;
+        _mesh.uv = uv;
+        _meshFilter.mesh = _mesh;
+        _atkLine.name = "atk";
+    }
 
-        intersection.x = p1.x + u * (p2.x - p1.x);
-        intersection.y = p1.y + u * (p2.y - p1.y);
-
-        return true;
+    private static int RandomNumber(int _min, int _max) {
+        return r.Next(_max - _min + 1) + _min;
     }
 }

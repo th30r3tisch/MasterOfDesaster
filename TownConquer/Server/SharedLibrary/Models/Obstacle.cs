@@ -14,13 +14,14 @@ namespace SharedLibrary.Models {
         }
 
         private void CreateObstacle(int _orientation, int _obstacleLength) {
-            length = _obstacleLength;
-            width = Constants.OBSTACLE_WIDTH;
+            orientation = _orientation;
             if (_orientation == 0) {
-                orientation = 0;
+                length = _obstacleLength;
+                width = Constants.OBSTACLE_WIDTH;
             }
             else if (_orientation == 1) {
-                orientation = 90;
+                length = Constants.OBSTACLE_WIDTH;
+                width = _obstacleLength;
             }
         }
     }

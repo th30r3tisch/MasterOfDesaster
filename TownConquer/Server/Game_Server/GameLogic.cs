@@ -42,8 +42,8 @@ namespace Game_Server {
                     if (GetAreaContent(
                         (_x - Constants.OBSTACLE_MAX_LENGTH), 
                         (_z - Constants.OBSTACLE_MAX_LENGTH), 
-                        (_x + Constants.TOWN_MIN_DISTANCE), 
-                        (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check for overlapping obstacles
+                        (_x + Constants.OBSTACLE_MAX_LENGTH), 
+                        (_z + Constants.OBSTACLE_MAX_LENGTH)).Count == 0) { // check for overlapping obstacles
                         _t = new Town(new Vector3(_x, 0, _z));
                     }
                 }
@@ -57,19 +57,19 @@ namespace Game_Server {
                 world.Insert(new Obstacle(
                         new Vector3(
                             RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES),
-                            RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES),
-                            0),
+                            0,
+                            RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES)),
                         RandomNumber(0, 1),
                         RandomNumber(Constants.OBSTACLE_MIN_LENGTH, Constants.OBSTACLE_MAX_LENGTH)));
             }
         }
 
-        public bool IsIntersecting(List<TreeNode> _towns) {
+        public static bool IsIntersecting(Vector3 _atkTown, Vector3 _deffTown) {
             List<TreeNode> intersectionObjs = new List<TreeNode>();
-            int t1x = (int)_towns[0].position.X;
-            int t1z = (int)_towns[0].position.Z;
-            int t2x = (int)_towns[1].position.X;
-            int t2z = (int)_towns[1].position.Z;
+            int t1x = (int)_atkTown.X;
+            int t1z = (int)_atkTown.Z;
+            int t2x = (int)_deffTown.X;
+            int t2z = (int)_deffTown.Z;
             int startX = Math.Min(t1x, t2x);
             int startZ = Math.Min(t1z, t2z);
             int endX = Math.Max(t1x, t2x);
@@ -93,8 +93,8 @@ namespace Game_Server {
                     if (_node.GetType() == typeof(Obstacle)){
                         Point2D? _intersecting;
                         Line2D _line = new Line2D(
-                            new Point2D(_towns[0].position.X, _towns[0].position.Z), 
-                            new Point2D(_towns[1].position.X, _towns[0].position.Z));
+                            new Point2D(_atkTown.X, _atkTown.Z), 
+                            new Point2D(_deffTown.X, _deffTown.Z));
                         _intersecting = _line.IntersectWith(
                             new Line2D(
                                 new Point2D(_node.position.X, _node.position.Z), 

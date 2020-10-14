@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.Net;
 using System.Net.Sockets;
+using System.Numerics;
 
 namespace Game_Server {
     class Client {
@@ -174,9 +175,6 @@ namespace Game_Server {
             ServerSend.CreateWorld(id, Server.clients[id].player, Constants.RANDOM_SEED, _t); // create the world for new player
 
             foreach (Client _client in Server.clients.Values) {
-                //if (_client.id == id) {
-                //    ServerSend.CreateWorld(id, _client.player, Constants.RANDOM_SEED, _t); // create the world for new player
-                //}
                 if (_client.player != null) {
                     if (_client.id != id) {
                         ServerSend.UpdateWorld(id, _client.player, _client.player.towns[0]);// send every already connected player to the new player
@@ -184,7 +182,16 @@ namespace Game_Server {
                     }
                 }
             }
+        }
 
+        public void AttackTown(Vector3 _atkTown, Vector3 _deffTown) {
+            if (!GameLogic.IsIntersecting(_atkTown, _deffTown)) {
+                foreach (Client _client in Server.clients.Values) {
+                    if (_client.player != null) {
+                        ServerSend.GrantedAttack(_client.id, _atkTown, _deffTown);
+                    }
+                }
+            }
         }
 
         public void Disconnect() {

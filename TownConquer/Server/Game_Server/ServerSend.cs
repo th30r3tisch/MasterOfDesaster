@@ -1,6 +1,7 @@
 ﻿using SharedLibrary.Models;
 using SharedLibrary;
 using System;
+using System.Numerics;
 
 namespace Game_Server {
     class ServerSend {
@@ -33,6 +34,15 @@ namespace Game_Server {
                 _packet.Write(_town.position);
 
                 SendTCPData(_toClient, _packet);
+            }
+        }
+
+        public static void GrantedAttack(int _toClient, Vector3 _atkTown, Vector3 _deffTown) {
+            using (Packet _packet = new Packet((int)ServerPackets.grantedAttack)) {
+                _packet.Write(_atkTown);
+                _packet.Write(_deffTown);
+                SendTCPData(_toClient, _packet);
+                Console.WriteLine($"Attack from Town {_atkTown} to {_deffTown} is GRANTED.");
             }
         }
 

@@ -246,7 +246,8 @@ public class Client : MonoBehaviour
         packetHandlers = new Dictionary<int, PacketHandler>() {
             { (int)ServerPackets.welcome, ClientHandle.Welcome },
             { (int)ServerPackets.createWorld, ClientHandle.CreateWorld },
-            { (int)ServerPackets.updateWorld, ClientHandle.UpdateWorld }
+            { (int)ServerPackets.updateWorld, ClientHandle.UpdateWorld },
+            { (int)ServerPackets.grantedAttack, ClientHandle.GrantedAttack },
         };
 
         Debug.Log("Initialized packets.");

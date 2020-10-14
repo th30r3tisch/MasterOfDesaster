@@ -102,6 +102,7 @@ namespace Game_Server {
 
             packetHandlers = new Dictionary<int, PacketHandler>() {
                 {(int)ClientPackets.welcomeReceived, ServerHandle.WelcomeReceived },
+                {(int)ClientPackets.attackRequest, ServerHandle.AttackRequest },
             };
             Console.WriteLine("Initialized packets and created World.");
         }

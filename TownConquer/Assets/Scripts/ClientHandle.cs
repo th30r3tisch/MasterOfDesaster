@@ -43,4 +43,12 @@ public class ClientHandle : MonoBehaviour
         Vector3 _townPos = new Vector3(_v.X, _v.Y, _v.Z);
         GameManager.instance.AddEnemies(_enemy, _townPos);
     }
+
+    public static void GrantedAttack(Packet _packet) {
+        System.Numerics.Vector3 _v1 = _packet.ReadVector3();
+        Vector3 _atkTown = new Vector3(_v1.X, _v1.Y, _v1.Z);
+        System.Numerics.Vector3 _v2 = _packet.ReadVector3();
+        Vector3 _deffTown = new Vector3(_v2.X, _v2.Y, _v2.Z);
+        GameManager.instance.AttackTown(_atkTown, _deffTown);
+    }
 }
