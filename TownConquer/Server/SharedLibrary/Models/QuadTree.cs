@@ -22,36 +22,36 @@ namespace SharedLibrary.Models {
         void Split() {
             int _xOffset = boundry.xMin
                     + (boundry.xMax - boundry.xMin) / 2;
-            int _yOffset = boundry.yMin
-                    + (boundry.yMax - boundry.yMin) / 2;
+            int _zOffset = boundry.zMin
+                    + (boundry.zMax - boundry.zMin) / 2;
 
             northWest = new QuadTree(level + 1, new TreeBoundry(
                     boundry.xMin,
-                    boundry.yMin,
+                    boundry.zMin,
                     _xOffset,
-                    _yOffset));
+                    _zOffset));
             northEast = new QuadTree(level + 1, new TreeBoundry(
                     _xOffset,
-                    boundry.yMin,
+                    boundry.zMin,
                     boundry.xMax,
-                    _yOffset));
+                    _zOffset));
             southWest = new QuadTree(level + 1, new TreeBoundry(
                     boundry.xMin,
-                    _yOffset,
+                    _zOffset,
                     _xOffset,
-                    boundry.yMax));
+                    boundry.zMax));
             southEast = new QuadTree(level + 1, new TreeBoundry(
                     _xOffset,
-                    _yOffset,
+                    _zOffset,
                     boundry.xMax,
-                    boundry.yMax));
+                    boundry.zMax));
 
         }
 
         public void Insert(TreeNode _treeNode) {
             float _x = _treeNode.position.X;
-            float _y = _treeNode.position.Y;
-            if (!boundry.inRange(_x, _y)) {
+            float _z = _treeNode.position.Z;
+            if (!boundry.inRange(_x, _z)) {
                 return;
             }
 
@@ -65,46 +65,46 @@ namespace SharedLibrary.Models {
             }
 
             // Check to which partition coordinates belong
-            if (northWest.boundry.inRange(_x, _y))
+            if (northWest.boundry.inRange(_x, _z))
                 northWest.Insert(_treeNode);
-            else if (northEast.boundry.inRange(_x, _y))
+            else if (northEast.boundry.inRange(_x, _z))
                 northEast.Insert(_treeNode);
-            else if (southWest.boundry.inRange(_x, _y))
+            else if (southWest.boundry.inRange(_x, _z))
                 southWest.Insert(_treeNode);
-            else if (southEast.boundry.inRange(_x, _y))
+            else if (southEast.boundry.inRange(_x, _z))
                 southEast.Insert(_treeNode);
             else
-                Console.WriteLine($"ERROR : Unhandled partition {_x} {_y}");
+                Console.WriteLine($"ERROR : Unhandled partition {_x} {_z}");
         }
 
-        public void GetAreaContent(QuadTree _tree, int _startX, int _startY, int _endX, int _endY, List<TreeNode> _wholeMap) {
+        public void GetAreaContent(QuadTree _tree, int _startX, int _startZ, int _endX, int _endZ, List<TreeNode> _wholeMap) {
             if (_tree == null) return;
 
-            if (!(_startX > _tree.boundry.xMax) && !(_endX < _tree.boundry.xMin) && !(_startY > _tree.boundry.yMax) && !(_endY < _tree.boundry.yMin)) {
+            if (!(_startX > _tree.boundry.xMax) && !(_endX < _tree.boundry.xMin) && !(_startZ > _tree.boundry.zMax) && !(_endZ < _tree.boundry.zMin)) {
                 foreach (TreeNode _treeNode in _tree.treeNodes) {
-                    if (_treeNode.InRange(_startX, _startY, _endX, _endY)) {
+                    if (_treeNode.InRange(_startX, _startZ, _endX, _endZ)) {
                         _wholeMap.Add(_treeNode);
                     }
                 }
             }
-            GetAreaContent(_tree.northWest, _startX, _startY, _endX, _endY, _wholeMap);
-            GetAreaContent(_tree.northEast, _startX, _startY, _endX, _endY, _wholeMap);
-            GetAreaContent(_tree.southWest, _startX, _startY, _endX, _endY, _wholeMap);
-            GetAreaContent(_tree.southEast, _startX, _startY, _endX, _endY, _wholeMap);
+            GetAreaContent(_tree.northWest, _startX, _startZ, _endX, _endZ, _wholeMap);
+            GetAreaContent(_tree.northEast, _startX, _startZ, _endX, _endZ, _wholeMap);
+            GetAreaContent(_tree.southWest, _startX, _startZ, _endX, _endZ, _wholeMap);
+            GetAreaContent(_tree.southEast, _startX, _startZ, _endX, _endZ, _wholeMap);
         }
 
-        public List<TreeNode> GetAllContent(QuadTree _tree, int _startX, int _startY, int _endX, int _endY) {
+        public List<TreeNode> GetAllContent(QuadTree _tree, int _startX, int _startZ, int _endX, int _endZ) {
             List<TreeNode> _wholeMap = new List<TreeNode>();
-            GetAreaContent(_tree, _startX, _startY, _endX, _endY, _wholeMap);
+            GetAreaContent(_tree, _startX, _startZ, _endX, _endZ, _wholeMap);
             return _wholeMap;
         }
 
         private void AddTownAtk(QuadTree _tree, Town _atk, Town _deff) {
             if (_tree == null) return;
 
-            if (!(_deff.position.X > _tree.boundry.xMax) && !(_deff.position.X < _tree.boundry.xMin) && !(_deff.position.Y > _tree.boundry.yMax) && !(_deff.position.Y < _tree.boundry.yMin)) {
+            if (!(_deff.position.X > _tree.boundry.xMax) && !(_deff.position.X < _tree.boundry.xMin) && !(_deff.position.Z > _tree.boundry.zMax) && !(_deff.position.Z < _tree.boundry.zMin)) {
                 for (int i = 0; i < _tree.treeNodes.Count; i++) {
-                    if (_tree.treeNodes[i].IsNode(_deff.position.X, _deff.position.Y)) {
+                    if (_tree.treeNodes[i].IsNode(_deff.position.X, _deff.position.Z)) {
                         Town t = (Town)_tree.treeNodes[i];
                         if (t.GetAttackTowns().Count == 0) {
                             ((Town)_tree.treeNodes[i]).AddAttackTown(_atk);
@@ -131,9 +131,9 @@ namespace SharedLibrary.Models {
         private void RmTownAtk(QuadTree _tree, Town _deff, Town _atk) {
             if (_tree == null) return;
 
-            if (!(_deff.position.X > _tree.boundry.xMax) && !(_deff.position.X < _tree.boundry.xMin) && !(_deff.position.Y > _tree.boundry.yMax) && !(_deff.position.Y < _tree.boundry.yMin)) {
+            if (!(_deff.position.X > _tree.boundry.xMax) && !(_deff.position.X < _tree.boundry.xMin) && !(_deff.position.Z > _tree.boundry.zMax) && !(_deff.position.Z < _tree.boundry.zMin)) {
                 for (int i = 0; i < _tree.treeNodes.Count; i++) {
-                    if (_tree.treeNodes[i].IsNode(_deff.position.X, _deff.position.Y)) {
+                    if (_tree.treeNodes[i].IsNode(_deff.position.X, _deff.position.Z)) {
                         foreach (Town _town in _deff.GetAttackTowns()) {
                             if (_town == _atk) {
                                 ((Town)_tree.treeNodes[i]).RemoveAttackTown(_atk);
@@ -155,7 +155,7 @@ namespace SharedLibrary.Models {
         private void UpdateOwner(QuadTree _tree, Player _player, TreeNode _treeNode) {
             if (_tree == null) return;
 
-            if (!(_treeNode.position.X > _tree.boundry.xMax) && !(_treeNode.position.X < _tree.boundry.xMin) && !(_treeNode.position.Y > _tree.boundry.yMax) && !(_treeNode.position.Y < _tree.boundry.yMin)) {
+            if (!(_treeNode.position.X > _tree.boundry.xMax) && !(_treeNode.position.X < _tree.boundry.xMin) && !(_treeNode.position.Z > _tree.boundry.zMax) && !(_treeNode.position.Z < _tree.boundry.zMin)) {
                 for (int i = 0; i < _tree.treeNodes.Count; i++) {
                     if (_tree.treeNodes[i].IsNode(_treeNode.position.X, _treeNode.position.X)) {
                         Console.WriteLine($"update owner: {_player.username}");

@@ -1,18 +1,18 @@
 ﻿
 namespace SharedLibrary.Models {
     public class TreeBoundry {
-        public int xMin, yMin, xMax, yMax;
+        public int xMin, zMin, xMax, zMax;
 
-        public TreeBoundry(int _xMin, int _yMin, int _xMax, int _yMax) {
+        public TreeBoundry(int _xMin, int _zMin, int _xMax, int _zMax) {
             xMin = _xMin;
-            yMin = _yMin;
+            zMin = _zMin;
             xMax = _xMax;
-            yMax = _yMax;
+            zMax = _zMax;
         }
 
-        public bool inRange(float _x, float _y) {
+        public bool inRange(float _x, float _z) {
             return (_x >= xMin && _x <= xMax
-                    && _y >= yMin && _y <= yMax);
+                    && _z >= zMin && _z <= zMax);
         }
     }
 }

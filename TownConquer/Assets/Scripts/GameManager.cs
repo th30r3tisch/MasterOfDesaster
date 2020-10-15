@@ -59,15 +59,15 @@ public class GameManager : MonoBehaviour {
             int _x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
             int _z = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
             if (GetAreaContent(
-                (_x - Constants.TOWN_MIN_DISTANCE),
-                (_z - Constants.TOWN_MIN_DISTANCE),
-                (_x + Constants.TOWN_MIN_DISTANCE),
-                (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check for overlapping towns
+                _x - Constants.TOWN_MIN_DISTANCE,
+                _z - Constants.TOWN_MIN_DISTANCE,
+                _x + Constants.TOWN_MIN_DISTANCE,
+                _z + Constants.TOWN_MIN_DISTANCE).Count == 0) { // check for overlapping towns
                 if (GetAreaContent(
-                    (_x - Constants.OBSTACLE_MAX_LENGTH),
-                    (_z - Constants.OBSTACLE_MAX_LENGTH),
-                    (_x + Constants.OBSTACLE_MAX_LENGTH),
-                    (_z + Constants.OBSTACLE_MAX_LENGTH)).Count == 0) { // check for overlapping obstacles
+                    _x - Constants.OBSTACLE_MAX_LENGTH,
+                    _z - Constants.OBSTACLE_MAX_LENGTH,
+                    _x + Constants.TOWN_MIN_DISTANCE,
+                    _z + Constants.TOWN_MIN_DISTANCE).Count == 0) { // check for overlapping obstacles
                     CreateTown(_i, new Vector3(_x, 0, _z), game);
                     flag = true;
                 }
@@ -89,6 +89,7 @@ public class GameManager : MonoBehaviour {
         _town.GetComponent<TownManager>().ownerName = owner.username;
         _town.GetComponent<TownManager>().ownerid = owner.id;
         _town.GetComponent<TownManager>().life = _t.life;
+        _town.GetComponentInChildren<Renderer>().material.color = new Color32(owner.color.R, owner.color.G, owner.color.B, owner.color.A );
         towns.Add(_i, _town.GetComponent<TownManager>());
     }
 
@@ -109,8 +110,8 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private List<TreeNode> GetAreaContent(int _startX, int _startY, int _endX, int _endY) {
-        return world.GetAreaContent(_startX, _startY, _endX, _endY);
+    private List<TreeNode> GetAreaContent(int _startX, int _startZ, int _endX, int _endZ) {
+        return world.GetAreaContent(_startX, _startZ, _endX, _endZ);
     }
 
     public void AttackTown(Vector3 lineStart, Vector3 lineEnd) {

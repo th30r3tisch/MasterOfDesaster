@@ -42,8 +42,8 @@ namespace Game_Server {
                     if (GetAreaContent(
                         (_x - Constants.OBSTACLE_MAX_LENGTH), 
                         (_z - Constants.OBSTACLE_MAX_LENGTH), 
-                        (_x + Constants.OBSTACLE_MAX_LENGTH), 
-                        (_z + Constants.OBSTACLE_MAX_LENGTH)).Count == 0) { // check for overlapping obstacles
+                        (_x + Constants.TOWN_MIN_DISTANCE), 
+                        (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check for overlapping obstacles
                         _t = new Town(new Vector3(_x, 0, _z));
                     }
                 }
