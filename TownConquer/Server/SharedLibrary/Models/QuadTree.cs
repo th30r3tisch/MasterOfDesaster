@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace SharedLibrary.Models {
 
@@ -99,92 +100,78 @@ namespace SharedLibrary.Models {
             return _wholeMap;
         }
 
-        private void AddTownAtk(QuadTree _tree, Town _atk, Town _deff) {
-            if (_tree == null) return;
+        private void AddTownAtk(QuadTree _tree, Vector3 _atk, Vector3 _deff) {
 
-            if (!(_deff.position.X > _tree.boundry.xMax) && !(_deff.position.X < _tree.boundry.xMin) && !(_deff.position.Z > _tree.boundry.zMax) && !(_deff.position.Z < _tree.boundry.zMin)) {
-                for (int i = 0; i < _tree.treeNodes.Count; i++) {
-                    if (_tree.treeNodes[i].IsNode(_deff.position.X, _deff.position.Z)) {
-                        Town t = (Town)_tree.treeNodes[i];
-                        if (t.GetAttackTowns().Count == 0) {
-                            ((Town)_tree.treeNodes[i]).AddAttackTown(_atk);
-                            ((Town)_tree.treeNodes[i]).life = _deff.life;
-                        }
-                        else {
-                            foreach (Town _town in _deff.GetAttackTowns()) {
-                                if (_town == _atk) return;
-                                else {
-                                    ((Town)_tree.treeNodes[i]).AddAttackTown(_atk);
-                                    ((Town)_tree.treeNodes[i]).life = _deff.life;
-                                }
-                            }
-                        }
+            Town _atkTown = SearchTown(_tree, _atk);
+            Town _deffTown = SearchTown(_tree, _deff);
+            if (_deffTown.GetAttackTowns().Count == 0) {
+                _deffTown.AddAttackTown(_atkTown);
+            }
+            else {
+                foreach (Town _town in _deffTown.GetAttackTowns()) {
+                    if (_town == _atkTown) return;
+                    else {
+                        _deffTown.AddAttackTown(_atkTown);
                     }
                 }
             }
-            AddTownAtk(_tree.northWest, _deff, _atk);
-            AddTownAtk(_tree.northEast, _deff, _atk);
-            AddTownAtk(_tree.southWest, _deff, _atk);
-            AddTownAtk(_tree.southEast, _deff, _atk);
         }
 
-        private void RmTownAtk(QuadTree _tree, Town _deff, Town _atk) {
-            if (_tree == null) return;
+        private void RmTownAtk(QuadTree _tree, Vector3 _atk, Vector3 _deff) {
 
-            if (!(_deff.position.X > _tree.boundry.xMax) && !(_deff.position.X < _tree.boundry.xMin) && !(_deff.position.Z > _tree.boundry.zMax) && !(_deff.position.Z < _tree.boundry.zMin)) {
+            Town _atkTown = SearchTown(_tree, _atk);
+            Town _deffTown = SearchTown(_tree, _deff);
+            foreach (Town _town in _deffTown.GetAttackTowns()) {
+                if (_town == _atkTown) {
+                    _deffTown.RemoveAttackTown(_atkTown);
+                }
+            }
+        }
+
+        private void UpdateOwner(QuadTree _tree, Player _player, Vector3 _t) {
+
+            Town _town = SearchTown(_tree, _t);
+            Console.WriteLine($"update owner: {_player.username}");
+            _town.RemoveAllConquerors();
+            _town.player = _player;
+        }
+
+        private Town SearchTown(QuadTree _tree, Vector3 _town) {
+
+            if (_tree == null) return null;
+
+            if (!(_town.X > _tree.boundry.xMax) && !(_town.X < _tree.boundry.xMin) && !(_town.Z > _tree.boundry.zMax) && !(_town.Z < _tree.boundry.zMin)) {
                 for (int i = 0; i < _tree.treeNodes.Count; i++) {
-                    if (_tree.treeNodes[i].IsNode(_deff.position.X, _deff.position.Z)) {
-                        foreach (Town _town in _deff.GetAttackTowns()) {
-                            if (_town == _atk) {
-                                ((Town)_tree.treeNodes[i]).RemoveAttackTown(_atk);
-                                ((Town)_tree.treeNodes[i]).life = _deff.life;
-                            }
-                            else return;
-                        }
+                    if (_tree.treeNodes[i].IsNode(_town.X, _town.Z)) {
+                        return (Town)_tree.treeNodes[i];
                     }
                 }
             }
-            RmTownAtk(_tree.northWest, _deff, _atk);
-            RmTownAtk(_tree.northEast, _deff, _atk);
-            RmTownAtk(_tree.southWest, _deff, _atk);
-            RmTownAtk(_tree.southEast, _deff, _atk);
-        }
-
-
-
-        private void UpdateOwner(QuadTree _tree, Player _player, TreeNode _treeNode) {
-            if (_tree == null) return;
-
-            if (!(_treeNode.position.X > _tree.boundry.xMax) && !(_treeNode.position.X < _tree.boundry.xMin) && !(_treeNode.position.Z > _tree.boundry.zMax) && !(_treeNode.position.Z < _tree.boundry.zMin)) {
-                for (int i = 0; i < _tree.treeNodes.Count; i++) {
-                    if (_tree.treeNodes[i].IsNode(_treeNode.position.X, _treeNode.position.X)) {
-                        Console.WriteLine($"update owner: {_player.username}");
-                        ((Town)_tree.treeNodes[i]).RemoveAllConquerors();
-                        ((Town)_tree.treeNodes[i]).player = _player;
-                        ((Town)_tree.treeNodes[i]).life = ((Town)_treeNode).life;
-
-                        return;
-                    }
-                }
+            if (SearchTown(_tree.northWest, _town) != null) {
+                return SearchTown(_tree.northWest, _town);
             }
-            UpdateOwner(_tree.northWest, _player, _treeNode);
-            UpdateOwner(_tree.northEast, _player, _treeNode);
-            UpdateOwner(_tree.southWest, _player, _treeNode);
-            UpdateOwner(_tree.southEast, _player, _treeNode);
+            if (SearchTown(_tree.northEast, _town) != null) {
+                return SearchTown(_tree.northEast, _town);
+            }
+            if (SearchTown(_tree.southWest, _town) != null) {
+                return SearchTown(_tree.southWest, _town);
+            }
+            if (SearchTown(_tree.southEast, _town) != null) {
+                return SearchTown(_tree.southEast, _town);
+            }
+            return null;
         }
 
-        public void AddUpdateNode(Town _attacker, Town _defender) {
+        public void AddUpdateNode(Vector3 _attacker, Vector3 _defender) {
             AddTownAtk(this, _attacker, _defender);
         }
 
-        public void RmUpdateNode(List<TreeNode> _nodes) {
-            Town inComingAtk = (Town)_nodes[0];
-            Town inComingDeff = (Town)_nodes[1];
-            RmTownAtk(this, inComingDeff, inComingAtk);
+        public void RmUpdateNode(Vector3 _attacker, Vector3 _defender) {
+            RmTownAtk(this, _attacker, _defender);
         }
 
-        public void UpdateOwner(Player _player, TreeNode _treeNode) {
-            UpdateOwner(this, _player, _treeNode);
+        public void UpdateOwner(Player _player, Vector3 _town) {
+            UpdateOwner(this, _player, _town);
         }
     }
 }

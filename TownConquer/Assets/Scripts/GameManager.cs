@@ -116,6 +116,7 @@ public class GameManager : MonoBehaviour {
 
     public void AttackTown(Vector3 lineStart, Vector3 lineEnd) {
         CreateLineMesh(lineStart, lineEnd);
+
     }
 
     private void CreateLineMesh(Vector3 lineStart, Vector3 lineEnd) {

@@ -186,6 +186,7 @@ namespace Game_Server {
 
         public void AttackTown(Vector3 _atkTown, Vector3 _deffTown) {
             if (!GameLogic.IsIntersecting(_atkTown, _deffTown)) {
+                GameLogic.AddAttackToTown(_atkTown, _deffTown);
                 foreach (Client _client in Server.clients.Values) {
                     if (_client.player != null) {
                         ServerSend.GrantedAttack(_client.id, _atkTown, _deffTown);

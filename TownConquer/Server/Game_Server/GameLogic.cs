@@ -113,5 +113,9 @@ namespace Game_Server {
         public static List<TreeNode> GetAreaContent(int _startX, int _startY, int _endX, int _endY) {
             return world.GetAreaContent(_startX, _startY, _endX, _endY);
         }
+
+        public static void AddAttackToTown(Vector3 _atkTown, Vector3 _deffTown) {
+            world.GetQuadtree().AddUpdateNode(_atkTown, _deffTown);
+        }
     }
 }
