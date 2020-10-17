@@ -11,12 +11,14 @@ namespace SharedLibrary {
         createWorld,
         updateWorld,
         grantedAttack,
+        grantedRetreat,
     }
 
     /// <summary>Sent from client to server.</summary>
     public enum ClientPackets {
         welcomeReceived = 1,
         attackRequest,
+        retreatRequest,
     }
 
     public class Packet : IDisposable {

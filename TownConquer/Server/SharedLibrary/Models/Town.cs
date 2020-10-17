@@ -18,16 +18,6 @@ namespace SharedLibrary.Models {
             attackerTowns.Clear();
         }
 
-        public List<Town> GetAttackTowns() {
-            List<Town> _towns = new List<Town>();
-            if (attackerTowns != null && attackerTowns.Count > 0) {
-                foreach (Town _town in attackerTowns) {
-                    _towns.Add(_town);
-                }
-            }
-            return _towns;
-        }
-
         public void AddAttackTown(Town _town) {
             if (attackerTowns == null) attackerTowns = new List<Town>();
             attackerTowns.Add(_town);
@@ -35,11 +25,7 @@ namespace SharedLibrary.Models {
 
         public void RemoveAttackTown(Town _town) {
             if (attackerTowns != null && attackerTowns.Count > 0) {
-                foreach (Town _entry in attackerTowns) {
-                    if (_entry.position.X == _town.position.X && _entry.position.Y == _town.position.Y) {
-                        attackerTowns.Remove(_entry);
-                    }
-                }
+                attackerTowns.Remove(_town);
             }
         }
     }

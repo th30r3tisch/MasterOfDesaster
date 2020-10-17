@@ -66,8 +66,8 @@ public class GameManager : MonoBehaviour {
                 if (GetAreaContent(
                     _x - Constants.OBSTACLE_MAX_LENGTH,
                     _z - Constants.OBSTACLE_MAX_LENGTH,
-                    _x + Constants.TOWN_MIN_DISTANCE,
-                    _z + Constants.TOWN_MIN_DISTANCE).Count == 0) { // check for overlapping obstacles
+                    _x + Constants.OBSTACLE_MAX_LENGTH,
+                    _z + Constants.OBSTACLE_MAX_LENGTH).Count == 0) { // check for overlapping obstacles
                     CreateTown(_i, new Vector3(_x, 0, _z), game);
                     flag = true;
                 }
@@ -79,7 +79,7 @@ public class GameManager : MonoBehaviour {
         GameObject _town;
         Town _t;
 
-        _t = new Town(new System.Numerics.Vector3(_position.x, _position.y, _position.z));
+        _t = new Town(ToNumericVector(_position));
         _t.player = owner;
         owner.addTown(_t);
         world.Insert(_t);
@@ -97,15 +97,15 @@ public class GameManager : MonoBehaviour {
         GameObject _obstacle;
         Obstacle _o;
         for (int i = 0; i < Constants.OBSTACLE_NUMBER; i++) {
-            System.Numerics.Vector3 _position = new System.Numerics.Vector3(
+            Vector3 _position = new Vector3(
                         RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES),
                         0,
                         RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES));
             int _orientation = RandomNumber(0, 1);
             int _length = RandomNumber(Constants.OBSTACLE_MIN_LENGTH, Constants.OBSTACLE_MAX_LENGTH);
-            _o = new Obstacle(_position, _orientation, _length);
+            _o = new Obstacle(ToNumericVector(_position), _orientation, _length);
             world.Insert(_o);
-            _obstacle = Instantiate(obstaclePrefab, new Vector3(_position.X, _position.Y, _position.Z), horizontalOrientation);
+            _obstacle = Instantiate(obstaclePrefab, _position, horizontalOrientation);
             _obstacle.transform.localScale = new Vector3(_o.width, 8, _o.length);
         }
     }
@@ -114,25 +114,29 @@ public class GameManager : MonoBehaviour {
         return world.GetAreaContent(_startX, _startZ, _endX, _endZ);
     }
 
-    public void AttackTown(Vector3 lineStart, Vector3 lineEnd) {
-        CreateLineMesh(lineStart, lineEnd);
-
+    public void AttackTown(Vector3 _lineStart, Vector3 _lineEnd) {
+        CreateLineMesh(_lineStart, _lineEnd);
+        world.GetQuadtree().AddUpdateNode(ToNumericVector(_lineStart), ToNumericVector(_lineEnd));
     }
 
-    private void CreateLineMesh(Vector3 lineStart, Vector3 lineEnd) {
+    public void RetreatTroops(Vector3 _lineStart, Vector3 _lineEnd) {
+        world.GetQuadtree().RmUpdateNode(ToNumericVector(_lineStart), ToNumericVector(_lineEnd));
+    }
+
+    private void CreateLineMesh(Vector3 _lineStart, Vector3 _lineEnd) {
         GameObject _atkLine = new GameObject();
         MeshRenderer _meshRenderer = _atkLine.AddComponent<MeshRenderer>();
         _meshRenderer.sharedMaterial = Resources.Load("Line", typeof(Material)) as Material;
         MeshFilter _meshFilter = _atkLine.AddComponent<MeshFilter>();
         Mesh _mesh = new Mesh();
 
-        Vector3 _direction = lineEnd - lineStart;
+        Vector3 _direction = _lineEnd - _lineStart;
 
         Vector3[] _vertices = new Vector3[4]{
-            Vector3.Cross(_direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + lineStart,
-            Vector3.Cross(_direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + lineStart,
-            Vector3.Cross(_direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + lineEnd,
-            Vector3.Cross(_direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + lineEnd
+            Vector3.Cross(_direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + _lineStart,
+            Vector3.Cross(_direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + _lineStart,
+            Vector3.Cross(_direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + _lineEnd,
+            Vector3.Cross(_direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + _lineEnd
         };
         int[] _tris = new int[6]{
             // lower left triangle
@@ -159,9 +163,18 @@ public class GameManager : MonoBehaviour {
         _mesh.uv = uv;
         _meshFilter.mesh = _mesh;
         _atkLine.name = "atk";
+        _atkLine.AddComponent<AttackManager>();
+        _atkLine.GetComponent<AttackManager>().ownerid = Client.instance.myId;
+        _atkLine.GetComponent<AttackManager>().start = _lineStart;
+        _atkLine.GetComponent<AttackManager>().end = _lineEnd;
+        _atkLine.AddComponent<MeshCollider>();
     }
 
     private static int RandomNumber(int _min, int _max) {
         return r.Next(_max - _min + 1) + _min;
+    }
+
+    private System.Numerics.Vector3 ToNumericVector(Vector3 v) {
+        return new System.Numerics.Vector3(v.x, v.y, v.z);
     }
 }

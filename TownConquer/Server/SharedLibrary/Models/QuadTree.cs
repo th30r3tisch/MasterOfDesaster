@@ -104,11 +104,11 @@ namespace SharedLibrary.Models {
 
             Town _atkTown = SearchTown(_tree, _atk);
             Town _deffTown = SearchTown(_tree, _deff);
-            if (_deffTown.GetAttackTowns().Count == 0) {
+            if (_deffTown.attackerTowns.Count == 0) {
                 _deffTown.AddAttackTown(_atkTown);
             }
             else {
-                foreach (Town _town in _deffTown.GetAttackTowns()) {
+                foreach (Town _town in _deffTown.attackerTowns) {
                     if (_town == _atkTown) return;
                     else {
                         _deffTown.AddAttackTown(_atkTown);
@@ -121,11 +121,7 @@ namespace SharedLibrary.Models {
 
             Town _atkTown = SearchTown(_tree, _atk);
             Town _deffTown = SearchTown(_tree, _deff);
-            foreach (Town _town in _deffTown.GetAttackTowns()) {
-                if (_town == _atkTown) {
-                    _deffTown.RemoveAttackTown(_atkTown);
-                }
-            }
+            _deffTown.RemoveAttackTown(_atkTown);
         }
 
         private void UpdateOwner(QuadTree _tree, Player _player, Vector3 _t) {

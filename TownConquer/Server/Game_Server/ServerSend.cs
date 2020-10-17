@@ -46,6 +46,15 @@ namespace Game_Server {
             }
         }
 
+        public static void GrantedRetreat(int _toClient, Vector3 _atkTown, Vector3 _deffTown) {
+            using (Packet _packet = new Packet((int)ServerPackets.grantedRetreat)) {
+                _packet.Write(_atkTown);
+                _packet.Write(_deffTown);
+                SendTCPData(_toClient, _packet);
+                Console.WriteLine($"Retreat from Town {_atkTown} to {_deffTown} is GRANTED.");
+            }
+        }
+
         #region TCP
 
         private static void SendTCPData(int _toClient, Packet _packet) {

@@ -195,6 +195,15 @@ namespace Game_Server {
             }
         }
 
+        public void RetreatTown(Vector3 _atkTown, Vector3 _deffTown) {
+            GameLogic.ReomveAttackFromTown(_atkTown, _deffTown);
+            foreach (Client _client in Server.clients.Values) {
+                if (_client.player != null) {
+                    ServerSend.GrantedRetreat(_client.id, _atkTown, _deffTown);
+                }
+            }
+        }
+
         public void Disconnect() {
             Console.WriteLine($"{tcp.socket.Client.RemoteEndPoint} has disconnected.");
             player = null;
