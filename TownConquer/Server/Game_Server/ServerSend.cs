@@ -55,6 +55,15 @@ namespace Game_Server {
             }
         }
 
+        public static void GrantedConquer(int _toClient, Player _player, Vector3 _deffTown) {
+            using (Packet _packet = new Packet((int)ServerPackets.grantedConquer)) {
+                _packet.Write(_player.id);
+                _packet.Write(_deffTown);
+                SendTCPData(_toClient, _packet);
+                Console.WriteLine($"Conquer of {_deffTown} is GRANTED.");
+            }
+        }
+
         #region TCP
 
         private static void SendTCPData(int _toClient, Packet _packet) {

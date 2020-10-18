@@ -12,6 +12,7 @@ namespace SharedLibrary {
         updateWorld,
         grantedAttack,
         grantedRetreat,
+        grantedConquer,
     }
 
     /// <summary>Sent from client to server.</summary>
@@ -19,6 +20,7 @@ namespace SharedLibrary {
         welcomeReceived = 1,
         attackRequest,
         retreatRequest,
+        conquerRequest,
     }
 
     public class Packet : IDisposable {

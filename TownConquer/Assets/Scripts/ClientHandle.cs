@@ -59,4 +59,11 @@ public class ClientHandle : MonoBehaviour
         Vector3 _deffTown = new Vector3(_v2.X, _v2.Y, _v2.Z);
         GameManager.instance.RetreatTroops(_atkTown, _deffTown);
     }
+
+    public static void GrantedConquer(Packet _packet) {
+        int _conquererId = _packet.ReadInt();
+        System.Numerics.Vector3 _v2 = _packet.ReadVector3();
+        Vector3 _deffTown = new Vector3(_v2.X, _v2.Y, _v2.Z);
+        GameManager.instance.ConquerTown(_conquererId, _deffTown);
+    }
 }

@@ -121,5 +121,9 @@ namespace Game_Server {
         public static void ReomveAttackFromTown(Vector3 _atkTown, Vector3 _deffTown) {
             world.GetQuadtree().RmUpdateNode(_atkTown, _deffTown);
         }
+
+        public static void ConquerTown(Player _player, Vector3 _deffTown) {
+            world.GetQuadtree().UpdateOwner(_player, _deffTown);
+        }
     }
 }

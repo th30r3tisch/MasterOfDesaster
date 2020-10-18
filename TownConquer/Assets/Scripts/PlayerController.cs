@@ -49,7 +49,6 @@ public class PlayerController : MonoBehaviour {
                 GameObject go = _hitInfo.collider.gameObject;
                 if (go.name.StartsWith("at") && go.GetComponent<AttackManager>().ownerid == Client.instance.myId) {
                     ClientSend.RetreatRequest(go.GetComponent<AttackManager>().start, go.GetComponent<AttackManager>().end);
-                    DestroyImmediate(go);
                 }
             }
         }

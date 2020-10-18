@@ -77,12 +77,11 @@ public class GameManager : MonoBehaviour {
 
     private void CreateTown(int _i, Vector3 _position, Player owner) {
         GameObject _town;
-        Town _t;
+        UTown _t;
 
-        _t = new Town(ToNumericVector(_position));
-        _t.player = owner;
-        owner.addTown(_t);
-        world.Insert(_t);
+        _t = new UTown(ToNumericVector(_position)) {
+            player = owner
+        };
 
         _town = Instantiate(townPrefab, _position, horizontalOrientation);
         _town.GetComponent<TownManager>().id = _i;
@@ -91,6 +90,11 @@ public class GameManager : MonoBehaviour {
         _town.GetComponent<TownManager>().life = _t.life;
         _town.GetComponentInChildren<Renderer>().material.color = new Color32(owner.color.R, owner.color.G, owner.color.B, owner.color.A );
         towns.Add(_i, _town.GetComponent<TownManager>());
+
+        _t.go = _town;
+        owner.addTown(_t);
+        world.Insert(_t);
+
     }
 
     private void CreateObstacles() {
@@ -115,15 +119,70 @@ public class GameManager : MonoBehaviour {
     }
 
     public void AttackTown(Vector3 _lineStart, Vector3 _lineEnd) {
-        CreateLineMesh(_lineStart, _lineEnd);
+        UTown _deffT = (UTown)world.GetQuadtree().GetTown(ToNumericVector(_lineEnd));
+        UTown _atkT = (UTown)world.GetQuadtree().GetTown(ToNumericVector(_lineStart));
+
+        TownManager _deffTm = _deffT.go.GetComponent<TownManager>();
+        TownManager _atkTm = _atkT.go.GetComponent<TownManager>();
+        if (_deffTm.ownerid == _atkTm.ownerid) {
+            _deffTm.supporter++;
+        }
+        else {
+            _deffTm.attacker.Add(_atkT);
+        }
+
+        _deffT.incommingAttacks.Add(CreateLineMesh(_atkTm.ownerid, _lineStart, _lineEnd));
         world.GetQuadtree().AddUpdateNode(ToNumericVector(_lineStart), ToNumericVector(_lineEnd));
     }
 
     public void RetreatTroops(Vector3 _lineStart, Vector3 _lineEnd) {
+        UTown _atkT = (UTown)world.GetQuadtree().GetTown(ToNumericVector(_lineStart));
+        UTown _deffT = (UTown)world.GetQuadtree().GetTown(ToNumericVector(_lineEnd));
+        TownManager _tm = _deffT.go.GetComponent<TownManager>();
+        GameObject _attackToRemove = _deffT.GetAttackGameObject(_lineStart);
+
+        _deffT.incommingAttacks.Remove(_attackToRemove);
         world.GetQuadtree().RmUpdateNode(ToNumericVector(_lineStart), ToNumericVector(_lineEnd));
+        DestroyImmediate(_attackToRemove);
+
+        if (_deffT.player.id == _atkT.player.id) {
+            _tm.supporter--;
+        }
+        else {
+            _tm.attacker.Remove(_atkT);
+        }
     }
 
-    private void CreateLineMesh(Vector3 _lineStart, Vector3 _lineEnd) {
+    public void ConquerTown(int _conquererId, Vector3 _deffTown) {
+        UTown _t = (UTown)world.GetQuadtree().GetTown(ToNumericVector(_deffTown));
+        TownManager _tm = _t.go.GetComponent<TownManager>();
+
+        _tm.attacker.Clear();
+        _tm.supporter = 0;
+        _tm.ownerid = _conquererId;
+
+        if (_conquererId == Client.instance.myId) {
+            world.GetQuadtree().UpdateOwner(Client.instance.me, ToNumericVector(_deffTown));
+            _tm.ownerName = Client.instance.me.username;
+            _t.go.GetComponentInChildren<Renderer>().material.color = new Color32(Client.instance.me.color.R, Client.instance.me.color.G, Client.instance.me.color.B, Client.instance.me.color.A);
+        }
+        else {
+            foreach (Player _player in Client.instance.enemies) {
+                if (_player.id == _conquererId) {
+                    world.GetQuadtree().UpdateOwner(_player, ToNumericVector(_deffTown));
+                    _tm.ownerName = _player.username;
+                    _t.go.GetComponentInChildren<Renderer>().material.color = new Color32(_player.color.R, _player.color.G, _player.color.B, _player.color.A);
+                }
+            }
+        }
+        
+        foreach (GameObject _gameObject in _t.incommingAttacks) {
+            DestroyImmediate(_gameObject);
+        }
+        _t.incommingAttacks.Clear();
+    }
+
+    private GameObject CreateLineMesh(int _ownerId, Vector3 _lineStart, Vector3 _lineEnd) {
         GameObject _atkLine = new GameObject();
         MeshRenderer _meshRenderer = _atkLine.AddComponent<MeshRenderer>();
         _meshRenderer.sharedMaterial = Resources.Load("Line", typeof(Material)) as Material;
@@ -164,10 +223,12 @@ public class GameManager : MonoBehaviour {
         _meshFilter.mesh = _mesh;
         _atkLine.name = "atk";
         _atkLine.AddComponent<AttackManager>();
-        _atkLine.GetComponent<AttackManager>().ownerid = Client.instance.myId;
+        _atkLine.GetComponent<AttackManager>().ownerid = _ownerId;
         _atkLine.GetComponent<AttackManager>().start = _lineStart;
         _atkLine.GetComponent<AttackManager>().end = _lineEnd;
         _atkLine.AddComponent<MeshCollider>();
+
+        return _atkLine;
     }
 
     private static int RandomNumber(int _min, int _max) {

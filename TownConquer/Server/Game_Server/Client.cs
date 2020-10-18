@@ -204,6 +204,16 @@ namespace Game_Server {
             }
         }
 
+        public void ConquerTown(int _attackerId, Vector3 _deffTown) {
+            Player _conquerer = Server.clients[_attackerId].player;
+            GameLogic.ConquerTown(_conquerer, _deffTown);
+            foreach (Client _client in Server.clients.Values) {
+                if (_client.player != null) {
+                    ServerSend.GrantedConquer(_client.id, _conquerer, _deffTown);
+                }
+            }
+        }
+
         public void Disconnect() {
             Console.WriteLine($"{tcp.socket.Client.RemoteEndPoint} has disconnected.");
             player = null;

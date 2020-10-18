@@ -104,16 +104,8 @@ namespace SharedLibrary.Models {
 
             Town _atkTown = SearchTown(_tree, _atk);
             Town _deffTown = SearchTown(_tree, _deff);
-            if (_deffTown.attackerTowns.Count == 0) {
+            if (!_deffTown.attackerTowns.Contains(_atkTown)) {
                 _deffTown.AddAttackTown(_atkTown);
-            }
-            else {
-                foreach (Town _town in _deffTown.attackerTowns) {
-                    if (_town == _atkTown) return;
-                    else {
-                        _deffTown.AddAttackTown(_atkTown);
-                    }
-                }
             }
         }
 
@@ -168,6 +160,10 @@ namespace SharedLibrary.Models {
 
         public void UpdateOwner(Player _player, Vector3 _town) {
             UpdateOwner(this, _player, _town);
+        }
+
+        public Town GetTown(Vector3 _town) {
+            return SearchTown(this, _town);
         }
     }
 }

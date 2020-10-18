@@ -37,5 +37,14 @@ namespace Game_Server {
 
             Server.clients[_fromClient].RetreatTown(_atkTown, _deffTown);
         }
+
+        public static void ConquerRequest(int _fromClient, Packet _packet) {
+            int _clientId = _packet.ReadInt();
+            Vector3 _deffTown = _packet.ReadVector3();
+
+            Console.WriteLine($"{Server.clients[_fromClient].tcp.socket.Client.RemoteEndPoint} requested to conquer {_deffTown}.");
+
+            Server.clients[_fromClient].ConquerTown(_clientId, _deffTown);
+        }
     }
 }

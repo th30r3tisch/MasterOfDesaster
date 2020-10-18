@@ -249,6 +249,7 @@ public class Client : MonoBehaviour
             { (int)ServerPackets.updateWorld, ClientHandle.UpdateWorld },
             { (int)ServerPackets.grantedAttack, ClientHandle.GrantedAttack },
             { (int)ServerPackets.grantedRetreat, ClientHandle.GrantedRetreat },
+            { (int)ServerPackets.grantedConquer, ClientHandle.GrantedConquer },
         };
 
         Debug.Log("Initialized packets.");

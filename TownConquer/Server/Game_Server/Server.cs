@@ -104,6 +104,7 @@ namespace Game_Server {
                 {(int)ClientPackets.welcomeReceived, ServerHandle.WelcomeReceived },
                 {(int)ClientPackets.attackRequest, ServerHandle.AttackRequest },
                 {(int)ClientPackets.retreatRequest, ServerHandle.RetreatRequest },
+                {(int)ClientPackets.conquerRequest, ServerHandle.ConquerRequest },
             };
             Console.WriteLine("Initialized packets and created World.");
         }

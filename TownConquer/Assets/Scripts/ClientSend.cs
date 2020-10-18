@@ -56,4 +56,13 @@ public class ClientSend : MonoBehaviour
             SendTCPData(_packet);
         }
     }
+
+    public static void ConquerRequest(Vector3 deffTown) {
+        using (Packet _packet = new Packet((int)ClientPackets.conquerRequest)) {
+            _packet.Write(Client.instance.myId);
+            _packet.Write(new System.Numerics.Vector3(deffTown.x, deffTown.y, deffTown.z));
+
+            SendTCPData(_packet);
+        }
+    }
 }
