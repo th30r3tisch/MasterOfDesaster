@@ -1,13 +1,15 @@
-﻿using UnityEngine;
+﻿using SharedLibrary;
+using UnityEngine;
 
 public class CameraController : MonoBehaviour {
     public float dragSpeed = 2;
     public float scrollspeed = 200;
-    public float minY = 200; // min scroll height
-    public float maxY = 900; // max scroll height
+    public float minY = 400; // min scroll height
+    public float maxY = 1000; // max scroll height
     public LayerMask mask;
 
     private RaycastHit oldMousePos;
+    private bool topdown = false;
 
 
     void Update() {
@@ -16,8 +18,22 @@ public class CameraController : MonoBehaviour {
 
         _pos = DragWorld(_pos);
         _pos = ZoomWorld(_pos);
+        _pos = LimitCameraMovement(_pos);
 
         transform.position = _pos;
+
+        ToggleTopdownView();
+    }
+
+    private void ToggleTopdownView() {
+        if (Input.GetKey(KeyCode.Space) && !topdown) {
+            transform.rotation = Quaternion.Euler(90, 0, 0);
+            topdown = true;
+        }
+        else if (Input.GetKey(KeyCode.Space) && topdown) {
+            transform.rotation = Quaternion.Euler(30, 0, 0);
+            topdown = false;
+        }
     }
 
 
@@ -63,6 +79,10 @@ public class CameraController : MonoBehaviour {
         _pos.y = Mathf.Clamp(_pos.y, minY, maxY);
 
         return _pos;
+    }
+
+    Vector3 LimitCameraMovement(Vector3 _pos) {
+        return new Vector3(Mathf.Clamp(_pos.x, 0, Constants.MAP_WIDTH), Mathf.Clamp(_pos.y, minY, maxY), Mathf.Clamp(_pos.z, 0, Constants.MAP_HEIGHT));
     }
 
 }
