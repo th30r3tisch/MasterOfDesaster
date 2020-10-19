@@ -30,7 +30,7 @@ public class ClientHandle : MonoBehaviour
         System.Numerics.Vector3 v = _packet.ReadVector3();
         Vector3 _townPos = new Vector3(v.X, v.Y, v.Z);
 
-        GameManager.instance.InitMap(_seed, _townPos, Client.instance.me); //TODO add player towns
+        GameManager.instance.InitMap(_seed, _townPos, Client.instance.me);
     }
 
     public static void UpdateWorld(Packet _packet) {

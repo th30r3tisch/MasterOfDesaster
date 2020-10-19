@@ -2,7 +2,7 @@
 
 public class CameraController : MonoBehaviour {
     public float dragSpeed = 2;
-    public float scrollspeed = 10;
+    public float scrollspeed = 200;
     public float minY = 200; // min scroll height
     public float maxY = 900; // max scroll height
     public LayerMask mask;

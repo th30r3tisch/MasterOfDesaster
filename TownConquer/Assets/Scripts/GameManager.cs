@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public void AddEnemies( Player _enemy, Vector3 _townPos) {
+    public void AddEnemies(Player _enemy, Vector3 _townPos) {
         CreateTown(towns.Count, _townPos, _enemy);
         Client.instance.enemies.Add(_enemy);
     }
@@ -37,9 +37,9 @@ public class GameManager : MonoBehaviour {
         r = new System.Random(_seed);
 
         world = new World(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
-        game = new Player(-1, "game", System.Drawing.Color.FromArgb(100,100,100));
-        _ground = Instantiate(landPrefab, new Vector3(Constants.MAP_WIDTH/2, 0, Constants.MAP_HEIGHT/2), horizontalOrientation);
-        _ground.transform.localScale = new Vector3(Constants.MAP_WIDTH/10, 1, Constants.MAP_HEIGHT/10);
+        game = new Player(-1, "game", System.Drawing.Color.FromArgb(100, 100, 100));
+        _ground = Instantiate(landPrefab, new Vector3(Constants.MAP_WIDTH / 2, 0, Constants.MAP_HEIGHT / 2), horizontalOrientation);
+        _ground.transform.localScale = new Vector3(Constants.MAP_WIDTH / 10, 1, Constants.MAP_HEIGHT / 10);
 
         CreateObstacles();
         CreateTowns();
@@ -79,7 +79,7 @@ public class GameManager : MonoBehaviour {
         GameObject _town;
         UTown _t;
 
-        _t = new UTown(ToNumericVector(_position)) {
+        _t = new UTown(ConversionManager.ToNumericVector(_position)) {
             player = owner
         };
 
@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour {
         _town.GetComponent<TownManager>().ownerName = owner.username;
         _town.GetComponent<TownManager>().ownerid = owner.id;
         _town.GetComponent<TownManager>().life = _t.life;
-        _town.GetComponentInChildren<Renderer>().material.color = new Color32(owner.color.R, owner.color.G, owner.color.B, owner.color.A );
+        _town.GetComponentInChildren<Renderer>().material.color = ConversionManager.DrawingToColor32(owner.color);
         towns.Add(_i, _town.GetComponent<TownManager>());
 
         _t.go = _town;
@@ -107,7 +107,7 @@ public class GameManager : MonoBehaviour {
                         RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES));
             int _orientation = RandomNumber(0, 1);
             int _length = RandomNumber(Constants.OBSTACLE_MIN_LENGTH, Constants.OBSTACLE_MAX_LENGTH);
-            _o = new Obstacle(ToNumericVector(_position), _orientation, _length);
+            _o = new Obstacle(ConversionManager.ToNumericVector(_position), _orientation, _length);
             world.Insert(_o);
             _obstacle = Instantiate(obstaclePrefab, _position, horizontalOrientation);
             _obstacle.transform.localScale = new Vector3(_o.width, 8, _o.length);
@@ -119,8 +119,8 @@ public class GameManager : MonoBehaviour {
     }
 
     public void AttackTown(Vector3 _lineStart, Vector3 _lineEnd) {
-        UTown _deffT = (UTown)world.GetQuadtree().GetTown(ToNumericVector(_lineEnd));
-        UTown _atkT = (UTown)world.GetQuadtree().GetTown(ToNumericVector(_lineStart));
+        UTown _deffT = (UTown)world.GetQuadtree().GetTown(ConversionManager.ToNumericVector(_lineEnd));
+        UTown _atkT = (UTown)world.GetQuadtree().GetTown(ConversionManager.ToNumericVector(_lineStart));
 
         TownManager _deffTm = _deffT.go.GetComponent<TownManager>();
         TownManager _atkTm = _atkT.go.GetComponent<TownManager>();
@@ -132,18 +132,13 @@ public class GameManager : MonoBehaviour {
         }
 
         _deffT.incommingAttacks.Add(CreateLineMesh(_atkTm.ownerid, _lineStart, _lineEnd));
-        world.GetQuadtree().AddUpdateNode(ToNumericVector(_lineStart), ToNumericVector(_lineEnd));
+        world.GetQuadtree().AddUpdateNode(ConversionManager.ToNumericVector(_lineStart), ConversionManager.ToNumericVector(_lineEnd));
     }
 
     public void RetreatTroops(Vector3 _lineStart, Vector3 _lineEnd) {
-        UTown _atkT = (UTown)world.GetQuadtree().GetTown(ToNumericVector(_lineStart));
-        UTown _deffT = (UTown)world.GetQuadtree().GetTown(ToNumericVector(_lineEnd));
+        UTown _atkT = (UTown)world.GetQuadtree().GetTown(ConversionManager.ToNumericVector(_lineStart));
+        UTown _deffT = (UTown)world.GetQuadtree().GetTown(ConversionManager.ToNumericVector(_lineEnd));
         TownManager _tm = _deffT.go.GetComponent<TownManager>();
-        GameObject _attackToRemove = _deffT.GetAttackGameObject(_lineStart);
-
-        _deffT.incommingAttacks.Remove(_attackToRemove);
-        world.GetQuadtree().RmUpdateNode(ToNumericVector(_lineStart), ToNumericVector(_lineEnd));
-        DestroyImmediate(_attackToRemove);
 
         if (_deffT.player.id == _atkT.player.id) {
             _tm.supporter--;
@@ -151,37 +146,51 @@ public class GameManager : MonoBehaviour {
         else {
             _tm.attacker.Remove(_atkT);
         }
+
+        GameObject _attackToRemove = _deffT.GetAttackGameObject(_lineStart);
+        DestroyImmediate(_attackToRemove);
+        _deffT.incommingAttacks.Remove(_attackToRemove);
+        world.GetQuadtree().RmUpdateNode(ConversionManager.ToNumericVector(_lineStart), ConversionManager.ToNumericVector(_lineEnd));
     }
 
     public void ConquerTown(int _conquererId, Vector3 _deffTown) {
-        UTown _t = (UTown)world.GetQuadtree().GetTown(ToNumericVector(_deffTown));
-        TownManager _tm = _t.go.GetComponent<TownManager>();
-
-        _tm.attacker.Clear();
-        _tm.supporter = 0;
-        _tm.ownerid = _conquererId;
-
         if (_conquererId == Client.instance.myId) {
-            world.GetQuadtree().UpdateOwner(Client.instance.me, ToNumericVector(_deffTown));
-            _tm.ownerName = Client.instance.me.username;
-            _t.go.GetComponentInChildren<Renderer>().material.color = new Color32(Client.instance.me.color.R, Client.instance.me.color.G, Client.instance.me.color.B, Client.instance.me.color.A);
+            UpdateTownReferences(_deffTown, Client.instance.me);
         }
         else {
             foreach (Player _player in Client.instance.enemies) {
                 if (_player.id == _conquererId) {
-                    world.GetQuadtree().UpdateOwner(_player, ToNumericVector(_deffTown));
-                    _tm.ownerName = _player.username;
-                    _t.go.GetComponentInChildren<Renderer>().material.color = new Color32(_player.color.R, _player.color.G, _player.color.B, _player.color.A);
+                    UpdateTownReferences(_deffTown, _player);
                 }
             }
         }
-        
+    }
+
+    private void UpdateTownReferences(Vector3 _deffTown, Player _player) {
+        UTown _t = (UTown)world.GetQuadtree().GetTown(ConversionManager.ToNumericVector(_deffTown));
+        TownManager _tm = _t.go.GetComponent<TownManager>();
+
+        _tm.attacker.Clear();
+        _tm.supporter = 0;
+        _tm.ownerid = _player.id;
+        _tm.ownerName = _player.username;
+
+        world.GetQuadtree().UpdateOwner(_player, ConversionManager.ToNumericVector(_deffTown));
+
+        _t.go.GetComponentInChildren<Renderer>().material.color = ConversionManager.DrawingToColor32(_player.color);
         foreach (GameObject _gameObject in _t.incommingAttacks) {
             DestroyImmediate(_gameObject);
         }
         _t.incommingAttacks.Clear();
     }
 
+    /// <summary>
+    /// Creates a mesh line that indicates an attack between towns.
+    /// </summary>
+    /// <param name="_ownerId">Player id who sent the attack</param>
+    /// <param name="_lineStart">Town coord from where the attack starts</param>
+    /// <param name="_lineEnd">Town coord where the attack ends</param>
+    /// <returns>The Gameobject of the mesh line</returns>
     private GameObject CreateLineMesh(int _ownerId, Vector3 _lineStart, Vector3 _lineEnd) {
         GameObject _atkLine = new GameObject();
         MeshRenderer _meshRenderer = _atkLine.AddComponent<MeshRenderer>();
@@ -231,11 +240,13 @@ public class GameManager : MonoBehaviour {
         return _atkLine;
     }
 
+    /// <summary>
+    /// Generates a random number within the bounds min/max.
+    /// </summary>
+    /// <param name="_min">min random number created</param>
+    /// <param name="_max">max random number created</param>
+    /// <returns>The created random number</returns>
     private static int RandomNumber(int _min, int _max) {
         return r.Next(_max - _min + 1) + _min;
-    }
-
-    private System.Numerics.Vector3 ToNumericVector(Vector3 v) {
-        return new System.Numerics.Vector3(v.x, v.y, v.z);
     }
 }

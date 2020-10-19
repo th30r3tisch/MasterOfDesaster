@@ -1,4 +1,5 @@
-﻿namespace SharedLibrary {
+﻿
+namespace SharedLibrary {
     public class Constants {
         public const int SERVER_PORT = 26950;
         public const int MAX_PLAYERS = 5;
