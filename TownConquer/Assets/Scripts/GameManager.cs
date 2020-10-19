@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour {
     public GameObject landPrefab;
     public GameObject obstaclePrefab;
 
-    private static World world;
+    private static QuadTree world;
     private static Player game;
     private Quaternion horizontalOrientation = new Quaternion(0, 0, 0, 0);
     private static System.Random r;
@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour {
         GameObject _ground;
         r = new System.Random(_seed);
 
-        world = new World(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
+        world = new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT));
         game = new Player(-1, "game", System.Drawing.Color.FromArgb(100, 100, 100));
         _ground = Instantiate(landPrefab, new Vector3(Constants.MAP_WIDTH / 2, 0, Constants.MAP_HEIGHT / 2), horizontalOrientation);
         _ground.transform.localScale = new Vector3(Constants.MAP_WIDTH / 10, 1, Constants.MAP_HEIGHT / 10);
@@ -115,12 +115,12 @@ public class GameManager : MonoBehaviour {
     }
 
     private List<TreeNode> GetAreaContent(int _startX, int _startZ, int _endX, int _endZ) {
-        return world.GetAreaContent(_startX, _startZ, _endX, _endZ);
+        return world.GetAllContentBetween(_startX, _startZ, _endX, _endZ);
     }
 
     public void AttackTown(Vector3 _lineStart, Vector3 _lineEnd) {
-        UTown _deffT = (UTown)world.GetQuadtree().GetTown(ConversionManager.ToNumericVector(_lineEnd));
-        UTown _atkT = (UTown)world.GetQuadtree().GetTown(ConversionManager.ToNumericVector(_lineStart));
+        UTown _deffT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_lineEnd));
+        UTown _atkT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_lineStart));
 
         TownManager _deffTm = _deffT.go.GetComponent<TownManager>();
         TownManager _atkTm = _atkT.go.GetComponent<TownManager>();
@@ -132,12 +132,12 @@ public class GameManager : MonoBehaviour {
         }
 
         _deffT.incommingAttacks.Add(CreateLineMesh(_atkTm.ownerid, _lineStart, _lineEnd));
-        world.GetQuadtree().AddUpdateNode(ConversionManager.ToNumericVector(_lineStart), ConversionManager.ToNumericVector(_lineEnd));
+        world.AddTownAtk(ConversionManager.ToNumericVector(_lineStart), ConversionManager.ToNumericVector(_lineEnd));
     }
 
     public void RetreatTroops(Vector3 _lineStart, Vector3 _lineEnd) {
-        UTown _atkT = (UTown)world.GetQuadtree().GetTown(ConversionManager.ToNumericVector(_lineStart));
-        UTown _deffT = (UTown)world.GetQuadtree().GetTown(ConversionManager.ToNumericVector(_lineEnd));
+        UTown _atkT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_lineStart));
+        UTown _deffT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_lineEnd));
         TownManager _tm = _deffT.go.GetComponent<TownManager>();
 
         if (_deffT.player.id == _atkT.player.id) {
@@ -150,7 +150,7 @@ public class GameManager : MonoBehaviour {
         GameObject _attackToRemove = _deffT.GetAttackGameObject(_lineStart);
         DestroyImmediate(_attackToRemove);
         _deffT.incommingAttacks.Remove(_attackToRemove);
-        world.GetQuadtree().RmUpdateNode(ConversionManager.ToNumericVector(_lineStart), ConversionManager.ToNumericVector(_lineEnd));
+        world.RmTownAtk(ConversionManager.ToNumericVector(_lineStart), ConversionManager.ToNumericVector(_lineEnd));
     }
 
     public void ConquerTown(int _conquererId, Vector3 _deffTown) {
@@ -167,7 +167,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private void UpdateTownReferences(Vector3 _deffTown, Player _player) {
-        UTown _t = (UTown)world.GetQuadtree().GetTown(ConversionManager.ToNumericVector(_deffTown));
+        UTown _t = (UTown)world.GetTown(ConversionManager.ToNumericVector(_deffTown));
         TownManager _tm = _t.go.GetComponent<TownManager>();
 
         _tm.attacker.Clear();
@@ -175,7 +175,7 @@ public class GameManager : MonoBehaviour {
         _tm.ownerid = _player.id;
         _tm.ownerName = _player.username;
 
-        world.GetQuadtree().UpdateOwner(_player, ConversionManager.ToNumericVector(_deffTown));
+        world.UpdateOwner(_player, ConversionManager.ToNumericVector(_deffTown));
 
         _t.go.GetComponentInChildren<Renderer>().material.color = ConversionManager.DrawingToColor32(_player.color);
         foreach (GameObject _gameObject in _t.incommingAttacks) {

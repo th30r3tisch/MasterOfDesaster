@@ -8,7 +8,7 @@ using System.Net.Sockets;
 namespace Game_Server {
     class Server {
 
-        public static World world { get; private set; }
+        public static QuadTree world { get; private set; }
         public static int MaxPlayers { get; private set; }
         public static int Port { get; private set; }
         public static Dictionary<int, Client> clients = new Dictionary<int, Client>();

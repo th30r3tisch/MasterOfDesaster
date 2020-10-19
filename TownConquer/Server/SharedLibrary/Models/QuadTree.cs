@@ -78,7 +78,7 @@ namespace SharedLibrary.Models {
                 Console.WriteLine($"ERROR : Unhandled partition {_x} {_z}");
         }
 
-        public void GetAreaContent(QuadTree _tree, int _startX, int _startZ, int _endX, int _endZ, List<TreeNode> _wholeMap) {
+        private void GetAreaContent(QuadTree _tree, int _startX, int _startZ, int _endX, int _endZ, List<TreeNode> _wholeMap) {
             if (_tree == null) return;
 
             if (!(_startX > _tree.boundry.xMax) && !(_endX < _tree.boundry.xMin) && !(_startZ > _tree.boundry.zMax) && !(_endZ < _tree.boundry.zMin)) {
@@ -94,31 +94,28 @@ namespace SharedLibrary.Models {
             GetAreaContent(_tree.southEast, _startX, _startZ, _endX, _endZ, _wholeMap);
         }
 
-        public List<TreeNode> GetAllContent(QuadTree _tree, int _startX, int _startZ, int _endX, int _endZ) {
+        public List<TreeNode> GetAllContentBetween(int _startX, int _startZ, int _endX, int _endZ) {
             List<TreeNode> _wholeMap = new List<TreeNode>();
-            GetAreaContent(_tree, _startX, _startZ, _endX, _endZ, _wholeMap);
+            GetAreaContent(this, _startX, _startZ, _endX, _endZ, _wholeMap);
             return _wholeMap;
         }
 
-        private void AddTownAtk(QuadTree _tree, Vector3 _atk, Vector3 _deff) {
-
-            Town _atkTown = SearchTown(_tree, _atk);
-            Town _deffTown = SearchTown(_tree, _deff);
+        public void AddTownAtk(Vector3 _atk, Vector3 _deff) {
+            Town _atkTown = SearchTown(this, _atk);
+            Town _deffTown = SearchTown(this, _deff);
             if (!_deffTown.attackerTowns.Contains(_atkTown)) {
                 _deffTown.AddAttackTown(_atkTown);
             }
         }
 
-        private void RmTownAtk(QuadTree _tree, Vector3 _atk, Vector3 _deff) {
-
-            Town _atkTown = SearchTown(_tree, _atk);
-            Town _deffTown = SearchTown(_tree, _deff);
+        public void RmTownAtk(Vector3 _atk, Vector3 _deff) {
+            Town _atkTown = SearchTown(this, _atk);
+            Town _deffTown = SearchTown(this, _deff);
             _deffTown.RemoveAttackTown(_atkTown);
         }
 
-        private void UpdateOwner(QuadTree _tree, Player _player, Vector3 _t) {
-
-            Town _town = SearchTown(_tree, _t);
+        public void UpdateOwner(Player _player, Vector3 _t) {
+            Town _town = SearchTown(this, _t);
             Console.WriteLine($"update owner: {_player.username}");
             _town.RemoveAllConquerors();
             _town.player = _player;
@@ -148,18 +145,6 @@ namespace SharedLibrary.Models {
                 return SearchTown(_tree.southEast, _town);
             }
             return null;
-        }
-
-        public void AddUpdateNode(Vector3 _attacker, Vector3 _defender) {
-            AddTownAtk(this, _attacker, _defender);
-        }
-
-        public void RmUpdateNode(Vector3 _attacker, Vector3 _defender) {
-            RmTownAtk(this, _attacker, _defender);
-        }
-
-        public void UpdateOwner(Player _player, Vector3 _town) {
-            UpdateOwner(this, _player, _town);
         }
 
         public Town GetTown(Vector3 _town) {

@@ -8,15 +8,15 @@ using SharedLibrary;
 namespace Game_Server {
     class GameLogic {
 
-        private static World world;
+        private static QuadTree world;
         private static Random r;
 
         public static void Update() {
             ThreadManager.UpdateMain();
         }
 
-        public static World GenereateInitialMap() {
-            world = new World(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
+        public static QuadTree GenereateInitialMap() {
+            world = new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT));
             r = new Random(Constants.RANDOM_SEED);
             CreateObstacles();
             CreateTowns();
@@ -34,12 +34,12 @@ namespace Game_Server {
             while (_t == null) {
                 int _x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
                 int _z = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
-                if (GetAreaContent(
+                if (world.GetAllContentBetween(
                     (_x - Constants.TOWN_MIN_DISTANCE), 
                     (_z - Constants.TOWN_MIN_DISTANCE), 
                     (_x + Constants.TOWN_MIN_DISTANCE), 
                     (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check for overlapping towns
-                    if (GetAreaContent(
+                    if (world.GetAllContentBetween(
                         (_x - Constants.OBSTACLE_MAX_LENGTH), 
                         (_z - Constants.OBSTACLE_MAX_LENGTH), 
                         (_x + Constants.OBSTACLE_MAX_LENGTH), 
@@ -75,15 +75,15 @@ namespace Game_Server {
             int endX = Math.Max(t1x, t2x);
             int endZ = Math.Max(t1z, t2z);
             //rectangle between towns
-            intersectionObjs.AddRange(GetAreaContent(startX, startZ, endX, endZ));
+            intersectionObjs.AddRange(world.GetAllContentBetween(startX, startZ, endX, endZ));
             //rectangle around town one
-            intersectionObjs.AddRange(GetAreaContent(
+            intersectionObjs.AddRange(world.GetAllContentBetween(
                 t1x - Constants.OBSTACLE_MAX_LENGTH, 
                 t1z - Constants.OBSTACLE_MAX_LENGTH, 
                 t1x + Constants.OBSTACLE_MAX_LENGTH, 
                 t1z + Constants.OBSTACLE_MAX_LENGTH));
             //rectangle around town two
-            intersectionObjs.AddRange(GetAreaContent(
+            intersectionObjs.AddRange(world.GetAllContentBetween(
                 t2x - Constants.OBSTACLE_MAX_LENGTH, 
                 t2z - Constants.OBSTACLE_MAX_LENGTH, 
                 t2x + Constants.OBSTACLE_MAX_LENGTH, 
@@ -110,20 +110,16 @@ namespace Game_Server {
             return r.Next(_max - _min + 1) + _min;
         }
 
-        public static List<TreeNode> GetAreaContent(int _startX, int _startY, int _endX, int _endY) {
-            return world.GetAreaContent(_startX, _startY, _endX, _endY);
-        }
-
         public static void AddAttackToTown(Vector3 _atkTown, Vector3 _deffTown) {
-            world.GetQuadtree().AddUpdateNode(_atkTown, _deffTown);
+            world.AddTownAtk(_atkTown, _deffTown);
         }
 
         public static void ReomveAttackFromTown(Vector3 _atkTown, Vector3 _deffTown) {
-            world.GetQuadtree().RmUpdateNode(_atkTown, _deffTown);
+            world.RmTownAtk(_atkTown, _deffTown);
         }
 
         public static void ConquerTown(Player _player, Vector3 _deffTown) {
-            world.GetQuadtree().UpdateOwner(_player, _deffTown);
+            world.UpdateOwner(_player, _deffTown);
         }
     }
 }
