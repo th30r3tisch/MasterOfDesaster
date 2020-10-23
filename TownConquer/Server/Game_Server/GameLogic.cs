@@ -43,7 +43,7 @@ namespace Game_Server {
                         (_z - Constants.TOWN_MIN_DISTANCE), 
                         (_x + Constants.OBSTACLE_MAX_LENGTH / 2), 
                         (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check horizontal objects
-                        _t = new Town(new Vector3(_x, 0, _z));
+                        _t = new Town(new Vector3(_x, 5, _z));
                     }
                 }
             }
@@ -56,7 +56,7 @@ namespace Game_Server {
                 world.Insert(new Obstacle(
                         new Vector3(
                             RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES),
-                            0,
+                            2,
                             RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES)),
                         RandomNumber(0, 1),
                         RandomNumber(Constants.OBSTACLE_MIN_LENGTH, Constants.OBSTACLE_MAX_LENGTH)));
@@ -116,6 +116,7 @@ namespace Game_Server {
             return false;
         }
 
+        // https://github.com/setchi/Unity-LineSegmentsIntersection
         public static bool LineSegmentsIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4) {
             Vector2 intersection = Vector2.Zero;
 

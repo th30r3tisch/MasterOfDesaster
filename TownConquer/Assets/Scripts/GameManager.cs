@@ -68,7 +68,7 @@ public class GameManager : MonoBehaviour {
                     (_z - Constants.TOWN_MIN_DISTANCE),
                     (_x + Constants.OBSTACLE_MAX_LENGTH / 2),
                     (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check horizontal objects
-                    CreateTown(_i, new Vector3(_x, 0, _z), game);
+                    CreateTown(_i, new Vector3(_x, 5, _z), game);
                     flag = true;
                 }
             }
@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour {
         _town.GetComponent<TownManager>().ownerName = owner.username;
         _town.GetComponent<TownManager>().ownerid = owner.id;
         _town.GetComponent<TownManager>().life = _t.life;
-        _town.GetComponentInChildren<Renderer>().material.color = ConversionManager.DrawingToColor32(owner.color);
+        _town.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(owner.color);
         towns.Add(_i, _town.GetComponent<TownManager>());
 
         _t.go = _town;
@@ -103,7 +103,7 @@ public class GameManager : MonoBehaviour {
         for (int i = 0; i < Constants.OBSTACLE_NUMBER; i++) {
             Vector3 _position = new Vector3(
                         RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES),
-                        0,
+                        1,
                         RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES));
             int _orientation = RandomNumber(0, 1);
             int _length = RandomNumber(Constants.OBSTACLE_MIN_LENGTH, Constants.OBSTACLE_MAX_LENGTH);
@@ -177,7 +177,7 @@ public class GameManager : MonoBehaviour {
 
         world.UpdateOwner(_player, ConversionManager.ToNumericVector(_deffTown));
 
-        _t.go.GetComponentInChildren<Renderer>().material.color = ConversionManager.DrawingToColor32(_player.color);
+        _t.go.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(_player.color);
         foreach (GameObject _gameObject in _t.incommingAttacks) {
             DestroyImmediate(_gameObject);
         }

@@ -14,6 +14,10 @@ public class TownManager : MonoBehaviour {
     private float elapsed;
 
     void Update() {
+        GrowLife();
+    }
+
+    private void GrowLife() {
         elapsed += Time.deltaTime;
         if (elapsed >= Constants.TOWN_GROTH_SECONDS) {
             elapsed = 0;
@@ -32,6 +36,14 @@ public class TownManager : MonoBehaviour {
         if (_town.player.id == Client.instance.myId) {
             ClientSend.ConquerRequest(gameObject.transform.position);
         }
+    }
+
+    private void OnMouseEnter() {
+        GetComponent<Outline>().OutlineWidth = 3;
+    }
+
+    private void OnMouseExit() {
+        GetComponent<Outline>().OutlineWidth = 0;
     }
 }
 

@@ -2233,7 +2233,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73df7c8995e0dbb4bbc3f4bebda6af29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  townPrefab: {fileID: 3406992744227443346, guid: efbf74aee9f81c34782be1f43cae304a,
+  townPrefab: {fileID: 8959790078022710973, guid: efbf74aee9f81c34782be1f43cae304a,
     type: 3}
   landPrefab: {fileID: 4905137262072636616, guid: b3a600a9504a1a94abe85146ebd5dd7b,
     type: 3}

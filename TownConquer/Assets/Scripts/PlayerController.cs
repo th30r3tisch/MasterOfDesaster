@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
@@ -17,13 +18,12 @@ public class PlayerController : MonoBehaviour {
         CheckIfAttackIsAborted();
     }
 
-
     private void CheckIfAttackIsHappening() {
         if (!Input.GetKey(KeyCode.LeftAlt)) {
             if (Input.GetMouseButtonDown(0)) {
                 RaycastHit _hitInfo = GetRayCastHitInfo();
                 if (_hitInfo.collider.gameObject.name.StartsWith("Town") &&
-                    _hitInfo.collider.gameObject.GetComponentInParent<TownManager>().ownerid == Client.instance.myId) {
+                    _hitInfo.collider.gameObject.GetComponent<TownManager>().ownerid == Client.instance.myId) {
                     lineStart = _hitInfo.collider.gameObject.transform.position;
                     startTownId = _hitInfo.collider.gameObject.GetInstanceID();
                     startCondition = true;
