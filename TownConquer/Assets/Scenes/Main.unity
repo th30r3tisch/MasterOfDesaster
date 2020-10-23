@@ -1192,9 +1192,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dragSpeed: 2
-  scrollspeed: 100
-  minY: 200
-  maxY: 900
+  scrollspeed: 200
+  minY: 400
+  maxY: 1000
   mask:
     serializedVersion: 2
     m_Bits: 1

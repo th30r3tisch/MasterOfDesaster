@@ -219,6 +219,8 @@ namespace Game_Server {
             player = null;
             tcp.Disconnect();
             udp.Disconnect();
+
+            ServerSend.PlayerDisconneced(id);
         }
     }
 }

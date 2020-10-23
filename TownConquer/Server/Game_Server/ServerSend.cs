@@ -64,6 +64,14 @@ namespace Game_Server {
             }
         }
 
+        public static void PlayerDisconneced(int _playerId) {
+            using (Packet _packet = new Packet((int)ServerPackets.playerDisconnected)) {
+                _packet.Write(_playerId);
+                SendTCPDataToAll(_packet);
+                Console.WriteLine($"Player with ID: {_playerId} disconnected.");
+            }
+        }
+
         #region TCP
 
         private static void SendTCPData(int _toClient, Packet _packet) {

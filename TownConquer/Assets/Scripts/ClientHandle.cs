@@ -66,4 +66,13 @@ public class ClientHandle : MonoBehaviour
         Vector3 _deffTown = new Vector3(_v2.X, _v2.Y, _v2.Z);
         GameManager.instance.ConquerTown(_conquererId, _deffTown);
     }
+
+    public static void PlayerDisconnected(Packet _packet) {
+        int playerId = _packet.ReadInt();
+        foreach (Player _player in Client.instance.enemies) {
+            if (_player.id == playerId) {
+                Client.instance.enemies.Remove(_player);
+            }
+        }
+    }
 }

@@ -13,6 +13,7 @@ namespace SharedLibrary {
         grantedAttack,
         grantedRetreat,
         grantedConquer,
+        playerDisconnected,
     }
 
     /// <summary>Sent from client to server.</summary>

@@ -250,6 +250,7 @@ public class Client : MonoBehaviour
             { (int)ServerPackets.grantedAttack, ClientHandle.GrantedAttack },
             { (int)ServerPackets.grantedRetreat, ClientHandle.GrantedRetreat },
             { (int)ServerPackets.grantedConquer, ClientHandle.GrantedConquer },
+            { (int)ServerPackets.playerDisconnected, ClientHandle.PlayerDisconnected },
         };
 
         Debug.Log("Initialized packets.");

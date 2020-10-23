@@ -59,15 +59,15 @@ public class GameManager : MonoBehaviour {
             int _x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
             int _z = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
             if (GetAreaContent(
-                _x - Constants.TOWN_MIN_DISTANCE,
-                _z - Constants.TOWN_MIN_DISTANCE,
-                _x + Constants.TOWN_MIN_DISTANCE,
-                _z + Constants.TOWN_MIN_DISTANCE).Count == 0) { // check for overlapping towns
+                (_x - Constants.TOWN_MIN_DISTANCE),
+                    (_z - Constants.OBSTACLE_MAX_LENGTH / 2), // divided by 2 because point is center of object
+                    (_x + Constants.TOWN_MIN_DISTANCE),
+                    (_z + Constants.OBSTACLE_MAX_LENGTH / 2)).Count == 0) { // check vertical objects
                 if (GetAreaContent(
-                    _x - Constants.OBSTACLE_MAX_LENGTH,
-                    _z - Constants.OBSTACLE_MAX_LENGTH,
-                    _x + Constants.OBSTACLE_MAX_LENGTH,
-                    _z + Constants.OBSTACLE_MAX_LENGTH).Count == 0) { // check for overlapping obstacles
+                    (_x - Constants.OBSTACLE_MAX_LENGTH / 2),
+                    (_z - Constants.TOWN_MIN_DISTANCE),
+                    (_x + Constants.OBSTACLE_MAX_LENGTH / 2),
+                    (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check horizontal objects
                     CreateTown(_i, new Vector3(_x, 0, _z), game);
                     flag = true;
                 }

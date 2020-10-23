@@ -5,7 +5,6 @@ C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\System.Numerics.Vectors.dll
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\SharedLibrary.pdb
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\MathNet.Numerics.xml
-C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\MathNet.Spatial.xml
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\obj\Debug\Game_Server.csprojAssemblyReference.cache
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\obj\Debug\Game_Server.csproj.CoreCompileInputs.cache
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\obj\Debug\Game_Server.csproj.CopyComplete
