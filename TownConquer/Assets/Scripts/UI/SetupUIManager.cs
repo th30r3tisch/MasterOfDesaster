@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
+public class SetupUIManager : MonoBehaviour
 {
-    public static UIManager instance;
+    public static SetupUIManager instance;
     public GameObject startMenu;
     public InputField usernameField;
     public Toggle redColor;
@@ -22,9 +23,13 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// By clicking the connect button in the menu the game scene is loaded. (Index can be seen in the build settings)
+    /// </summary>
     public void ConnectToServer() {
         startMenu.SetActive(false);
         usernameField.interactable = false;
-        Client.instance.ConnectToServer();
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 }

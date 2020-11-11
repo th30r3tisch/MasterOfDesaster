@@ -82,7 +82,7 @@ public class CameraController : MonoBehaviour {
     }
 
     Vector3 LimitCameraMovement(Vector3 _pos) {
-        return new Vector3(Mathf.Clamp(_pos.x, 0, Constants.MAP_WIDTH), Mathf.Clamp(_pos.y, minY, maxY), Mathf.Clamp(_pos.z, -500, Constants.MAP_HEIGHT));
+        return new Vector3(Mathf.Clamp(_pos.x, 0, Constants.MAP_WIDTH), Mathf.Clamp(_pos.y, minY, maxY), Mathf.Clamp(_pos.z, -600, Constants.MAP_HEIGHT));
     }
 
 }

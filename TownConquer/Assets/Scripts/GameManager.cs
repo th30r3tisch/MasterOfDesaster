@@ -39,7 +39,7 @@ public class GameManager : MonoBehaviour {
         world = new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT));
         game = new Player(-1, "game", System.Drawing.Color.FromArgb(100, 100, 100));
         _ground = Instantiate(landPrefab, new Vector3(Constants.MAP_WIDTH / 2, 0, Constants.MAP_HEIGHT / 2), horizontalOrientation);
-        _ground.transform.localScale = new Vector3(Constants.MAP_WIDTH / 10, 1, Constants.MAP_HEIGHT / 10);
+        _ground.transform.localScale = new Vector3(Constants.MAP_WIDTH, 1, Constants.MAP_HEIGHT);
 
         CreateObstacles();
         CreateTowns();
