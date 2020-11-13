@@ -6,6 +6,10 @@ public class ConversionManager
         return new System.Numerics.Vector3(v.x, v.y, v.z);
     }
 
+    public static Vector3 ToUnityVector(System.Numerics.Vector3 v) {
+        return new Vector3(v.X, v.Y, v.Z);
+    }
+
     public static System.Drawing.Color ToDrawingColor(Color c) {
         return System.Drawing.Color.FromArgb((int)c.a, (int)c.r, (int)c.g, (int)c.b);
     }

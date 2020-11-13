@@ -88,6 +88,7 @@ public class GameManager : MonoBehaviour {
         _town.GetComponent<TownManager>().ownerName = owner.username;
         _town.GetComponent<TownManager>().ownerid = owner.id;
         _town.GetComponent<TownManager>().life = _t.life;
+        _town.GetComponent<TownManager>().town = _t;
         _town.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(owner.color);
         towns.Add(_i, _town.GetComponent<TownManager>());
 
@@ -121,35 +122,26 @@ public class GameManager : MonoBehaviour {
     public void AttackTown(Vector3 _lineStart, Vector3 _lineEnd) {
         UTown _deffT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_lineEnd));
         UTown _atkT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_lineStart));
+        GameObject _line;
 
-        TownManager _deffTm = _deffT.go.GetComponent<TownManager>();
-        TownManager _atkTm = _atkT.go.GetComponent<TownManager>();
-        if (_deffTm.ownerid == _atkTm.ownerid) {
-            _deffTm.supporter++;
+        if (_deffT.player.id == _atkT.player.id) {
+            _line = CreateLineMesh(_atkT.player.id, _lineStart, _lineEnd, "sup");
+            _deffT.incoming.Add(_line);
         }
         else {
-            _deffTm.attacker.Add(_atkT);
+            _line = CreateLineMesh(_atkT.player.id, _lineStart, _lineEnd, "atk");
+            _deffT.incoming.Add(_line);
         }
-
-        _deffT.incommingAttacks.Add(CreateLineMesh(_atkTm.ownerid, _lineStart, _lineEnd));
+        _atkT.outgoing.Add(_line);
         world.AddTownAtk(ConversionManager.ToNumericVector(_lineStart), ConversionManager.ToNumericVector(_lineEnd));
     }
 
     public void RetreatTroops(Vector3 _lineStart, Vector3 _lineEnd) {
         UTown _atkT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_lineStart));
         UTown _deffT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_lineEnd));
-        TownManager _tm = _deffT.go.GetComponent<TownManager>();
+        TownManager _atkTm = _atkT.go.GetComponent<TownManager>();
+        _atkTm.RetreatTroopsFromTown(_deffT);
 
-        if (_deffT.player.id == _atkT.player.id) {
-            _tm.supporter--;
-        }
-        else {
-            _tm.attacker.Remove(_atkT);
-        }
-
-        GameObject _attackToRemove = _deffT.GetAttackGameObject(_lineStart);
-        DestroyImmediate(_attackToRemove);
-        _deffT.incommingAttacks.Remove(_attackToRemove);
         world.RmTownAtk(ConversionManager.ToNumericVector(_lineStart), ConversionManager.ToNumericVector(_lineEnd));
     }
 
@@ -166,22 +158,32 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private void UpdateTownReferences(Vector3 _deffTown, Player _player) {
-        UTown _t = (UTown)world.GetTown(ConversionManager.ToNumericVector(_deffTown));
-        TownManager _tm = _t.go.GetComponent<TownManager>();
+    private void UpdateTownReferences(Vector3 _conqueredTownCoord, Player _player) {
+        UTown _conqueredT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_conqueredTownCoord));
+        TownManager _conqueredTm = _conqueredT.go.GetComponent<TownManager>();
+        List<GameObject> _incoming = _conqueredT.incoming;
+        List<GameObject> _outgoing = _conqueredT.outgoing;
 
-        _tm.attacker.Clear();
-        _tm.supporter = 0;
-        _tm.ownerid = _player.id;
-        _tm.ownerName = _player.username;
-
-        world.UpdateOwner(_player, ConversionManager.ToNumericVector(_deffTown));
-
-        _t.go.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(_player.color);
-        foreach (GameObject _gameObject in _t.incommingAttacks) {
-            DestroyImmediate(_gameObject);
+        // removes all incoming troops and deletes references in both towns
+        for (int i = _incoming.Count; i > 0; i--) {
+            AttackManager atkM = _incoming[i-1].GetComponent<AttackManager>();
+            UTown _atkT = (UTown)world.GetTown(ConversionManager.ToNumericVector(atkM.start));
+            _atkT.go.GetComponent<TownManager>().RetreatTroopsFromTown(_conqueredT);
+            world.RmTownAtk(ConversionManager.ToNumericVector(atkM.start), ConversionManager.ToNumericVector(_conqueredTownCoord));
         }
-        _t.incommingAttacks.Clear();
+
+        // removes all outgoing troops and deletes references in both towns
+        for (int i = _outgoing.Count; i > 0; i++) {
+            AttackManager atkM = _outgoing[i-1].GetComponent<AttackManager>();
+            UTown _deffT = (UTown)world.GetTown(ConversionManager.ToNumericVector(atkM.end));
+            _conqueredTm.RetreatTroopsFromTown(_deffT);
+            world.RmTownAtk(ConversionManager.ToNumericVector(_conqueredTownCoord), ConversionManager.ToNumericVector(atkM.end));
+        }
+
+        _conqueredTm.ownerid = _player.id;
+        _conqueredTm.ownerName = _player.username;
+        world.UpdateOwner(_player, ConversionManager.ToNumericVector(_conqueredTownCoord));
+        _conqueredT.go.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(_player.color);
     }
 
     /// <summary>
@@ -191,7 +193,7 @@ public class GameManager : MonoBehaviour {
     /// <param name="_lineStart">Town coord from where the attack starts</param>
     /// <param name="_lineEnd">Town coord where the attack ends</param>
     /// <returns>The Gameobject of the mesh line</returns>
-    private GameObject CreateLineMesh(int _ownerId, Vector3 _lineStart, Vector3 _lineEnd) {
+    private GameObject CreateLineMesh(int _ownerId, Vector3 _lineStart, Vector3 _lineEnd, string _type) {
         GameObject _atkLine = new GameObject();
         MeshRenderer _meshRenderer = _atkLine.AddComponent<MeshRenderer>();
         _meshRenderer.sharedMaterial = Resources.Load("Line", typeof(Material)) as Material;
@@ -235,6 +237,7 @@ public class GameManager : MonoBehaviour {
         _atkLine.GetComponent<AttackManager>().ownerid = _ownerId;
         _atkLine.GetComponent<AttackManager>().start = _lineStart;
         _atkLine.GetComponent<AttackManager>().end = _lineEnd;
+        _atkLine.GetComponent<AttackManager>().type = _type;
         _atkLine.AddComponent<MeshCollider>();
 
         return _atkLine;

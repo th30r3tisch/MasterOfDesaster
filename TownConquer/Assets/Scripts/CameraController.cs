@@ -26,11 +26,11 @@ public class CameraController : MonoBehaviour {
     }
 
     private void ToggleTopdownView() {
-        if (Input.GetKey(KeyCode.Space) && !topdown) {
+        if (Input.GetKeyDown(KeyCode.Space) && !topdown) {
             transform.rotation = Quaternion.Euler(90, 0, 0);
             topdown = true;
         }
-        else if (Input.GetKey(KeyCode.Space) && topdown) {
+        else if (Input.GetKeyDown(KeyCode.Space) && topdown) {
             transform.rotation = Quaternion.Euler(30, 0, 0);
             topdown = false;
         }

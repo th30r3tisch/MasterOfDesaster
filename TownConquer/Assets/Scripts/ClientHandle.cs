@@ -68,10 +68,11 @@ public class ClientHandle : MonoBehaviour
     }
 
     public static void PlayerDisconnected(Packet _packet) {
-        int playerId = _packet.ReadInt();
-        foreach (Player _player in Client.instance.enemies) {
-            if (_player.id == playerId) {
-                Client.instance.enemies.Remove(_player);
+        int _playerId = _packet.ReadInt();
+        List<Player> _player = Client.instance.enemies;
+        for (int i = 0; i < _player.Count; i++) {
+            if (_player[i].id == _playerId) {
+                _player.Remove(_player[i]);
             }
         }
     }
