@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour {
     public GameObject townPrefab;
     public GameObject landPrefab;
     public GameObject obstaclePrefab;
+    public Canvas ui;
 
     private static QuadTree world;
     private static Player game;
@@ -45,6 +46,7 @@ public class GameManager : MonoBehaviour {
         CreateTowns();
 
         CreateTown(towns.Count, _townPos, _player);
+        ui.GetComponent<GameUIManager>().Init();
     }
 
     private void CreateTowns() {
@@ -95,7 +97,6 @@ public class GameManager : MonoBehaviour {
         _t.go = _town;
         owner.addTown(_t);
         world.Insert(_t);
-
     }
 
     private void CreateObstacles() {
@@ -145,21 +146,28 @@ public class GameManager : MonoBehaviour {
         world.RmTownAtk(ConversionManager.ToNumericVector(_lineStart), ConversionManager.ToNumericVector(_lineEnd));
     }
 
-    public void ConquerTown(int _conquererId, Vector3 _deffTown) {
-        if (_conquererId == Client.instance.myId) {
-            UpdateTownReferences(_deffTown, Client.instance.me);
-        }
-        else {
-            foreach (Player _player in Client.instance.enemies) {
-                if (_player.id == _conquererId) {
-                    UpdateTownReferences(_deffTown, _player);
-                }
-            }
-        }
+    public void ConquerTown(int _conquererId, Vector3 _conqueredTownCoord) {
+        UTown _conqueredT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_conqueredTownCoord));
+        Player _conquerer = GetPlayer(_conquererId);
+
+        _conquerer.towns.Add(_conqueredT);
+        _conqueredT.player.towns.Remove(_conqueredT);
+        UpdateTownReferences(_conqueredT, _conquerer);
     }
 
-    private void UpdateTownReferences(Vector3 _conqueredTownCoord, Player _player) {
-        UTown _conqueredT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_conqueredTownCoord));
+    private Player GetPlayer(int _id) {
+        foreach (Player _player in Client.instance.enemies) {
+            if (_player.id == _id) {
+                return _player;
+            }
+        }
+        if (_id == Client.instance.myId) {
+            return Client.instance.me;
+        }
+        return null;
+    }
+
+    private void UpdateTownReferences(UTown _conqueredT, Player _player) {
         TownManager _conqueredTm = _conqueredT.go.GetComponent<TownManager>();
         List<GameObject> _incoming = _conqueredT.incoming;
         List<GameObject> _outgoing = _conqueredT.outgoing;
@@ -169,7 +177,7 @@ public class GameManager : MonoBehaviour {
             AttackManager atkM = _incoming[i-1].GetComponent<AttackManager>();
             UTown _atkT = (UTown)world.GetTown(ConversionManager.ToNumericVector(atkM.start));
             _atkT.go.GetComponent<TownManager>().RetreatTroopsFromTown(_conqueredT);
-            world.RmTownAtk(ConversionManager.ToNumericVector(atkM.start), ConversionManager.ToNumericVector(_conqueredTownCoord));
+            world.RmTownAtk(ConversionManager.ToNumericVector(atkM.start), _conqueredT.position);
         }
 
         // removes all outgoing troops and deletes references in both towns
@@ -177,12 +185,12 @@ public class GameManager : MonoBehaviour {
             AttackManager atkM = _outgoing[i-1].GetComponent<AttackManager>();
             UTown _deffT = (UTown)world.GetTown(ConversionManager.ToNumericVector(atkM.end));
             _conqueredTm.RetreatTroopsFromTown(_deffT);
-            world.RmTownAtk(ConversionManager.ToNumericVector(_conqueredTownCoord), ConversionManager.ToNumericVector(atkM.end));
+            world.RmTownAtk(_conqueredT.position, ConversionManager.ToNumericVector(atkM.end));
         }
 
         _conqueredTm.ownerid = _player.id;
         _conqueredTm.ownerName = _player.username;
-        world.UpdateOwner(_player, ConversionManager.ToNumericVector(_conqueredTownCoord));
+        world.UpdateOwner(_player, _conqueredT.position);
         _conqueredT.go.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(_player.color);
     }
 
