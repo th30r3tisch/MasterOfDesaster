@@ -3,11 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using SharedLibrary;
+using System.Drawing;
 
 namespace Game_Server {
     class GameLogic {
 
         private static QuadTree world;
+        private static Player game;
         private static Random r;
 
         public static void Update() {
@@ -16,6 +18,7 @@ namespace Game_Server {
 
         public static QuadTree GenereateInitialMap() {
             world = new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT));
+            game = new Player(-1, "game", Color.FromArgb(100, 100, 100));
             r = new Random(Constants.RANDOM_SEED);
             CreateObstacles();
             CreateTowns();
@@ -24,11 +27,11 @@ namespace Game_Server {
 
         private static void CreateTowns() {
             for (int _i = 0; _i < Constants.TOWN_NUMBER; _i++) {
-                CreateTown();
+                CreateTown(game);
             }
         }
 
-        public static Town CreateTown() {
+        public static Town CreateTown(Player _owner) {
             Town _t = null;
             while (_t == null) {
                 int _x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
@@ -47,6 +50,8 @@ namespace Game_Server {
                     }
                 }
             }
+            _t.player = _owner;
+            _owner.addTown(_t);
             world.Insert(_t);
             return _t;
         }

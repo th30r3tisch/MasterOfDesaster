@@ -7,6 +7,7 @@ namespace SharedLibrary.Models {
         public Player player;
         public int life;
         public List<Town> attackerTowns;
+        public float creationTime = 0;
 
         public Town(Vector3 _spawnPos) {
             position = _spawnPos;

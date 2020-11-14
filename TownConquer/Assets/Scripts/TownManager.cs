@@ -22,7 +22,7 @@ public class TownManager : MonoBehaviour {
                 life += 1;
             }
             life += town.GetSupportCount() - town.GetAttackCount() - town.outgoing.Count;
-            if (life <= 0) {
+            if (life < 0) {
                 life = 0;
                 if (town.GetAttackCount() > 0) {
                     ConquerTownRequest();

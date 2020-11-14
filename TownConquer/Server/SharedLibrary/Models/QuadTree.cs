@@ -117,8 +117,13 @@ namespace SharedLibrary.Models {
         public void UpdateOwner(Player _player, Vector3 _t) {
             Town _town = SearchTown(this, _t);
             Console.WriteLine($"update owner: {_player.username}");
+
+            Player _oldOwner = _town.player;
+            _oldOwner.towns.Remove(_town);
+
             _town.RemoveAllConquerors();
             _town.player = _player;
+            _player.addTown(_town);
         }
 
         private Town SearchTown(QuadTree _tree, Vector3 _town) {

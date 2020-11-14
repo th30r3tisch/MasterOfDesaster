@@ -34,14 +34,18 @@ public class ClientHandle : MonoBehaviour
     }
 
     public static void UpdateWorld(Packet _packet) {
+        List<Vector3> _towns = new List<Vector3>();
         int _enemyId = _packet.ReadInt();
         string _enemyname = _packet.ReadString();
         System.Drawing.Color _enemyColor = _packet.ReadColor();
-        System.Numerics.Vector3 _v = _packet.ReadVector3();
-
+        int _townNumber = _packet.ReadInt();
+        for (int i = 0; i < _townNumber; i++) {
+            System.Numerics.Vector3 _v = _packet.ReadVector3();
+            Vector3 _townPos = new Vector3(_v.X, _v.Y, _v.Z);
+            _towns.Add(_townPos); 
+        }
         Player _enemy = new Player(_enemyId, _enemyname, _enemyColor);
-        Vector3 _townPos = new Vector3(_v.X, _v.Y, _v.Z);
-        GameManager.instance.AddEnemies(_enemy, _townPos);
+        GameManager.instance.AddEnemies(_enemy, _towns);
     }
 
     public static void GrantedAttack(Packet _packet) {

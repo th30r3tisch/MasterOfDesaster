@@ -167,18 +167,16 @@ namespace Game_Server {
         }
 
         public void SendIntoGame(string _playerName, Color _color) {
-            Town _t = GameLogic.CreateTown();
-            _t.player = player;
             player = new Player(id, _playerName, _color);
-            player.addTown(_t);
+            Town _t = GameLogic.CreateTown(player);
 
             ServerSend.CreateWorld(id, Server.clients[id].player, Constants.RANDOM_SEED, _t); // create the world for new player
 
             foreach (Client _client in Server.clients.Values) {
                 if (_client.player != null) {
                     if (_client.id != id) {
-                        ServerSend.UpdateWorld(id, _client.player, _client.player.towns[0]);// send every already connected player to the new player
-                        ServerSend.UpdateWorld(_client.id, player, _t);// send the new players info to all connected players
+                        ServerSend.UpdateWorld(id, _client.player, _client.player.towns.Count, _client.player.towns);// send every already connected player to the new player
+                        ServerSend.UpdateWorld(_client.id, player, player.towns.Count, player.towns);// send the new players info to all connected players
                     }
                 }
             }

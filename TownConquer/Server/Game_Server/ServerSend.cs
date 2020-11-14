@@ -2,6 +2,7 @@
 using SharedLibrary;
 using System;
 using System.Numerics;
+using System.Collections.Generic;
 
 namespace Game_Server {
     class ServerSend {
@@ -26,13 +27,15 @@ namespace Game_Server {
             }
         }
 
-        public static void UpdateWorld(int _toClient, Player _player, Town _town) {
+        public static void UpdateWorld(int _toClient, Player _player, int townNumber, List<Town> _towns) {
             using (Packet _packet = new Packet((int)ServerPackets.updateWorld)) {
                 _packet.Write(_player.id);
                 _packet.Write(_player.username);
                 _packet.Write(_player.color);
-                _packet.Write(_town.position);
-
+                _packet.Write(townNumber);
+                foreach (Town _town in _towns) {
+                    _packet.Write(_town.position);
+                }
                 SendTCPData(_toClient, _packet);
             }
         }

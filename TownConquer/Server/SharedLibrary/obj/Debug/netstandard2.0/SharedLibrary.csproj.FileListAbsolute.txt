@@ -4,6 +4,6 @@ C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\SharedLibrary\b
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\SharedLibrary\obj\Debug\netstandard2.0\SharedLibrary.csprojAssemblyReference.cache
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\SharedLibrary\obj\Debug\netstandard2.0\SharedLibrary.AssemblyInfoInputs.cache
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\SharedLibrary\obj\Debug\netstandard2.0\SharedLibrary.AssemblyInfo.cs
+C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\SharedLibrary\obj\Debug\netstandard2.0\SharedLibrary.csproj.CoreCompileInputs.cache
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\SharedLibrary\obj\Debug\netstandard2.0\SharedLibrary.dll
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\SharedLibrary\obj\Debug\netstandard2.0\SharedLibrary.pdb
-C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\SharedLibrary\obj\Debug\netstandard2.0\SharedLibrary.csproj.CoreCompileInputs.cache

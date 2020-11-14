@@ -6,7 +6,6 @@ using UnityEngine;
 public class GameManager : MonoBehaviour {
 
     public static GameManager instance;
-    public static Dictionary<int, TownManager> towns = new Dictionary<int, TownManager>();
 
     public GameObject townPrefab;
     public GameObject landPrefab;
@@ -28,8 +27,21 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public void AddEnemies(Player _enemy, Vector3 _townPos) {
-        CreateTown(towns.Count, _townPos, _enemy);
+    public void AddEnemies(Player _enemy, List<Vector3> _towns) {
+        foreach (Vector3 _townPos in _towns) {
+            UTown _town = (UTown)world.GetTown(ConversionManager.ToNumericVector( _townPos));
+            if (_town == null) {
+                CreateTown(Constants.TOWN_NUMBER + Client.instance.enemies.Count + 1, _townPos, _enemy);
+            }
+            else {
+                TownManager _tm = _town.go.GetComponent<TownManager>();
+                _enemy.addTown(_town);
+                _town.player = _enemy;
+                _tm.ownerid = _enemy.id;
+                _tm.ownerName = _enemy.username;
+                _town.go.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(_enemy.color);
+            }
+        }
         Client.instance.enemies.Add(_enemy);
     }
 
@@ -45,7 +57,7 @@ public class GameManager : MonoBehaviour {
         CreateObstacles();
         CreateTowns();
 
-        CreateTown(towns.Count, _townPos, _player);
+        CreateTown(Constants.TOWN_NUMBER, _townPos, _player);
         ui.GetComponent<GameUIManager>().Init();
     }
 
@@ -92,7 +104,6 @@ public class GameManager : MonoBehaviour {
         _town.GetComponent<TownManager>().life = _t.life;
         _town.GetComponent<TownManager>().town = _t;
         _town.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(owner.color);
-        towns.Add(_i, _town.GetComponent<TownManager>());
 
         _t.go = _town;
         owner.addTown(_t);
@@ -150,8 +161,6 @@ public class GameManager : MonoBehaviour {
         UTown _conqueredT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_conqueredTownCoord));
         Player _conquerer = GetPlayer(_conquererId);
 
-        _conquerer.towns.Add(_conqueredT);
-        _conqueredT.player.towns.Remove(_conqueredT);
         UpdateTownReferences(_conqueredT, _conquerer);
     }
 
