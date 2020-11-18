@@ -1,4 +1,5 @@
-﻿using SharedLibrary;
+﻿using Game_Server.KI;
+using SharedLibrary;
 using SharedLibrary.Models;
 using System;
 using System.Drawing;
@@ -168,10 +169,16 @@ namespace Game_Server {
 
         public void SendIntoGame(string _playerName, Color _color) {
 
+            if (GameLogic.kis.Count == 0) GameLogic.CreateKis();
+
             player = new Player(id, _playerName, _color, DateTime.Now);
             Town _t = GameLogic.CreateTown(player);
 
             ServerSend.CreateWorld(id, Server.clients[id].player, Constants.RANDOM_SEED, _t); // create the world for new player
+
+            foreach (KI_base _ki in GameLogic.kis) {
+                ServerSend.UpdateWorld(id, _ki.player, _ki.player.towns.Count, _ki.player.towns);// send every KI player to the new player
+            }
 
             foreach (Client _client in Server.clients.Values) {
                 if (_client.player != null) {

@@ -4,9 +4,12 @@ using System.Collections.Generic;
 using System.Numerics;
 using SharedLibrary;
 using System.Drawing;
+using Game_Server.KI;
 
 namespace Game_Server {
     class GameLogic {
+
+        public static List<KI_base> kis;
 
         private static QuadTree world;
         private static Player game;
@@ -20,6 +23,7 @@ namespace Game_Server {
             world = new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT));
             game = new Player(-1, "game", Color.FromArgb(150, 150, 150), DateTime.Now);
             r = new Random(Constants.RANDOM_SEED);
+            kis = new List<KI_base>();
 
             CreateObstacles();
             CreateTowns();
@@ -213,5 +217,9 @@ namespace Game_Server {
             Console.WriteLine($"New town life is: {finalNewLife}");
         }
 
+        public static void CreateKis() {
+            kis.Add(new KI_Stupid(world, "KI1", Color.FromArgb(0, 0, 0)));
+            kis.Add(new KI_Stupid(world, "KI2", Color.FromArgb(255, 255, 255)));
+        }
     }
 }
