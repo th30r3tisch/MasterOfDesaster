@@ -22,29 +22,32 @@ namespace Game_Server {
             int _clientIdCheck = _packet.ReadInt();
             Vector3 _atkTown = _packet.ReadVector3();
             Vector3 _deffTown = _packet.ReadVector3();
+            DateTime _timeStamp = DateTime.FromBinary(_packet.ReadLong());
 
             Console.WriteLine($"{Server.clients[_fromClient].tcp.socket.Client.RemoteEndPoint} requested an attack at town {_deffTown}.");
 
-            Server.clients[_fromClient].AttackTown(_atkTown, _deffTown);
+            Server.clients[_fromClient].AttackTown(_atkTown, _deffTown, _timeStamp);
         }
 
         public static void RetreatRequest(int _fromClient, Packet _packet) {
             int _clientIdCheck = _packet.ReadInt();
             Vector3 _atkTown = _packet.ReadVector3();
             Vector3 _deffTown = _packet.ReadVector3();
+            DateTime _timeStamp = DateTime.FromBinary(_packet.ReadLong());
 
             Console.WriteLine($"{Server.clients[_fromClient].tcp.socket.Client.RemoteEndPoint} requested an retreat of troops from town {_deffTown}.");
 
-            Server.clients[_fromClient].RetreatTown(_atkTown, _deffTown);
+            Server.clients[_fromClient].RetreatTown(_atkTown, _deffTown, _timeStamp);
         }
 
         public static void ConquerRequest(int _fromClient, Packet _packet) {
             int _clientId = _packet.ReadInt();
             Vector3 _deffTown = _packet.ReadVector3();
+            DateTime _timeStamp = DateTime.FromBinary(_packet.ReadLong());
 
             Console.WriteLine($"{Server.clients[_fromClient].tcp.socket.Client.RemoteEndPoint} requested to conquer {_deffTown}.");
 
-            Server.clients[_fromClient].ConquerTown(_clientId, _deffTown);
+            Server.clients[_fromClient].ConquerTown(_clientId, _deffTown, _timeStamp);
         }
     }
 }

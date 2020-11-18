@@ -167,7 +167,8 @@ namespace Game_Server {
         }
 
         public void SendIntoGame(string _playerName, Color _color) {
-            player = new Player(id, _playerName, _color);
+
+            player = new Player(id, _playerName, _color, DateTime.Now);
             Town _t = GameLogic.CreateTown(player);
 
             ServerSend.CreateWorld(id, Server.clients[id].player, Constants.RANDOM_SEED, _t); // create the world for new player
@@ -182,9 +183,9 @@ namespace Game_Server {
             }
         }
 
-        public void AttackTown(Vector3 _atkTown, Vector3 _deffTown) {
+        public void AttackTown(Vector3 _atkTown, Vector3 _deffTown, DateTime _timeStamp) {
             if (!GameLogic.IsIntersecting(_atkTown, _deffTown)) {
-                GameLogic.AddAttackToTown(_atkTown, _deffTown);
+                GameLogic.AddAttackToTown(_atkTown, _deffTown, _timeStamp);
                 foreach (Client _client in Server.clients.Values) {
                     if (_client.player != null) {
                         ServerSend.GrantedAttack(_client.id, _atkTown, _deffTown);
@@ -193,8 +194,8 @@ namespace Game_Server {
             }
         }
 
-        public void RetreatTown(Vector3 _atkTown, Vector3 _deffTown) {
-            GameLogic.ReomveAttackFromTown(_atkTown, _deffTown);
+        public void RetreatTown(Vector3 _atkTown, Vector3 _deffTown, DateTime _timeStamp) {
+            GameLogic.ReomveAttackFromTown(_atkTown, _deffTown, _timeStamp);
             foreach (Client _client in Server.clients.Values) {
                 if (_client.player != null) {
                     ServerSend.GrantedRetreat(_client.id, _atkTown, _deffTown);
@@ -202,9 +203,9 @@ namespace Game_Server {
             }
         }
 
-        public void ConquerTown(int _attackerId, Vector3 _deffTown) {
+        public void ConquerTown(int _attackerId, Vector3 _deffTown, DateTime _timeStamp) {
             Player _conquerer = Server.clients[_attackerId].player;
-            GameLogic.ConquerTown(_conquerer, _deffTown);
+            GameLogic.ConquerTown(_conquerer, _deffTown, _timeStamp);
             foreach (Client _client in Server.clients.Values) {
                 if (_client.player != null) {
                     ServerSend.GrantedConquer(_client.id, _conquerer, _deffTown);

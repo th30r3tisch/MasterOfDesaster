@@ -18,8 +18,9 @@ namespace Game_Server {
 
         public static QuadTree GenereateInitialMap() {
             world = new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT));
-            game = new Player(-1, "game", Color.FromArgb(100, 100, 100));
+            game = new Player(-1, "game", Color.FromArgb(150, 150, 150), DateTime.Now);
             r = new Random(Constants.RANDOM_SEED);
+
             CreateObstacles();
             CreateTowns();
             return world;
@@ -37,20 +38,21 @@ namespace Game_Server {
                 int _x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
                 int _z = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
                 if (world.GetAllContentBetween(
-                    (_x - Constants.TOWN_MIN_DISTANCE), 
+                    (_x - Constants.TOWN_MIN_DISTANCE),
                     (_z - Constants.OBSTACLE_MAX_LENGTH / 2), // divided by 2 because point is center of object
-                    (_x + Constants.TOWN_MIN_DISTANCE), 
+                    (_x + Constants.TOWN_MIN_DISTANCE),
                     (_z + Constants.OBSTACLE_MAX_LENGTH / 2)).Count == 0) { // check vertical objects
                     if (world.GetAllContentBetween(
-                        (_x - Constants.OBSTACLE_MAX_LENGTH / 2), 
-                        (_z - Constants.TOWN_MIN_DISTANCE), 
-                        (_x + Constants.OBSTACLE_MAX_LENGTH / 2), 
+                        (_x - Constants.OBSTACLE_MAX_LENGTH / 2),
+                        (_z - Constants.TOWN_MIN_DISTANCE),
+                        (_x + Constants.OBSTACLE_MAX_LENGTH / 2),
                         (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check horizontal objects
                         _t = new Town(new Vector3(_x, 5, _z));
                     }
                 }
             }
             _t.player = _owner;
+            _t.creationTime = _owner.creationTime;
             _owner.addTown(_t);
             world.Insert(_t);
             return _t;
@@ -92,15 +94,15 @@ namespace Game_Server {
                 endZ));
             if (intersectionObjs.Count != 0) {
                 foreach (TreeNode _node in intersectionObjs) {
-                    if (_node.GetType() == typeof(Obstacle)){
+                    if (_node.GetType() == typeof(Obstacle)) {
 
                         Obstacle _o = (Obstacle)_node;
                         bool _intersecting = false;
 
                         if (_o.orientation == 1) { // horizontal
                             _intersecting = LineSegmentsIntersection(
-                                new Vector2(_atkTown.X, _atkTown.Z), 
-                                new Vector2(_deffTown.X, _deffTown.Z), 
+                                new Vector2(_atkTown.X, _atkTown.Z),
+                                new Vector2(_deffTown.X, _deffTown.Z),
                                 new Vector2(_node.position.X - (_o.width / 2), _node.position.Z),
                                 new Vector2(_node.position.X + (_o.width / 2), _node.position.Z)
                                 );
@@ -148,16 +150,68 @@ namespace Game_Server {
             return r.Next(_max - _min + 1) + _min;
         }
 
-        public static void AddAttackToTown(Vector3 _atkTown, Vector3 _deffTown) {
+        public static void AddAttackToTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
+            Town _atkTown = world.SearchTown(world, _atk);
+            Town _deffTown = world.SearchTown(world, _deff);
+            CalculateTownLife(_atkTown, _timeStamp);
+            CalculateTownLife(_deffTown, _timeStamp);
             world.AddTownAtk(_atkTown, _deffTown);
         }
 
-        public static void ReomveAttackFromTown(Vector3 _atkTown, Vector3 _deffTown) {
+        public static void ReomveAttackFromTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
+            Town _atkTown = world.SearchTown(world, _atk);
+            Town _deffTown = world.SearchTown(world, _deff);
+            CalculateTownLife(_atkTown, _timeStamp);
+            CalculateTownLife(_deffTown, _timeStamp);
             world.RmTownAtk(_atkTown, _deffTown);
         }
 
-        public static void ConquerTown(Player _player, Vector3 _deffTown) {
+        public static void ConquerTown(Player _player, Vector3 _town, DateTime _timeStamp) {
+            Town _deffTown = world.SearchTown(world, _town);
+            CalculateTownLife(_deffTown, _timeStamp);
+            UpdateTown(_deffTown, _timeStamp);
+
             world.UpdateOwner(_player, _deffTown);
         }
+
+        public static void UpdateTown(Town _town, DateTime _timeStamp) {
+            // removes all incoming atk troops and deletes references in both towns
+            for (int i = _town.attackerTowns.Count; i > 0; i--) {
+                CalculateTownLife(_town.attackerTowns[i - 1], _timeStamp);
+                world.RmTownAtk(_town.attackerTowns[i - 1], _town);
+            }
+
+            // removes all incoming support troops and deletes references in both towns
+            for (int i = _town.supporterTowns.Count; i > 0; i--) {
+                CalculateTownLife(_town.supporterTowns[i - 1], _timeStamp);
+                world.RmTownAtk(_town.supporterTowns[i - 1], _town);
+            }
+
+            // removes all outgoing troops and deletes references in both towns
+            for (int i = _town.outgoing.Count; i > 0; i--) {
+                CalculateTownLife(_town.outgoing[i - 1], _timeStamp);
+                world.RmTownAtk(_town, _town.outgoing[i - 1]);
+            }
+        }
+
+        public static void CalculateTownLife(Town _town, DateTime _creationTime) {
+            TimeSpan span = _creationTime.Subtract(_town.creationTime);
+            int timePassed = (int)span.TotalSeconds;
+            int firstLifeCalc = _town.life;
+
+            if (_town.player.id != -1) {
+                int rawTownLife = timePassed / Constants.TOWN_GROTH_SECONDS;
+                int lostLifeByOutgoing = timePassed / Constants.TOWN_GROTH_SECONDS * _town.outgoing.Count;
+                int gotLifeByIncoming = timePassed / Constants.TOWN_GROTH_SECONDS * _town.supporterTowns.Count;
+                firstLifeCalc += rawTownLife - lostLifeByOutgoing + gotLifeByIncoming;
+            }
+            int lostLifeByIncoming = timePassed / Constants.TOWN_GROTH_SECONDS * _town.attackerTowns.Count;
+
+            int finalNewLife = firstLifeCalc - lostLifeByIncoming;
+            _town.life = finalNewLife;
+            _town.creationTime = _creationTime;
+            Console.WriteLine($"New town life is: {finalNewLife}");
+        }
+
     }
 }

@@ -17,7 +17,7 @@ namespace SharedLibrary {
         public const int OBSTACLE_MIN_LENGTH = 50;
         public const int OBSTACLE_MAX_LENGTH = 400;
         public const int ATTACK_LINE_WIDTH = 10;
-        public const int RANDOM_SEED = 1;
-        public const int TOWN_GROTH_SECONDS = 3;
+        public const int RANDOM_SEED = 2;
+        public const int TOWN_GROTH_SECONDS = 2;
     }
 }

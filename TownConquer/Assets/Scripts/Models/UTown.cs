@@ -7,7 +7,7 @@ public class UTown : Town {
 
     public GameObject go;
     public List<GameObject> incoming = new List<GameObject>();
-    public List<GameObject> outgoing = new List<GameObject>();
+    public List<GameObject> outgoingGO = new List<GameObject>();
 
     public UTown(System.Numerics.Vector3 _pos): base(_pos) { }
 

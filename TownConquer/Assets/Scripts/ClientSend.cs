@@ -1,4 +1,5 @@
 ﻿using SharedLibrary;
+using System;
 using UnityEngine;
 
 public class ClientSend : MonoBehaviour
@@ -42,6 +43,7 @@ public class ClientSend : MonoBehaviour
             _packet.Write(Client.instance.myId);
             _packet.Write(ConversionManager.ToNumericVector(atkTown));
             _packet.Write(ConversionManager.ToNumericVector(deffTown));
+            _packet.Write(DateTime.Now.ToBinary());
 
             SendTCPData(_packet);
         }
@@ -52,6 +54,7 @@ public class ClientSend : MonoBehaviour
             _packet.Write(Client.instance.myId);
             _packet.Write(ConversionManager.ToNumericVector(atkTown));
             _packet.Write(ConversionManager.ToNumericVector(deffTown));
+            _packet.Write(DateTime.Now.ToBinary());
 
             SendTCPData(_packet);
         }
@@ -61,6 +64,7 @@ public class ClientSend : MonoBehaviour
         using (Packet _packet = new Packet((int)ClientPackets.conquerRequest)) {
             _packet.Write(Client.instance.myId);
             _packet.Write(ConversionManager.ToNumericVector(deffTown));
+            _packet.Write(DateTime.Now.ToBinary());
 
             SendTCPData(_packet);
         }

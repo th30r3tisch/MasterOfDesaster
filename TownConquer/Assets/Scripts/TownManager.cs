@@ -9,6 +9,11 @@ public class TownManager : MonoBehaviour {
     public UTown town;
 
     private float elapsed;
+    private GameUIManager ui;
+
+    private void Start() {
+        ui = GameObject.Find("UI").GetComponentInChildren<GameUIManager>();
+    }
 
     void Update() {
         GrowLife();
@@ -21,7 +26,7 @@ public class TownManager : MonoBehaviour {
             if (ownerid >= 0) {
                 life += 1;
             }
-            life += town.GetSupportCount() - town.GetAttackCount() - town.outgoing.Count;
+            life += town.GetSupportCount() - town.GetAttackCount() - town.outgoingGO.Count;
             if (life < 0) {
                 life = 0;
                 if (town.GetAttackCount() > 0) {
@@ -35,21 +40,23 @@ public class TownManager : MonoBehaviour {
     }
 
     public void RequestRetreatOfAllTroops() {
-        foreach (GameObject _target in town.outgoing) {
-            ClientSend.RetreatRequest(gameObject.transform.position, _target.GetComponent<AttackManager>().end);
+        foreach (GameObject _target in town.outgoingGO) {
+            ClientSend.RetreatRequest(
+                gameObject.transform.position, 
+                ConversionManager.ToUnityVector(_target.GetComponent<AttackManager>().end.position));
         }
     }
 
     public void RetreatTroopsFromTown(UTown _targetTown) {
         GameObject _outgoing = null;
         int i = 0;
-        while (i < town.outgoing.Count && _outgoing == null) {
-            if (town.outgoing[i].GetComponent<AttackManager>().end == ConversionManager.ToUnityVector(_targetTown.position)) {
-                _outgoing = town.outgoing[i];
+        while (i < town.outgoingGO.Count && _outgoing == null) {
+            if (town.outgoingGO[i].GetComponent<AttackManager>().end.position == _targetTown.position) {
+                _outgoing = town.outgoingGO[i];
             }
             i++;
         }
-        town.outgoing.Remove(_outgoing);
+        town.outgoingGO.Remove(_outgoing);
         _targetTown.go.GetComponent<TownManager>().RemoveIncomingRef(town);
         DestroyImmediate(_outgoing);
     }
@@ -58,7 +65,7 @@ public class TownManager : MonoBehaviour {
         GameObject _incoming = null;
         int i = 0;
         while (i < town.incoming.Count && _incoming == null) {
-            if (town.incoming[i].GetComponent<AttackManager>().start == ConversionManager.ToUnityVector(_originTown.position)) {
+            if (town.incoming[i].GetComponent<AttackManager>().start.position == _originTown.position) {
                 _incoming = town.incoming[i];
             }
             i++;
@@ -75,6 +82,7 @@ public class TownManager : MonoBehaviour {
 
     private void OnMouseEnter() {
         GetComponent<Outline>().OutlineWidth = 3;
+        ui.DisplayTownInfo(ownerName, life, town.creationTime);
     }
 
     private void OnMouseExit() {

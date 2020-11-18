@@ -1,5 +1,6 @@
 ﻿using SharedLibrary;
 using SharedLibrary.Models;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
@@ -24,13 +25,14 @@ public class ClientHandle : MonoBehaviour
         int _myId = _packet.ReadInt();
         string _username = _packet.ReadString();
         System.Drawing.Color _color = _packet.ReadColor();
-        Client.instance.me = new Player(_myId, _username, _color);
+        DateTime creationTime = DateTime.FromBinary(_packet.ReadLong());
+        Client.instance.me = new Player(_myId, _username, _color, creationTime);
         int _seed = _packet.ReadInt();
 
         System.Numerics.Vector3 v = _packet.ReadVector3();
         Vector3 _townPos = new Vector3(v.X, v.Y, v.Z);
 
-        GameManager.instance.InitMap(_seed, _townPos, Client.instance.me);
+        GameManager.instance.InitMap(_seed, _townPos, Client.instance.me, creationTime);
     }
 
     public static void UpdateWorld(Packet _packet) {
@@ -38,13 +40,14 @@ public class ClientHandle : MonoBehaviour
         int _enemyId = _packet.ReadInt();
         string _enemyname = _packet.ReadString();
         System.Drawing.Color _enemyColor = _packet.ReadColor();
+        DateTime creationTime = DateTime.FromBinary(_packet.ReadLong());
         int _townNumber = _packet.ReadInt();
         for (int i = 0; i < _townNumber; i++) {
             System.Numerics.Vector3 _v = _packet.ReadVector3();
             Vector3 _townPos = new Vector3(_v.X, _v.Y, _v.Z);
             _towns.Add(_townPos); 
         }
-        Player _enemy = new Player(_enemyId, _enemyname, _enemyColor);
+        Player _enemy = new Player(_enemyId, _enemyname, _enemyColor, creationTime);
         GameManager.instance.AddEnemies(_enemy, _towns);
     }
 

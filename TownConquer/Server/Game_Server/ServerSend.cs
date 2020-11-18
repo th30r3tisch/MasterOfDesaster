@@ -20,6 +20,7 @@ namespace Game_Server {
                 _packet.Write(_player.id);
                 _packet.Write(_player.username);
                 _packet.Write(_player.color);
+                _packet.Write(_player.creationTime.ToBinary());
                 _packet.Write(_seed);
                 _packet.Write(_town.position);
 
@@ -32,6 +33,7 @@ namespace Game_Server {
                 _packet.Write(_player.id);
                 _packet.Write(_player.username);
                 _packet.Write(_player.color);
+                _packet.Write(_player.creationTime.ToBinary());
                 _packet.Write(townNumber);
                 foreach (Town _town in _towns) {
                     _packet.Write(_town.position);

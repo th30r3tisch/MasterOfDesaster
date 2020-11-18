@@ -1,5 +1,6 @@
 ﻿using SharedLibrary;
 using SharedLibrary.Models;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -45,12 +46,12 @@ public class GameManager : MonoBehaviour {
         Client.instance.enemies.Add(_enemy);
     }
 
-    public void InitMap(int _seed, Vector3 _townPos, Player _player) {
+    public void InitMap(int _seed, Vector3 _townPos, Player _player, DateTime _creationTime) {
         GameObject _ground;
         r = new System.Random(_seed);
 
         world = new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT));
-        game = new Player(-1, "game", System.Drawing.Color.FromArgb(100, 100, 100));
+        game = new Player(-1, "game", System.Drawing.Color.FromArgb(100, 100, 100), _creationTime);
         _ground = Instantiate(landPrefab, new Vector3(Constants.MAP_WIDTH / 2, 0, Constants.MAP_HEIGHT / 2), horizontalOrientation);
         _ground.transform.localScale = new Vector3(Constants.MAP_WIDTH, 1, Constants.MAP_HEIGHT);
 
@@ -72,12 +73,12 @@ public class GameManager : MonoBehaviour {
         while (flag == false) {
             int _x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
             int _z = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
-            if (GetAreaContent(
+            if (world.GetAllContentBetween(
                 (_x - Constants.TOWN_MIN_DISTANCE),
                     (_z - Constants.OBSTACLE_MAX_LENGTH / 2), // divided by 2 because point is center of object
                     (_x + Constants.TOWN_MIN_DISTANCE),
                     (_z + Constants.OBSTACLE_MAX_LENGTH / 2)).Count == 0) { // check vertical objects
-                if (GetAreaContent(
+                if (world.GetAllContentBetween(
                     (_x - Constants.OBSTACLE_MAX_LENGTH / 2),
                     (_z - Constants.TOWN_MIN_DISTANCE),
                     (_x + Constants.OBSTACLE_MAX_LENGTH / 2),
@@ -89,24 +90,25 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private void CreateTown(int _i, Vector3 _position, Player owner) {
+    private void CreateTown(int _i, Vector3 _position, Player _owner) {
         GameObject _town;
         UTown _t;
 
         _t = new UTown(ConversionManager.ToNumericVector(_position)) {
-            player = owner
+            player = _owner
         };
 
         _town = Instantiate(townPrefab, _position, horizontalOrientation);
         _town.GetComponent<TownManager>().id = _i;
-        _town.GetComponent<TownManager>().ownerName = owner.username;
-        _town.GetComponent<TownManager>().ownerid = owner.id;
+        _town.GetComponent<TownManager>().ownerName = _owner.username;
+        _town.GetComponent<TownManager>().ownerid = _owner.id;
         _town.GetComponent<TownManager>().life = _t.life;
         _town.GetComponent<TownManager>().town = _t;
-        _town.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(owner.color);
+        _town.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(_owner.color);
 
         _t.go = _town;
-        owner.addTown(_t);
+        _t.creationTime = _owner.creationTime;
+        _owner.addTown(_t);
         world.Insert(_t);
     }
 
@@ -127,25 +129,21 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private List<TreeNode> GetAreaContent(int _startX, int _startZ, int _endX, int _endZ) {
-        return world.GetAllContentBetween(_startX, _startZ, _endX, _endZ);
-    }
-
     public void AttackTown(Vector3 _lineStart, Vector3 _lineEnd) {
         UTown _deffT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_lineEnd));
         UTown _atkT = (UTown)world.GetTown(ConversionManager.ToNumericVector(_lineStart));
         GameObject _line;
 
         if (_deffT.player.id == _atkT.player.id) {
-            _line = CreateLineMesh(_atkT.player.id, _lineStart, _lineEnd, "sup");
+            _line = CreateLineMesh(_atkT.player.id, _atkT, _deffT, "sup");
             _deffT.incoming.Add(_line);
         }
         else {
-            _line = CreateLineMesh(_atkT.player.id, _lineStart, _lineEnd, "atk");
+            _line = CreateLineMesh(_atkT.player.id, _atkT, _deffT, "atk");
             _deffT.incoming.Add(_line);
         }
-        _atkT.outgoing.Add(_line);
-        world.AddTownAtk(ConversionManager.ToNumericVector(_lineStart), ConversionManager.ToNumericVector(_lineEnd));
+        _atkT.outgoingGO.Add(_line);
+        world.AddTownAtk(_deffT, _atkT);
     }
 
     public void RetreatTroops(Vector3 _lineStart, Vector3 _lineEnd) {
@@ -154,7 +152,7 @@ public class GameManager : MonoBehaviour {
         TownManager _atkTm = _atkT.go.GetComponent<TownManager>();
         _atkTm.RetreatTroopsFromTown(_deffT);
 
-        world.RmTownAtk(ConversionManager.ToNumericVector(_lineStart), ConversionManager.ToNumericVector(_lineEnd));
+        world.RmTownAtk(_atkT, _deffT);
     }
 
     public void ConquerTown(int _conquererId, Vector3 _conqueredTownCoord) {
@@ -179,27 +177,27 @@ public class GameManager : MonoBehaviour {
     private void UpdateTownReferences(UTown _conqueredT, Player _player) {
         TownManager _conqueredTm = _conqueredT.go.GetComponent<TownManager>();
         List<GameObject> _incoming = _conqueredT.incoming;
-        List<GameObject> _outgoing = _conqueredT.outgoing;
+        List<GameObject> _outgoing = _conqueredT.outgoingGO;
 
         // removes all incoming troops and deletes references in both towns
         for (int i = _incoming.Count; i > 0; i--) {
             AttackManager atkM = _incoming[i-1].GetComponent<AttackManager>();
-            UTown _atkT = (UTown)world.GetTown(ConversionManager.ToNumericVector(atkM.start));
+            UTown _atkT = (UTown)world.GetTown(atkM.start.position);
             _atkT.go.GetComponent<TownManager>().RetreatTroopsFromTown(_conqueredT);
-            world.RmTownAtk(ConversionManager.ToNumericVector(atkM.start), _conqueredT.position);
+            world.RmTownAtk(_atkT, _conqueredT);
         }
 
         // removes all outgoing troops and deletes references in both towns
-        for (int i = _outgoing.Count; i > 0; i++) {
+        for (int i = _outgoing.Count; i > 0; i--) {
             AttackManager atkM = _outgoing[i-1].GetComponent<AttackManager>();
-            UTown _deffT = (UTown)world.GetTown(ConversionManager.ToNumericVector(atkM.end));
+            UTown _deffT = (UTown)world.GetTown(atkM.end.position);
             _conqueredTm.RetreatTroopsFromTown(_deffT);
-            world.RmTownAtk(_conqueredT.position, ConversionManager.ToNumericVector(atkM.end));
+            world.RmTownAtk(_conqueredT, _deffT);
         }
 
         _conqueredTm.ownerid = _player.id;
         _conqueredTm.ownerName = _player.username;
-        world.UpdateOwner(_player, _conqueredT.position);
+        world.UpdateOwner(_player, _conqueredT);
         _conqueredT.go.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(_player.color);
     }
 
@@ -207,17 +205,20 @@ public class GameManager : MonoBehaviour {
     /// Creates a mesh line that indicates an attack between towns.
     /// </summary>
     /// <param name="_ownerId">Player id who sent the attack</param>
-    /// <param name="_lineStart">Town coord from where the attack starts</param>
-    /// <param name="_lineEnd">Town coord where the attack ends</param>
+    /// <param name="_startTown">Town from where the attack starts</param>
+    /// <param name="_endTown">Town where the attack ends</param>
+    /// <param name="_type">Type of the line (atk, deff)</param>
     /// <returns>The Gameobject of the mesh line</returns>
-    private GameObject CreateLineMesh(int _ownerId, Vector3 _lineStart, Vector3 _lineEnd, string _type) {
+    private GameObject CreateLineMesh(int _ownerId, UTown _startTown, UTown _endTown, string _type) {
         GameObject _atkLine = new GameObject();
         MeshRenderer _meshRenderer = _atkLine.AddComponent<MeshRenderer>();
-        _meshRenderer.sharedMaterial = Resources.Load("Line", typeof(Material)) as Material;
         MeshFilter _meshFilter = _atkLine.AddComponent<MeshFilter>();
         Mesh _mesh = new Mesh();
-
+        Vector3 _lineStart = ConversionManager.ToUnityVector( _startTown.position);
+        Vector3 _lineEnd = ConversionManager.ToUnityVector(_endTown.position);
         Vector3 _direction = _lineEnd - _lineStart;
+
+        _meshRenderer.sharedMaterial = Resources.Load("Line", typeof(Material)) as Material;
 
         Vector3[] _vertices = new Vector3[4]{
             Vector3.Cross(_direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + _lineStart,
@@ -252,8 +253,8 @@ public class GameManager : MonoBehaviour {
         _atkLine.name = "atk";
         _atkLine.AddComponent<AttackManager>();
         _atkLine.GetComponent<AttackManager>().ownerid = _ownerId;
-        _atkLine.GetComponent<AttackManager>().start = _lineStart;
-        _atkLine.GetComponent<AttackManager>().end = _lineEnd;
+        _atkLine.GetComponent<AttackManager>().start = _startTown;
+        _atkLine.GetComponent<AttackManager>().end = _endTown;
         _atkLine.GetComponent<AttackManager>().type = _type;
         _atkLine.AddComponent<MeshCollider>();
 

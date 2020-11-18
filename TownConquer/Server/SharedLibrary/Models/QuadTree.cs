@@ -100,33 +100,42 @@ namespace SharedLibrary.Models {
             return _wholeMap;
         }
 
-        public void AddTownAtk(Vector3 _atk, Vector3 _deff) {
-            Town _atkTown = SearchTown(this, _atk);
-            Town _deffTown = SearchTown(this, _deff);
-            if (!_deffTown.attackerTowns.Contains(_atkTown)) {
-                _deffTown.AddAttackTown(_atkTown);
+        public void AddTownAtk(Town _atkTown, Town _deffTown) {
+            if (_atkTown.player == _deffTown.player) {
+                if (!_deffTown.supporterTowns.Contains(_atkTown)) {
+                    _deffTown.AddSupporterTown(_atkTown);
+                }
             }
+            else {
+                if (!_deffTown.attackerTowns.Contains(_atkTown)) {
+                    _deffTown.AddAttackTown(_atkTown);
+                }
+            }
+            _atkTown.AddOutgoingTown(_deffTown);
         }
 
-        public void RmTownAtk(Vector3 _atk, Vector3 _deff) {
-            Town _atkTown = SearchTown(this, _atk);
-            Town _deffTown = SearchTown(this, _deff);
-            _deffTown.RemoveAttackTown(_atkTown);
+        public void RmTownAtk(Town _atkTown, Town _deffTown) {
+            if (_atkTown.player == _deffTown.player) {
+                _deffTown.RemoveSupporterTown(_atkTown);
+            }
+            else {
+                _deffTown.RemoveAttackTown(_atkTown);
+            }
+            _atkTown.RemoveOutgoingTown(_deffTown);
         }
 
-        public void UpdateOwner(Player _player, Vector3 _t) {
-            Town _town = SearchTown(this, _t);
+        public void UpdateOwner(Player _player, Town _town) {
             Console.WriteLine($"update owner: {_player.username}");
 
             Player _oldOwner = _town.player;
             _oldOwner.towns.Remove(_town);
 
-            _town.RemoveAllConquerors();
+            _town.creationTime = DateTime.Now;
             _town.player = _player;
             _player.addTown(_town);
         }
 
-        private Town SearchTown(QuadTree _tree, Vector3 _town) {
+        public Town SearchTown(QuadTree _tree, Vector3 _town) {
 
             if (_tree == null) return null;
 

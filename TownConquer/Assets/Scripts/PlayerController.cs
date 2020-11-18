@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Linq;
+using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
@@ -6,10 +8,12 @@ public class PlayerController : MonoBehaviour {
     public int lineWidth;
     public Material material;
 
-    private Vector3 lineStart;
-    private Vector3 lineEnd;
-    private bool startCondition = false;
-    int? startTownId = null;
+    DateTime _timeOne = DateTime.Now;
+    DateTime _timeTwo;
+    Vector3 _lineStart = Vector3.one;
+    Vector3 _lineEnd;
+    bool _startCondition = false;
+    GameObject _startTown = null;
 
 
     void Update() {
@@ -19,23 +23,26 @@ public class PlayerController : MonoBehaviour {
 
     private void CheckIfAttackIsHappening() {
         if (!Input.GetKey(KeyCode.LeftAlt)) {
+
             if (Input.GetMouseButtonDown(0)) {
                 RaycastHit _hitInfo = GetRayCastHitInfo();
-                if (_hitInfo.collider.gameObject.name.StartsWith("Town") &&
-                    _hitInfo.collider.gameObject.GetComponent<TownManager>().ownerid == Client.instance.myId) {
-                    lineStart = _hitInfo.collider.gameObject.transform.position;
-                    startTownId = _hitInfo.collider.gameObject.GetInstanceID();
-                    startCondition = true;
+                GameObject _go = _hitInfo.collider.gameObject;
+                if (_go.name.StartsWith("Town") &&
+                    _go.GetComponent<TownManager>().ownerid == Client.instance.myId) {
+                    _lineStart = _go.transform.position;
+                    _startTown = _go;
+                    _startCondition = true;
                 }
             }
-            if (Input.GetMouseButtonUp(0) && startCondition) {
+            if (Input.GetMouseButtonUp(0) && _startCondition) {
                 RaycastHit _hitInfo = GetRayCastHitInfo();
-                if (_hitInfo.collider.gameObject.name.StartsWith("Town") &&
-                    _hitInfo.collider.gameObject.GetInstanceID() != startTownId) {
-                    lineEnd = _hitInfo.collider.gameObject.transform.position;
-                    ClientSend.AttackRequest(lineStart, lineEnd);
-                    startCondition = false;
-                    startTownId = null;
+                GameObject _go = _hitInfo.collider.gameObject;
+                if (_go.name.StartsWith("Town") &&
+                    _go.GetInstanceID() != _startTown.GetInstanceID() &&
+                    !_go.GetComponent<TownManager>().town.attackerTowns.Contains(_startTown.GetComponent<TownManager>().town) &&
+                    !_go.GetComponent<TownManager>().town.supporterTowns.Contains(_startTown.GetComponent<TownManager>().town)) {
+                    _lineEnd = _go.transform.position;
+                    ClientSend.AttackRequest(_lineStart, _lineEnd);
                 }
             }
         }
@@ -46,8 +53,11 @@ public class PlayerController : MonoBehaviour {
             if (Input.GetMouseButtonUp(1)) {
                 RaycastHit _hitInfo = GetRayCastHitInfo();
                 GameObject go = _hitInfo.collider.gameObject;
-                if (go.name.StartsWith("at") && go.GetComponent<AttackManager>().ownerid == Client.instance.myId) {
-                    ClientSend.RetreatRequest(go.GetComponent<AttackManager>().start, go.GetComponent<AttackManager>().end);
+                AttackManager atm = go.GetComponent<AttackManager>();
+                if (go.name.StartsWith("at") && atm.ownerid == Client.instance.myId) {
+                    ClientSend.RetreatRequest(
+                        ConversionManager.ToUnityVector(atm.start.position),
+                        ConversionManager.ToUnityVector(atm.end.position));
                 }
             }
         }
