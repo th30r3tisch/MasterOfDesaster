@@ -9,15 +9,15 @@ namespace SharedLibrary {
         public const int TOWN_INITIAL_LIFE = 10;
         public const int OBSTACLE_WIDTH = 20;
         public const int OBSTACLE_NUMBER = 10;
-        public const int TOWN_NUMBER = 10;
-        public const int MAP_HEIGHT = 2000;
+        public const int TOWN_NUMBER = 20;
+        public const int MAP_HEIGHT = 4000;
         public const int MAP_WIDTH = 4000;
         public const int DISTANCE_TO_EDGES = 100;
         public const int TOWN_MIN_DISTANCE = 100;
         public const int OBSTACLE_MIN_LENGTH = 50;
         public const int OBSTACLE_MAX_LENGTH = 400;
         public const int ATTACK_LINE_WIDTH = 10;
-        public const int RANDOM_SEED = 2;
-        public const int TOWN_GROTH_SECONDS = 2;
+        public const int RANDOM_SEED = 1;
+        public const float TOWN_GROTH_SECONDS = .5f;
     }
 }

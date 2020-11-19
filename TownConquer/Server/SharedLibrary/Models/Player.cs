@@ -18,9 +18,5 @@ namespace SharedLibrary.Models {
             towns = new List<Town>();
             creationTime = _creationTime;
         }
-
-        public void addTown(Town _t) {
-            towns.Add(_t);
-        }
     }
 }

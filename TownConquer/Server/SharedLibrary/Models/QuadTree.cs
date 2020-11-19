@@ -49,6 +49,10 @@ namespace SharedLibrary.Models {
 
         }
 
+        /// <summary>
+        /// Inserts a node into the quadtree
+        /// </summary>
+        /// <param name="_treeNode">The node to insert</param>
         public void Insert(TreeNode _treeNode) {
             float _x = _treeNode.position.X;
             float _z = _treeNode.position.Z;
@@ -78,6 +82,15 @@ namespace SharedLibrary.Models {
                 Console.WriteLine($"ERROR : Unhandled partition {_x} {_z}");
         }
 
+        /// <summary>
+        /// Searches and returns all content of the quadtree within the specified bounds
+        /// </summary>
+        /// <param name="_tree">The quadtree to search in</param>
+        /// <param name="_startX">start x</param>
+        /// <param name="_startZ">start z</param>
+        /// <param name="_endX">end x</param>
+        /// <param name="_endZ">end z</param>
+        /// <param name="_wholeMap">List of all found objects</param>
         private void GetAreaContent(QuadTree _tree, int _startX, int _startZ, int _endX, int _endZ, List<TreeNode> _wholeMap) {
             if (_tree == null) return;
 
@@ -100,7 +113,12 @@ namespace SharedLibrary.Models {
             return _wholeMap;
         }
 
-        public void AddTownAtk(Town _atkTown, Town _deffTown) {
+        /// <summary>
+        /// Adds the attack or support reference between two towns
+        /// </summary>
+        /// <param name="_atkTown">the origin of the action</param>
+        /// <param name="_deffTown">the target of the action</param>
+        public void AddTownActionReference(Town _atkTown, Town _deffTown) {
             if (_atkTown.player == _deffTown.player) {
                 if (!_deffTown.supporterTowns.Contains(_atkTown)) {
                     _deffTown.AddSupporterTown(_atkTown);
@@ -114,7 +132,12 @@ namespace SharedLibrary.Models {
             _atkTown.AddOutgoingTown(_deffTown);
         }
 
-        public void RmTownAtk(Town _atkTown, Town _deffTown) {
+        /// <summary>
+        /// Removes the attack or support reference between two towns
+        /// </summary>
+        /// <param name="_atkTown">the origin of the action</param>
+        /// <param name="_deffTown">the target of the action</param>
+        public void RmTownActionReference(Town _atkTown, Town _deffTown) {
             if (_atkTown.player == _deffTown.player) {
                 _deffTown.RemoveSupporterTown(_atkTown);
             }
@@ -124,6 +147,11 @@ namespace SharedLibrary.Models {
             _atkTown.RemoveOutgoingTown(_deffTown);
         }
 
+        /// <summary>
+        /// Updates the owner of a town when conquered
+        /// </summary>
+        /// <param name="_player">The player who conquered the town</param>
+        /// <param name="_town">The town which is conquered</param>
         public void UpdateOwner(Player _player, Town _town) {
             Console.WriteLine($"update owner: {_player.username}");
 
@@ -132,9 +160,15 @@ namespace SharedLibrary.Models {
 
             _town.creationTime = DateTime.Now;
             _town.player = _player;
-            _player.addTown(_town);
+            _player.towns.Add(_town);
         }
 
+        /// <summary>
+        /// Searches a town within the quadtree and returns it
+        /// </summary>
+        /// <param name="_tree">The quadtree</param>
+        /// <param name="_town">The coord of the town to look for</param>
+        /// <returns>the town object or null if no town is found</returns>
         public Town SearchTown(QuadTree _tree, Vector3 _town) {
 
             if (_tree == null) return null;
@@ -161,8 +195,5 @@ namespace SharedLibrary.Models {
             return null;
         }
 
-        public Town GetTown(Vector3 _town) {
-            return SearchTown(this, _town);
-        }
     }
 }

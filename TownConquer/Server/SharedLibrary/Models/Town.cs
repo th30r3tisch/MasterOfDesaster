@@ -7,10 +7,11 @@ namespace SharedLibrary.Models {
     public class Town : TreeNode {
         public Player player;
         public int life;
+        public DateTime creationTime;
+
         public List<Town> attackerTowns = new List<Town>();
         public List<Town> supporterTowns = new List<Town>();
         public List<Town> outgoing = new List<Town>();
-        public DateTime creationTime;
 
         public Town(Vector3 _spawnPos) {
             position = _spawnPos;

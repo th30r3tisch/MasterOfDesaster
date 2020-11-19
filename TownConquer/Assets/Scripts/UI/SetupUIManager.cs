@@ -7,6 +7,7 @@ public class SetupUIManager : MonoBehaviour
     public static SetupUIManager instance;
     public GameObject startMenu;
     public InputField usernameField;
+    public Text errorMsg;
     public Toggle redColor;
     public Toggle greenColor;
     public Toggle blueColor;
@@ -27,9 +28,14 @@ public class SetupUIManager : MonoBehaviour
     /// By clicking the connect button in the menu the game scene is loaded. (Index can be seen in the build settings)
     /// </summary>
     public void ConnectToServer() {
-        startMenu.SetActive(false);
-        usernameField.interactable = false;
+        if (string.IsNullOrEmpty(usernameField.text)) {
+            errorMsg.text = "Please enter a name!";
+        }
+        else {
+            startMenu.SetActive(false);
+            usernameField.interactable = false;
 
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        }
     }
 }

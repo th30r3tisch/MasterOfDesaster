@@ -57,7 +57,7 @@ namespace Game_Server {
             }
             _t.player = _owner;
             _t.creationTime = _owner.creationTime;
-            _owner.addTown(_t);
+            _owner.towns.Add(_t);
             world.Insert(_t);
             return _t;
         }
@@ -159,7 +159,7 @@ namespace Game_Server {
             Town _deffTown = world.SearchTown(world, _deff);
             CalculateTownLife(_atkTown, _timeStamp);
             CalculateTownLife(_deffTown, _timeStamp);
-            world.AddTownAtk(_atkTown, _deffTown);
+            world.AddTownActionReference(_atkTown, _deffTown);
         }
 
         public static void ReomveAttackFromTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
@@ -167,7 +167,7 @@ namespace Game_Server {
             Town _deffTown = world.SearchTown(world, _deff);
             CalculateTownLife(_atkTown, _timeStamp);
             CalculateTownLife(_deffTown, _timeStamp);
-            world.RmTownAtk(_atkTown, _deffTown);
+            world.RmTownActionReference(_atkTown, _deffTown);
         }
 
         public static void ConquerTown(Player _player, Vector3 _town, DateTime _timeStamp) {
@@ -182,34 +182,34 @@ namespace Game_Server {
             // removes all incoming atk troops and deletes references in both towns
             for (int i = _town.attackerTowns.Count; i > 0; i--) {
                 CalculateTownLife(_town.attackerTowns[i - 1], _timeStamp);
-                world.RmTownAtk(_town.attackerTowns[i - 1], _town);
+                world.RmTownActionReference(_town.attackerTowns[i - 1], _town);
             }
 
             // removes all incoming support troops and deletes references in both towns
             for (int i = _town.supporterTowns.Count; i > 0; i--) {
                 CalculateTownLife(_town.supporterTowns[i - 1], _timeStamp);
-                world.RmTownAtk(_town.supporterTowns[i - 1], _town);
+                world.RmTownActionReference(_town.supporterTowns[i - 1], _town);
             }
 
             // removes all outgoing troops and deletes references in both towns
             for (int i = _town.outgoing.Count; i > 0; i--) {
                 CalculateTownLife(_town.outgoing[i - 1], _timeStamp);
-                world.RmTownAtk(_town, _town.outgoing[i - 1]);
+                world.RmTownActionReference(_town, _town.outgoing[i - 1]);
             }
         }
 
         public static void CalculateTownLife(Town _town, DateTime _creationTime) {
             TimeSpan span = _creationTime.Subtract(_town.creationTime);
-            int timePassed = (int)span.TotalSeconds;
+            float timePassed = (float)span.TotalSeconds;
             int firstLifeCalc = _town.life;
 
             if (_town.player.id != -1) {
-                int rawTownLife = timePassed / Constants.TOWN_GROTH_SECONDS;
-                int lostLifeByOutgoing = timePassed / Constants.TOWN_GROTH_SECONDS * _town.outgoing.Count;
-                int gotLifeByIncoming = timePassed / Constants.TOWN_GROTH_SECONDS * _town.supporterTowns.Count;
+                int rawTownLife = (int)(timePassed / Constants.TOWN_GROTH_SECONDS);
+                int lostLifeByOutgoing = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * _town.outgoing.Count);
+                int gotLifeByIncoming = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * _town.supporterTowns.Count);
                 firstLifeCalc += rawTownLife - lostLifeByOutgoing + gotLifeByIncoming;
             }
-            int lostLifeByIncoming = timePassed / Constants.TOWN_GROTH_SECONDS * _town.attackerTowns.Count;
+            int lostLifeByIncoming = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * _town.attackerTowns.Count);
 
             int finalNewLife = firstLifeCalc - lostLifeByIncoming;
             _town.life = finalNewLife;
@@ -218,8 +218,8 @@ namespace Game_Server {
         }
 
         public static void CreateKis() {
-            kis.Add(new KI_Stupid(world, "KI1", Color.FromArgb(0, 0, 0)));
-            kis.Add(new KI_Stupid(world, "KI2", Color.FromArgb(255, 255, 255)));
+            //kis.Add(new KI_Stupid(world, 998, "KI1", Color.FromArgb(0, 0, 0)));
+            //kis.Add(new KI_Stupid(world, 999, "KI2", Color.FromArgb(255, 255, 255)));
         }
     }
 }

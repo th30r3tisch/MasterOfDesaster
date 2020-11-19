@@ -1,4 +1,5 @@
 ﻿using SharedLibrary;
+using System.Linq;
 using UnityEngine;
 
 public class TownManager : MonoBehaviour {
@@ -26,10 +27,10 @@ public class TownManager : MonoBehaviour {
             if (ownerid >= 0) {
                 life += 1;
             }
-            life += town.GetSupportCount() - town.GetAttackCount() - town.outgoingGO.Count;
+            life += town.supporterTowns.Count - town.attackerTowns.Count - town.outgoing.Count;
             if (life < 0) {
                 life = 0;
-                if (town.GetAttackCount() > 0) {
+                if (town.attackerTowns.Count > 0) {
                     ConquerTownRequest();
                 }
                 else {
@@ -40,7 +41,7 @@ public class TownManager : MonoBehaviour {
     }
 
     public void RequestRetreatOfAllTroops() {
-        foreach (GameObject _target in town.outgoingGO) {
+        foreach (GameObject _target in town.outgoingActions) {
             ClientSend.RetreatRequest(
                 gameObject.transform.position, 
                 ConversionManager.ToUnityVector(_target.GetComponent<AttackManager>().end.position));
@@ -50,32 +51,19 @@ public class TownManager : MonoBehaviour {
     public void RetreatTroopsFromTown(UTown _targetTown) {
         GameObject _outgoing = null;
         int i = 0;
-        while (i < town.outgoingGO.Count && _outgoing == null) {
-            if (town.outgoingGO[i].GetComponent<AttackManager>().end.position == _targetTown.position) {
-                _outgoing = town.outgoingGO[i];
+        while (i < town.outgoingActions.Count && _outgoing == null) {
+            if (town.outgoingActions[i].GetComponent<AttackManager>().end.position == _targetTown.position) {
+                _outgoing = town.outgoingActions[i];
             }
             i++;
         }
-        town.outgoingGO.Remove(_outgoing);
-        _targetTown.go.GetComponent<TownManager>().RemoveIncomingRef(town);
+        town.outgoingActions.Remove(_outgoing);
         DestroyImmediate(_outgoing);
-    }
-
-    public void RemoveIncomingRef(UTown _originTown) {
-        GameObject _incoming = null;
-        int i = 0;
-        while (i < town.incoming.Count && _incoming == null) {
-            if (town.incoming[i].GetComponent<AttackManager>().start.position == _originTown.position) {
-                _incoming = town.incoming[i];
-            }
-            i++;
-        }
-        town.incoming.Remove(_incoming);
     }
 
 
     private void ConquerTownRequest() {
-        if (town.GetFirstAttackOwnerID() == Client.instance.myId) {
+        if (town.attackerTowns.First().player.id == Client.instance.myId) {
             ClientSend.ConquerRequest(gameObject.transform.position);
         }
     }
