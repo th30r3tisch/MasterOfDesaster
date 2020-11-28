@@ -202,7 +202,7 @@ namespace Game_Server {
         }
 
         public void RetreatTown(Vector3 _atkTown, Vector3 _deffTown, DateTime _timeStamp) {
-            GameLogic.ReomveAttackFromTown(_atkTown, _deffTown, _timeStamp);
+            GameLogic.RemoveAttackFromTown(_atkTown, _deffTown, _timeStamp);
             foreach (Client _client in Server.clients.Values) {
                 if (_client.player != null) {
                     ServerSend.GrantedRetreat(_client.id, _atkTown, _deffTown);

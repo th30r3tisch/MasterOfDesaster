@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using Game_Server.KI.KnapSack;
 
 namespace Game_Server {
     class Server {
@@ -23,6 +24,8 @@ namespace Game_Server {
             Port = _port;
 
             InitializeServerData();
+
+            new KnapSack_EA();
 
             tcpListener = new TcpListener(IPAddress.Any, Port);
             tcpListener.Start();

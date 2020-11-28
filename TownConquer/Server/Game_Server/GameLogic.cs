@@ -162,7 +162,7 @@ namespace Game_Server {
             world.AddTownActionReference(_atkTown, _deffTown);
         }
 
-        public static void ReomveAttackFromTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
+        public static void RemoveAttackFromTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
             Town _atkTown = world.SearchTown(world, _atk);
             Town _deffTown = world.SearchTown(world, _deff);
             CalculateTownLife(_atkTown, _timeStamp);
@@ -218,8 +218,8 @@ namespace Game_Server {
         }
 
         public static void CreateKis() {
-            //kis.Add(new KI_Stupid(world, 998, "KI1", Color.FromArgb(0, 0, 0)));
-            //kis.Add(new KI_Stupid(world, 999, "KI2", Color.FromArgb(255, 255, 255)));
+            kis.Add(new KI_Stupid(world, 998, "KI1", Color.FromArgb(0, 0, 0)));
+            kis.Add(new KI_Stupid(world, 999, "KI2", Color.FromArgb(255, 255, 255)));
         }
     }
 }
