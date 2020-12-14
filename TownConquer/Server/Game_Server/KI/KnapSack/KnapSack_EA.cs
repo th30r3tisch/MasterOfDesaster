@@ -5,10 +5,11 @@ using System.IO;
 namespace Game_Server.KI.KnapSack {
     class KnapSack_EA {
         List<Item> items = new List<Item>();
-        int numberOfItems = 10;
-        int numberOfKnapSacks = 100;
-        double recombinationProbability = 0.7;
-        int maxGenerations = 50;
+        private const int numberOfItems = 30;
+        private const int numberOfKnapSacks = 200;
+        private const double recombinationProbability = 0.7;
+        private const double mutationProbability = 1 / numberOfItems;
+        private const int noImprovementLimit = 25;
         Random r;
 
         public KnapSack_EA() {
@@ -17,7 +18,7 @@ namespace Game_Server.KI.KnapSack {
             string fileName = @"stats.txt";
             fileName = Path.GetFullPath(fileName);
             using (var w = new StreamWriter(fileName)) {
-                Evolve(GenerateInitPopulation(), 0, w);
+                Evolve(GenerateInitPopulation(), w, 0, 0);
             }
         }
 
@@ -25,16 +26,29 @@ namespace Game_Server.KI.KnapSack {
         /// Evolves the population
         /// </summary>
         /// <param name="population">the population to evolve</param>
-        /// <param name="generation"> number of generations past</param>
         /// <param name="w">Streamwriter to log statistics</param>
-        private void Evolve(List<KnapSack> population, int generation, StreamWriter w) {
-            if (generation < maxGenerations) {
+        /// <param name="oldavg">last avg of the population</param>
+        /// <param name="noImprovmentCount">counter of how many generations without improvement</param>
+        private void Evolve(List<KnapSack> population, StreamWriter w, int oldavg, int noImprovmentCount) {
+            if (noImprovmentCount < noImprovementLimit) {
                 Evaluate(population);
-                generation += 1;
-                var line = string.Format("{0},", AverageValueInPopulation(population));
-                w.Write(line);
+
+                int avg = AverageValueInPopulation(population);
+                if (avg <= oldavg) {
+                    noImprovmentCount++;
+                }
+                else {
+                    oldavg = avg;
+                    noImprovmentCount = 0;
+                }
+
+                string avgS = string.Format("{0},", avg);
+                string sdS = string.Format("{0},", StandardDeviationInPopulation(population, avg));
+                string bestS = string.Format("{0},", MaxValueInPopulation(population).first.value);
+                string sdi = string.Format("{0},", SimpsonsDiversityIndexOfPopulation(population).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+                w.Write(bestS);
                 w.Flush();
-                Evolve(CreateOffspring(population), generation, w);
+                Evolve(CreateOffspring(population), w, oldavg, noImprovmentCount);
             }
         }
 
@@ -45,10 +59,33 @@ namespace Game_Server.KI.KnapSack {
         /// <returns>the new population</returns>
         private List<KnapSack> CreateOffspring(List<KnapSack> population) {
             List<KnapSack> newPopulation = new List<KnapSack>();
-            for (int i = 0; i < numberOfKnapSacks/2; i++) {
-                newPopulation.AddRange(TournamentSelection(population));
+            List<KnapSack> children;
+            (KnapSack, KnapSack) elite = MaxValueInPopulation(population);
+            newPopulation.Add(elite.Item1);
+            newPopulation.Add(elite.Item2);
+            for (int i = 0; i < (numberOfKnapSacks) / 2; i++) {
+                children = TournamentSelection(population);
+                children = Mutate(children);
+                newPopulation.AddRange(children);
             }
             return newPopulation;
+        }
+
+        /// <summary>
+        /// Mutating solutions
+        /// </summary>
+        /// <param name="children">solutions to mutate</param>
+        /// <returns>mutated solutions</returns>
+        private List<KnapSack> Mutate(List<KnapSack> children) {
+            foreach (KnapSack child in children) {
+                List<int> content = child.content;
+                for (int i = 0; i < content.Count; i++) {
+                    if (r.NextDouble() < mutationProbability) {
+                        content[i] = 1 - content[i];
+                    }
+                }
+            }
+            return children;
         }
 
         /// <summary>
@@ -59,19 +96,18 @@ namespace Game_Server.KI.KnapSack {
             for (int i = 0; i < numberOfKnapSacks; i++) {
                 KnapSack knapSack = population[i];
                 List<int> knapSackContent = knapSack.content;
+                knapSack.value = 0;
                 // iterates through the binary content of a knapsack
                 for (int j = 0; j < numberOfItems; j++) {
                     int item = knapSackContent[j];
-                    // if the item in the knapsack is present -> value is 1
-                    if (item == 1) {
-                        // look for the coresponding item in the itemlist and add value and weight to the knapsack
-                        knapSack.capasity += items[j].weight;
-                        knapSack.value += items[j].value;
-                        if (knapSack.capasity > knapSack.maxCapasity) {
-                            knapSack.value = 0;
-                            j = numberOfItems + 1;
-                        }
+                    // look for the coresponding item in the itemlist and add value and weight to the knapsack
+                    knapSack.capasity += items[j].weight * item;
+                    knapSack.value += items[j].value * item;
+                    if (knapSack.capasity > knapSack.maxCapasity) {
+                        knapSack.value = 0;
+                        j = numberOfItems + 1;
                     }
+
                 }
             }
         }
@@ -113,8 +149,6 @@ namespace Game_Server.KI.KnapSack {
 
             List<int> content1 = parents[0].content.GetRange(0, splitListAt);
             List<int> content2 = parents[1].content.GetRange(0, splitListAt);
-            List<int> t1 = parents[1].content.GetRange(splitListAt, numberOfItems - splitListAt);
-            List<int> t2 = parents[0].content.GetRange(splitListAt, numberOfItems - splitListAt);
             content1.AddRange(parents[1].content.GetRange(splitListAt, numberOfItems - splitListAt));
             content2.AddRange(parents[0].content.GetRange(splitListAt, numberOfItems - splitListAt));
 
@@ -159,15 +193,47 @@ namespace Game_Server.KI.KnapSack {
                 averageValue += knapSack.value;
             }
             averageValue /= population.Count;
-            Console.WriteLine(averageValue);
             return averageValue;
         }
 
-        private void CheckPrint(List<KnapSack> population) {
-            foreach (KnapSack item in population) {
-                Console.WriteLine(item.value + " - " + item.capasity);
-                //Console.WriteLine("[{0}]", string.Join(", ", item.content));
+        private (KnapSack first, KnapSack second) MaxValueInPopulation(List<KnapSack> population) {
+            int max1 = 0;
+            int max2 = 0;
+            KnapSack first = null;
+            KnapSack second = null;
+            foreach (KnapSack knapSack in population) {
+                int value = knapSack.value;
+                if (value > max1) {
+                    max2 = max1; max1 = value;
+                    second = first; first = knapSack;
+                }
+                else if (value > max2) {
+                    max2 = value;
+                    second = knapSack;
+                }
             }
+            return (first, second);
+        }
+
+        private double StandardDeviationInPopulation(List<KnapSack> population, int avg) {
+            double varianz = 0;
+            foreach (KnapSack knapSack in population) {
+                varianz += Math.Pow(knapSack.value - avg, 2);
+            }
+            varianz /= population.Count;
+            return Math.Round(Math.Sqrt(varianz));
+        }
+
+        private double SimpsonsDiversityIndexOfPopulation(List<KnapSack> population) {
+            double sum = 0;
+            double zähler = 0;
+            foreach (KnapSack knapSack in population) {
+                sum += knapSack.value;
+                zähler += knapSack.value * (knapSack.value - 1);
+            }
+            double nenner = sum * (sum - 1);
+            double sdi = Math.Round(1d - (zähler / nenner), 2);
+            return sdi;
         }
     }
 }

@@ -214,7 +214,7 @@ namespace Game_Server {
             int finalNewLife = firstLifeCalc - lostLifeByIncoming;
             _town.life = finalNewLife;
             _town.creationTime = _creationTime;
-            Console.WriteLine($"New town life is: {finalNewLife}");
+            //Console.WriteLine($"New town life is: {finalNewLife}");
         }
 
         public static void CreateKis() {

@@ -6,7 +6,7 @@ namespace Game_Server.KI.KnapSack {
         public List<int> content;
         public int value;
         public int capasity;
-        public int maxCapasity = 30;
+        public int maxCapasity = 40;
 
         /// <summary>
         /// A knapsack represens one possible solution
