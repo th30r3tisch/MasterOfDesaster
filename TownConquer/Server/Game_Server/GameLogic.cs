@@ -9,17 +9,17 @@ using Game_Server.KI;
 namespace Game_Server {
     class GameLogic {
 
-        public static List<KI_base> kis;
+        public List<KI_base> kis;
 
-        private static QuadTree world;
-        private static Player game;
-        private static Random r;
+        public QuadTree world;
+        private Player game;
+        private Random r;
 
         public static void Update() {
             ThreadManager.UpdateMain();
         }
 
-        public static QuadTree GenereateInitialMap() {
+        public QuadTree GenereateInitialMap() {
             world = new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT));
             game = new Player(-1, "game", Color.FromArgb(150, 150, 150), DateTime.Now);
             r = new Random(Constants.RANDOM_SEED);
@@ -30,13 +30,13 @@ namespace Game_Server {
             return world;
         }
 
-        private static void CreateTowns() {
+        private void CreateTowns() {
             for (int _i = 0; _i < Constants.TOWN_NUMBER; _i++) {
                 CreateTown(game);
             }
         }
 
-        public static Town CreateTown(Player _owner) {
+        public Town CreateTown(Player _owner) {
             Town _t = null;
             while (_t == null) {
                 int _x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
@@ -62,7 +62,7 @@ namespace Game_Server {
             return _t;
         }
 
-        private static void CreateObstacles() {
+        private void CreateObstacles() {
             for (int i = 0; i < Constants.OBSTACLE_NUMBER; i++) {
                 world.Insert(new Obstacle(
                         new Vector3(
@@ -74,7 +74,7 @@ namespace Game_Server {
             }
         }
 
-        public static bool IsIntersecting(Vector3 _atkTown, Vector3 _deffTown) {
+        public bool IsIntersecting(Vector3 _atkTown, Vector3 _deffTown) {
             List<TreeNode> intersectionObjs = new List<TreeNode>();
             int t1x = (int)_atkTown.X;
             int t1z = (int)_atkTown.Z;
@@ -128,7 +128,7 @@ namespace Game_Server {
         }
 
         // https://github.com/setchi/Unity-LineSegmentsIntersection
-        public static bool LineSegmentsIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4) {
+        public bool LineSegmentsIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4) {
             Vector2 intersection = Vector2.Zero;
 
             var d = (p2.X - p1.X) * (p4.Y - p3.Y) - (p2.Y - p1.Y) * (p4.X - p3.X);
@@ -150,11 +150,11 @@ namespace Game_Server {
             return true;
         }
 
-        private static int RandomNumber(int _min, int _max) {
+        private int RandomNumber(int _min, int _max) {
             return r.Next(_max - _min + 1) + _min;
         }
 
-        public static void AddAttackToTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
+        public void AddAttackToTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
             Town _atkTown = world.SearchTown(world, _atk);
             Town _deffTown = world.SearchTown(world, _deff);
             CalculateTownLife(_atkTown, _timeStamp);
@@ -162,7 +162,7 @@ namespace Game_Server {
             world.AddTownActionReference(_atkTown, _deffTown);
         }
 
-        public static void RemoveAttackFromTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
+        public void RemoveAttackFromTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
             Town _atkTown = world.SearchTown(world, _atk);
             Town _deffTown = world.SearchTown(world, _deff);
             CalculateTownLife(_atkTown, _timeStamp);
@@ -170,7 +170,7 @@ namespace Game_Server {
             world.RmTownActionReference(_atkTown, _deffTown);
         }
 
-        public static void ConquerTown(Player _player, Vector3 _town, DateTime _timeStamp) {
+        public void ConquerTown(Player _player, Vector3 _town, DateTime _timeStamp) {
             Town _deffTown = world.SearchTown(world, _town);
             CalculateTownLife(_deffTown, _timeStamp);
             UpdateTown(_deffTown, _timeStamp);
@@ -178,7 +178,7 @@ namespace Game_Server {
             world.UpdateOwner(_player, _deffTown);
         }
 
-        public static void UpdateTown(Town _town, DateTime _timeStamp) {
+        public void UpdateTown(Town _town, DateTime _timeStamp) {
             // removes all incoming atk troops and deletes references in both towns
             for (int i = _town.attackerTowns.Count; i > 0; i--) {
                 CalculateTownLife(_town.attackerTowns[i - 1], _timeStamp);
@@ -198,7 +198,7 @@ namespace Game_Server {
             }
         }
 
-        public static void CalculateTownLife(Town _town, DateTime _creationTime) {
+        public void CalculateTownLife(Town _town, DateTime _creationTime) {
             TimeSpan span = _creationTime.Subtract(_town.creationTime);
             float timePassed = (float)span.TotalSeconds;
             int firstLifeCalc = _town.life;
@@ -217,9 +217,11 @@ namespace Game_Server {
             //Console.WriteLine($"New town life is: {finalNewLife}");
         }
 
-        public static void CreateKis() {
-            kis.Add(new KI_Stupid(world, 998, "KI1", Color.FromArgb(0, 0, 0)));
-            kis.Add(new KI_Stupid(world, 999, "KI2", Color.FromArgb(255, 255, 255)));
+        public void CreateKis(KI_base ki) {
+            if (Constants.TRAININGS_MODE == true) {
+                kis.Add(ki);
+            }
+            kis.Add(new KI_Stupid(world, 999, "KI999", Color.FromArgb(255, 255, 255), this));
         }
     }
 }

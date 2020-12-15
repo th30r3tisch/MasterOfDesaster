@@ -19,5 +19,7 @@ namespace SharedLibrary {
         public const int ATTACK_LINE_WIDTH = 10;
         public const int RANDOM_SEED = 1;
         public const float TOWN_GROTH_SECONDS = .1f;
+
+        public const bool TRAININGS_MODE = false;
     }
 }

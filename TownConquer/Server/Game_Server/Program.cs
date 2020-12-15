@@ -1,4 +1,5 @@
-﻿using SharedLibrary;
+﻿using Game_Server.KI;
+using SharedLibrary;
 using System;
 using System.Threading;
 
@@ -11,16 +12,18 @@ namespace Game_Server {
             Console.Title = "GameServer";
             isRunning = true;
 
-            Thread mainThread = new Thread(new ThreadStart(MainThread));
-            mainThread.Start();
+            Thread mainThread = new Thread(MainThread);
+            mainThread.Start("Main");
+            Server server = new Server();
 
             Server.Start(Constants.MAX_PLAYERS, Constants.SERVER_PORT);
+
         }
 
-        private static void MainThread() {
-            Console.WriteLine($"Main thread started. Running at {Constants.TICKS_PER_SEC} ticks per second.");
+        private static void MainThread(object data) {
+            Console.WriteLine($"{data} thread started. Running at {Constants.TICKS_PER_SEC} ticks per second.");
             DateTime _nextLoop = DateTime.Now;
-            
+
             while (isRunning) {
                 while (_nextLoop < DateTime.Now) {
                     GameLogic.Update();

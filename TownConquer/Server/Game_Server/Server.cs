@@ -4,12 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using Game_Server.KI.KnapSack;
+using Game_Server.KI;
 
 namespace Game_Server {
     class Server {
 
-        public static QuadTree world { get; private set; }
+        public static GameLogic logic { get; private set; }
         public static int MaxPlayers { get; private set; }
         public static int Port { get; private set; }
         public static Dictionary<int, Client> clients = new Dictionary<int, Client>();
@@ -25,7 +25,15 @@ namespace Game_Server {
 
             InitializeServerData();
 
-            new KnapSack_EA();
+            if (Constants.TRAININGS_MODE == true) {
+                EvoAlgo_1 ea = new EvoAlgo_1();
+                int populationCount = 0;
+                while (populationCount < 10) {
+                    GameLogic eaLogic = new GameLogic();
+                    ea.CreateIndividual(eaLogic);
+                    populationCount++;
+                }
+            }
 
             tcpListener = new TcpListener(IPAddress.Any, Port);
             tcpListener.Start();
@@ -98,7 +106,8 @@ namespace Game_Server {
 
         private static void InitializeServerData() {
 
-            world = GameLogic.GenereateInitialMap();
+            logic = new GameLogic();
+            logic.GenereateInitialMap();
             for (int i = 1; i <= MaxPlayers; i++) {
                 clients.Add(i, new Client(i));
             }

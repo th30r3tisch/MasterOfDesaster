@@ -1,4 +1,5 @@
-﻿using SharedLibrary.Models;
+﻿using SharedLibrary;
+using SharedLibrary.Models;
 using System;
 using System.Threading;
 
@@ -15,24 +16,26 @@ namespace Game_Server.KI {
             kiThread = new Thread(Run);
         }
 
-        public abstract void Run();
+        public abstract void Run(object logic);
 
-        protected void CheckKITownLifes(Town _town) {
-            GameLogic.CalculateTownLife(_town, DateTime.Now);
+        protected void CheckKITownLifes(Town _town, GameLogic logic) {
+            logic.CalculateTownLife(_town, DateTime.Now);
             if (_town.life <= 0) {
                 _town.life = 0;
                 for (int i = _town.outgoing.Count; i > 0; i--) {
-                    GameLogic.RemoveAttackFromTown(_town.position, _town.outgoing[i-1].position, DateTime.Now);
+                    logic.RemoveAttackFromTown(_town.position, _town.outgoing[i-1].position, DateTime.Now);
                 }
             }
             foreach (Town _t in _town.outgoing) {
-                GameLogic.CalculateTownLife(_t, DateTime.Now);
+                logic.CalculateTownLife(_t, DateTime.Now);
                 if (_t.life <= 0) {
                     _town.life = 0;
-                    GameLogic.ConquerTown(player, _t.position, DateTime.Now);
-                    foreach (Client _client in Server.clients.Values) {
-                        if (_client.player != null) {
-                            ServerSend.GrantedConquer(_client.id, player, _t.position);
+                    logic.ConquerTown(player, _t.position, DateTime.Now);
+                    if (Constants.TRAININGS_MODE == false) {
+                        foreach (Client _client in Server.clients.Values) {
+                            if (_client.player != null) {
+                                ServerSend.GrantedConquer(_client.id, player, _t.position);
+                            }
                         }
                     }
                     return;
