@@ -11,3 +11,11 @@ C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\obj\Debug\Game_Server.csproj.CopyComplete
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\obj\Debug\Game_Server.exe
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\obj\Debug\Game_Server.pdb
+C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\CsvHelper.dll
+C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\Microsoft.Bcl.AsyncInterfaces.dll
+C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\System.Threading.Tasks.Extensions.dll
+C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\CsvHelper.xml
+C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\Microsoft.Bcl.AsyncInterfaces.xml
+C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\System.Threading.Tasks.Extensions.xml

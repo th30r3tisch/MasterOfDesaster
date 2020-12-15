@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Game_Server.writer;
+using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Game_Server.KI.KnapSack {
     class KnapSack_EA {
@@ -12,24 +12,27 @@ namespace Game_Server.KI.KnapSack {
         private const int noImprovementLimit = 25;
         Random r;
 
+        StatEntry average = new StatEntry("average");
+        StatEntry standardDeviation = new StatEntry("standardDeviation");
+        StatEntry maxValues = new StatEntry("maxValues");
+        StatEntry simpsonDivIndex = new StatEntry("SimpsonDivIndex");
+
         public KnapSack_EA() {
             r = new Random(1);
+
             GenerateItems();
-            string fileName = @"stats.txt";
-            fileName = Path.GetFullPath(fileName);
-            using (var w = new StreamWriter(fileName)) {
-                Evolve(GenerateInitPopulation(), w, 0, 0);
-            }
+            Evolve(GenerateInitPopulation(), 0, 0);
+            StatsWriter writer = new StatsWriter("KnapSack");
+            writer.WriteStats(new[] { average, standardDeviation, maxValues, simpsonDivIndex });
         }
 
         /// <summary>
         /// Evolves the population
         /// </summary>
         /// <param name="population">the population to evolve</param>
-        /// <param name="w">Streamwriter to log statistics</param>
         /// <param name="oldavg">last avg of the population</param>
         /// <param name="noImprovmentCount">counter of how many generations without improvement</param>
-        private void Evolve(List<KnapSack> population, StreamWriter w, int oldavg, int noImprovmentCount) {
+        private void Evolve(List<KnapSack> population, int oldavg, int noImprovmentCount) {
             if (noImprovmentCount < noImprovementLimit) {
                 Evaluate(population);
 
@@ -42,13 +45,12 @@ namespace Game_Server.KI.KnapSack {
                     noImprovmentCount = 0;
                 }
 
-                string avgS = string.Format("{0},", avg);
-                string sdS = string.Format("{0},", StandardDeviationInPopulation(population, avg));
-                string bestS = string.Format("{0},", MaxValueInPopulation(population).first.value);
-                string sdi = string.Format("{0},", SimpsonsDiversityIndexOfPopulation(population).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
-                w.Write(bestS);
-                w.Flush();
-                Evolve(CreateOffspring(population), w, oldavg, noImprovmentCount);
+                average.entries.Add(avg);
+                standardDeviation.entries.Add(StandardDeviationInPopulation(population, avg));
+                maxValues.entries.Add(MaxValueInPopulation(population).first.value);
+                simpsonDivIndex.entries.Add(SimpsonsDiversityIndexOfPopulation(population));
+
+                Evolve(CreateOffspring(population), oldavg, noImprovmentCount);
             }
         }
 

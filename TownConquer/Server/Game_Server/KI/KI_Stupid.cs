@@ -17,7 +17,7 @@ namespace Game_Server.KI {
         }
 
         public override void Run(object logic) {
-            while (true) {
+            while (Constants.TOWN_NUMBER*0.8 > player.towns.Count) {
                 try {
                     Thread.Sleep((int)(Constants.TOWN_GROTH_SECONDS * 1000 + 10));
                 }

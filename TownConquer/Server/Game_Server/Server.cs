@@ -1,5 +1,4 @@
-﻿using SharedLibrary.Models;
-using SharedLibrary;
+﻿using SharedLibrary;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -26,13 +25,8 @@ namespace Game_Server {
             InitializeServerData();
 
             if (Constants.TRAININGS_MODE == true) {
+                //new KnapSack_EA();
                 EvoAlgo_1 ea = new EvoAlgo_1();
-                int populationCount = 0;
-                while (populationCount < 10) {
-                    GameLogic eaLogic = new GameLogic();
-                    ea.CreateIndividual(eaLogic);
-                    populationCount++;
-                }
             }
 
             tcpListener = new TcpListener(IPAddress.Any, Port);
