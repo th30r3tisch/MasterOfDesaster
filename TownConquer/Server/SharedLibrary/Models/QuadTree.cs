@@ -153,8 +153,6 @@ namespace SharedLibrary.Models {
         /// <param name="_player">The player who conquered the town</param>
         /// <param name="_town">The town which is conquered</param>
         public void UpdateOwner(Player _player, Town _town) {
-            Console.WriteLine($"update owner: {_player.username}");
-
             Player _oldOwner = _town.player;
             _oldOwner.towns.Remove(_town);
 

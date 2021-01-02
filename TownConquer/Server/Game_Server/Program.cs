@@ -26,7 +26,7 @@ namespace Game_Server {
 
             while (isRunning) {
                 while (_nextLoop < DateTime.Now) {
-                    GameLogic.Update();
+                    GameManager.Update();
                     _nextLoop = _nextLoop.AddMilliseconds(Constants.MS_PER_TICK);
 
                     if (_nextLoop > DateTime.Now) {

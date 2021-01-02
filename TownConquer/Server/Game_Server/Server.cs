@@ -8,7 +8,7 @@ using Game_Server.KI;
 namespace Game_Server {
     class Server {
 
-        public static GameLogic logic { get; private set; }
+        public static GameManager Gm { get; private set; }
         public static int MaxPlayers { get; private set; }
         public static int Port { get; private set; }
         public static Dictionary<int, Client> clients = new Dictionary<int, Client>();
@@ -23,11 +23,6 @@ namespace Game_Server {
             Port = _port;
 
             InitializeServerData();
-
-            if (Constants.TRAININGS_MODE == true) {
-                //new KnapSack_EA();
-                EvoAlgo_1 ea = new EvoAlgo_1();
-            }
 
             tcpListener = new TcpListener(IPAddress.Any, Port);
             tcpListener.Start();
@@ -100,8 +95,13 @@ namespace Game_Server {
 
         private static void InitializeServerData() {
 
-            logic = new GameLogic();
-            logic.GenereateInitialMap();
+            Gm = new GameManager();
+
+            if (Constants.TRAININGS_MODE == true) {
+                //new KnapSack_EA();
+                EvoAlgo_1 ea = new EvoAlgo_1();
+            }
+
             for (int i = 1; i <= MaxPlayers; i++) {
                 clients.Add(i, new Client(i));
             }

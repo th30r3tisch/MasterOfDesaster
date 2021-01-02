@@ -5,48 +5,50 @@ using System.Numerics;
 using SharedLibrary;
 using System.Drawing;
 using Game_Server.KI;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Game_Server {
-    class GameLogic {
-
-        public List<KI_base> kis;
-
-        public QuadTree world;
-        private Player game;
-        private Random r;
+    class GameManager {
+        public Game game;
 
         public static void Update() {
             ThreadManager.UpdateMain();
         }
 
-        public QuadTree GenereateInitialMap() {
-            world = new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT));
-            game = new Player(-1, "game", Color.FromArgb(150, 150, 150), DateTime.Now);
-            r = new Random(Constants.RANDOM_SEED);
-            kis = new List<KI_base>();
+        public GameManager() {
+            GenereateInitialMap();
+        }
+
+        public void GenereateInitialMap() {
+            game = new Game(
+                new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT)),
+                new Player(-1, "game", Color.FromArgb(150, 150, 150), DateTime.Now),
+                new Random(Constants.RANDOM_SEED)
+                );
 
             CreateObstacles();
             CreateTowns();
-            return world;
         }
 
         private void CreateTowns() {
             for (int _i = 0; _i < Constants.TOWN_NUMBER; _i++) {
-                CreateTown(game);
+                CreateTown(game.initOwner);
             }
         }
 
         public Town CreateTown(Player _owner) {
             Town _t = null;
+            QuadTree tree = game.tree;
             while (_t == null) {
                 int _x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
                 int _z = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
-                if (world.GetAllContentBetween(
+                if (tree.GetAllContentBetween(
                     (_x - Constants.TOWN_MIN_DISTANCE),
                     (_z - Constants.OBSTACLE_MAX_LENGTH / 2), // divided by 2 because point is center of object
                     (_x + Constants.TOWN_MIN_DISTANCE),
                     (_z + Constants.OBSTACLE_MAX_LENGTH / 2)).Count == 0) { // check vertical objects
-                    if (world.GetAllContentBetween(
+                    if (tree.GetAllContentBetween(
                         (_x - Constants.OBSTACLE_MAX_LENGTH / 2),
                         (_z - Constants.TOWN_MIN_DISTANCE),
                         (_x + Constants.OBSTACLE_MAX_LENGTH / 2),
@@ -58,13 +60,14 @@ namespace Game_Server {
             _t.player = _owner;
             _t.creationTime = _owner.creationTime;
             _owner.towns.Add(_t);
-            world.Insert(_t);
+            tree.Insert(_t);
             return _t;
         }
 
         private void CreateObstacles() {
+            QuadTree tree = game.tree;
             for (int i = 0; i < Constants.OBSTACLE_NUMBER; i++) {
-                world.Insert(new Obstacle(
+                tree.Insert(new Obstacle(
                         new Vector3(
                             RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES),
                             2,
@@ -75,6 +78,7 @@ namespace Game_Server {
         }
 
         public bool IsIntersecting(Vector3 _atkTown, Vector3 _deffTown) {
+            QuadTree tree = game.tree;
             List<TreeNode> intersectionObjs = new List<TreeNode>();
             int t1x = (int)_atkTown.X;
             int t1z = (int)_atkTown.Z;
@@ -85,13 +89,13 @@ namespace Game_Server {
             int endX = Math.Max(t1x, t2x);
             int endZ = Math.Max(t1z, t2z);
             //rectangle vertical
-            intersectionObjs.AddRange(world.GetAllContentBetween(
+            intersectionObjs.AddRange(tree.GetAllContentBetween(
                 startX,
                 startZ - Constants.OBSTACLE_MAX_LENGTH / 2,
                 endX,
                 endZ + Constants.OBSTACLE_MAX_LENGTH / 2));
             //rectangle horizontal
-            intersectionObjs.AddRange(world.GetAllContentBetween(
+            intersectionObjs.AddRange(tree.GetAllContentBetween(
                 startX - Constants.OBSTACLE_MAX_LENGTH / 2,
                 startZ,
                 endX + Constants.OBSTACLE_MAX_LENGTH / 2,
@@ -151,50 +155,54 @@ namespace Game_Server {
         }
 
         private int RandomNumber(int _min, int _max) {
-            return r.Next(_max - _min + 1) + _min;
+            return game.r.Next(_max - _min + 1) + _min;
         }
 
         public void AddAttackToTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
-            Town _atkTown = world.SearchTown(world, _atk);
-            Town _deffTown = world.SearchTown(world, _deff);
+            QuadTree tree = game.tree;
+            Town _atkTown = tree.SearchTown(tree, _atk);
+            Town _deffTown = tree.SearchTown(tree, _deff);
             CalculateTownLife(_atkTown, _timeStamp);
             CalculateTownLife(_deffTown, _timeStamp);
-            world.AddTownActionReference(_atkTown, _deffTown);
+            tree.AddTownActionReference(_atkTown, _deffTown);
         }
 
         public void RemoveAttackFromTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
-            Town _atkTown = world.SearchTown(world, _atk);
-            Town _deffTown = world.SearchTown(world, _deff);
+            QuadTree tree = game.tree;
+            Town _atkTown = tree.SearchTown(tree, _atk);
+            Town _deffTown = tree.SearchTown(tree, _deff);
             CalculateTownLife(_atkTown, _timeStamp);
             CalculateTownLife(_deffTown, _timeStamp);
-            world.RmTownActionReference(_atkTown, _deffTown);
+            tree.RmTownActionReference(_atkTown, _deffTown);
         }
 
         public void ConquerTown(Player _player, Vector3 _town, DateTime _timeStamp) {
-            Town _deffTown = world.SearchTown(world, _town);
+            QuadTree tree = game.tree;
+            Town _deffTown = tree.SearchTown(tree, _town);
             CalculateTownLife(_deffTown, _timeStamp);
             UpdateTown(_deffTown, _timeStamp);
 
-            world.UpdateOwner(_player, _deffTown);
+            tree.UpdateOwner(_player, _deffTown);
         }
 
         public void UpdateTown(Town _town, DateTime _timeStamp) {
+            QuadTree tree = game.tree;
             // removes all incoming atk troops and deletes references in both towns
             for (int i = _town.attackerTowns.Count; i > 0; i--) {
                 CalculateTownLife(_town.attackerTowns[i - 1], _timeStamp);
-                world.RmTownActionReference(_town.attackerTowns[i - 1], _town);
+                tree.RmTownActionReference(_town.attackerTowns[i - 1], _town);
             }
 
             // removes all incoming support troops and deletes references in both towns
             for (int i = _town.supporterTowns.Count; i > 0; i--) {
                 CalculateTownLife(_town.supporterTowns[i - 1], _timeStamp);
-                world.RmTownActionReference(_town.supporterTowns[i - 1], _town);
+                tree.RmTownActionReference(_town.supporterTowns[i - 1], _town);
             }
 
             // removes all outgoing troops and deletes references in both towns
             for (int i = _town.outgoing.Count; i > 0; i--) {
                 CalculateTownLife(_town.outgoing[i - 1], _timeStamp);
-                world.RmTownActionReference(_town, _town.outgoing[i - 1]);
+                tree.RmTownActionReference(_town, _town.outgoing[i - 1]);
             }
         }
 
@@ -217,11 +225,36 @@ namespace Game_Server {
             //Console.WriteLine($"New town life is: {finalNewLife}");
         }
 
-        public void CreateKis(KI_base ki) {
-            if (Constants.TRAININGS_MODE == true) {
-                kis.Add(ki);
+        public void CreateKis() {
+            var c = new CancellationTokenSource();
+            var token = c.Token;
+            //TODO here change to run with new task implementation
+            KI_base ki1 = new KI_Stupid(this, 999, "KI999", Color.FromArgb(255, 255, 255));
+            KI_base ki2 = new KI_Stupid(this, 998, "KI998", Color.FromArgb(0, 0, 0));
+
+            game.kis.Add(ki1);
+            game.kis.Add(ki2);
+
+            Task.Run(() => WinChecker(c));
+        }
+
+        public void WinChecker(CancellationTokenSource c) {
+            bool isWinner = false;
+            while (!isWinner) {
+                try {
+                    Thread.Sleep((int)(Constants.TOWN_GROTH_SECONDS * 1000 + 10));
+                }
+                catch (Exception _ex) {
+                    Console.WriteLine($"WinChecker error: {_ex}");
+                }
+                foreach (KI_base kI in game.kis) {
+                    if (kI.winner) {
+                        isWinner = true;
+                        Console.WriteLine($"{kI.player.username} has won the game");
+                        c.Cancel();
+                    }
+                }
             }
-            kis.Add(new KI_Stupid(world, 999, "KI999", Color.FromArgb(255, 255, 255), this));
         }
     }
 }

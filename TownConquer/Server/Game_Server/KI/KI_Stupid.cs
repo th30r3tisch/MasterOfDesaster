@@ -1,42 +1,53 @@
-﻿using SharedLibrary;
+﻿using Game_Server.KI.Models;
+using SharedLibrary;
 using SharedLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Game_Server.KI {
     class KI_Stupid : KI_base {
 
-        public KI_Stupid(QuadTree _world, int id, string name, Color color, GameLogic logic) : base(_world) {
+        public KI_Stupid(GameManager _gm, int id, string name, Color color) : base(_gm) {
             player = new Player(id, name, color, DateTime.Now);
-            Town _t = logic.CreateTown(player);
+            Town _t = gm.CreateTown(player);
             _t.player = player;
-            kiThread.Start(logic);
-            Console.WriteLine($"KI_Stupid started.");
         }
 
-        public override void Run(object logic) {
-            while (Constants.TOWN_NUMBER*0.8 > player.towns.Count) {
+        public override async Task<Individual> PlayAsync(CancellationToken ct) {
+            Console.WriteLine($"{player.username} started.");
+            while (Constants.TOWN_NUMBER*0.8 > player.towns.Count || player.towns.Count == 0) {
                 try {
-                    Thread.Sleep((int)(Constants.TOWN_GROTH_SECONDS * 1000 + 10));
+                    await Task.Delay((int)(Constants.TOWN_GROTH_SECONDS * 1000 + 10));
                 }
                 catch (Exception _ex) {
-                    Console.WriteLine($"KI_Stupid error: {_ex}");
+                    Console.WriteLine($"{player.username} error: {_ex}");
                 }
-                for(int i = player.towns.Count; i > 0; i--) {
+                i.result.townNumberDevelopment.Add(player.towns.Count);
+                i.result.timestamp.Add(DateTime.Now);
+                for (int i = player.towns.Count; i > 0; i--) {
                     Town _atkTown = player.towns[i - 1];
-                    CheckKITownLifes(_atkTown, (GameLogic)logic);
-                    TryAttackTown(_atkTown, (GameLogic)logic);
+                    CheckKITownLifes(_atkTown);
+                    TryAttackTown(_atkTown);
+                }
+                if (ct.IsCancellationRequested) {
+                    return i;
                 }
             }
+            if (Constants.TOWN_NUMBER * 0.8 <= player.towns.Count) {
+                winner = true;
+                return i;
+            }
+            return i;
         }
 
-        private void TryAttackTown(Town _atkTown, GameLogic logic) {
+        private void TryAttackTown(Town _atkTown) {
             if (_atkTown.life > 10 && _atkTown.outgoing.Count < 2) {
-                Town _deffTown = GetPossibleAttackTarget(_atkTown, world, logic);
+                Town _deffTown = GetPossibleAttackTarget(_atkTown);
                 if (_deffTown != null) {
-                    logic.AddAttackToTown(_atkTown.position, _deffTown.position, DateTime.Now);
+                    gm.AddAttackToTown(_atkTown.position, _deffTown.position, DateTime.Now);
                     if (Constants.TRAININGS_MODE == false) {
                         foreach (Client _client in Server.clients.Values) {
                             if (_client.player != null) {
@@ -48,15 +59,16 @@ namespace Game_Server.KI {
             }
         }
 
-        private Town GetPossibleAttackTarget(Town _atkTown, QuadTree _quadTree, GameLogic logic) {
-            int _conquerRadius = 400;
+        private Town GetPossibleAttackTarget(Town _atkTown) {
+            int _conquerRadius = i.gene.initialConquerRadius;
             Town _target = null;
+            QuadTree tree = gm.game.tree;
 
-            while (_target == null && _conquerRadius < 2000) {
+            while (_target == null && _conquerRadius < i.gene.maxConquerRadius) {
                 List<TreeNode> _townsInRange;
                 List<Town> _enemyTowns = new List<Town>();
                 Random _r = new Random();
-                _townsInRange = _quadTree.GetAllContentBetween(
+                _townsInRange = tree.GetAllContentBetween(
                     (int)(_atkTown.position.X - _conquerRadius),
                     (int)(_atkTown.position.Z - _conquerRadius),
                     (int)(_atkTown.position.X + _conquerRadius),
@@ -65,7 +77,7 @@ namespace Game_Server.KI {
                 for(int i = 0; i < _townsInRange.Count; i++) {
                     if (_townsInRange[i] is Town _deffTown) {
                         if (!_deffTown.player.username.Equals(_atkTown.player.username) &&
-                        !logic.IsIntersecting(_atkTown.position, _deffTown.position) &&
+                        !gm.IsIntersecting(_atkTown.position, _deffTown.position) &&
                         !_atkTown.outgoing.Contains(_deffTown)) {
                             _enemyTowns.Add(_deffTown);
                         }
