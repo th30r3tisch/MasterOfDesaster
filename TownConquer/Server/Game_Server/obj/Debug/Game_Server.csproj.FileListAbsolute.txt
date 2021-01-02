@@ -19,3 +19,5 @@ C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\Microsoft.Bcl.AsyncInterfaces.xml
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
 C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\System.Threading.Tasks.Extensions.xml
+C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\Microsoft.Bcl.HashCode.dll
+C:\Users\theoretisch\Desktop\Master\StratGame\TownConquer\Server\Game_Server\bin\Debug\Microsoft.Bcl.HashCode.xml

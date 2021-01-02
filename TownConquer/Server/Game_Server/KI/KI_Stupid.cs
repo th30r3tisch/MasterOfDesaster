@@ -25,12 +25,12 @@ namespace Game_Server.KI {
                 catch (Exception _ex) {
                     Console.WriteLine($"{player.username} error: {_ex}");
                 }
-                i.result.townNumberDevelopment.Add(player.towns.Count);
-                i.result.timestamp.Add(DateTime.Now);
-                for (int i = player.towns.Count; i > 0; i--) {
-                    Town _atkTown = player.towns[i - 1];
-                    CheckKITownLifes(_atkTown);
-                    TryAttackTown(_atkTown);
+                lock (gm.treeLock) {
+                    for (int i = player.towns.Count; i > 0; i--) {
+                        Town _atkTown = player.towns[i - 1];
+                        CheckKITownLifes(_atkTown);
+                        TryAttackTown(_atkTown);
+                    }
                 }
                 if (ct.IsCancellationRequested) {
                     return i;

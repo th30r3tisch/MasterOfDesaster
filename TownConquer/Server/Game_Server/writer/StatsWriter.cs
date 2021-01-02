@@ -13,15 +13,16 @@ namespace Game_Server {
             writer = new StreamWriter(path);
             csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
             csv.Configuration.Delimiter = ";";
-            csv.Configuration.HasHeaderRecord = true;
-            csv.Configuration.AutoMap<StatEntry>();
         }
 
         public void WriteStats(StatEntry[] records) {
             using (writer)
             using (csv) {
-                csv.WriteHeader<StatEntry>();
-                csv.WriteRecords(records);
+                foreach (var record in records) {
+                    csv.WriteField(record.name);
+                    csv.WriteField(record.entries);
+                    csv.NextRecord();
+                }
                 writer.Flush();
             }
         }

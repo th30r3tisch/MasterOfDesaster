@@ -10,11 +10,13 @@ namespace Game_Server.KI.Models {
         public Result result;
 
         public int number;
+        public string name;
 
-        public Individual(int _number, Genotype _gene) {
+        public Individual(int _number, string _name, Genotype _gene) {
             result = new Result();
             number = _number;
             gene = _gene;
+            name = _name;
         }
     }
 }

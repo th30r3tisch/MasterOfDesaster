@@ -34,20 +34,23 @@ namespace Game_Server.KI {
                     gm.RemoveAttackFromTown(_town.position, _town.outgoing[i-1].position, DateTime.Now);
                 }
             }
-            foreach (Town _t in _town.outgoing) {
-                gm.CalculateTownLife(_t, DateTime.Now);
-                if (_t.life <= 0) {
-                    _town.life = 0;
-                    //Console.WriteLine($"{player.username}-{player.towns.Count} conquers {_t.player.username}-{_t.player.towns.Count}");
-                    gm.ConquerTown(player, _t.position, DateTime.Now);
-                    if (Constants.TRAININGS_MODE == false) {
-                        foreach (Client _client in Server.clients.Values) {
-                            if (_client.player != null) {
-                                ServerSend.GrantedConquer(_client.id, player, _t.position);
+            lock (gm.treeLock) {
+                foreach (Town _t in _town.outgoing) {
+                    gm.CalculateTownLife(_t, DateTime.Now);
+                    if (_t.life <= 0) {
+                        _town.life = 0;
+                        //Console.WriteLine($"{player.username}-{player.towns.Count} conquers {_t.player.username}-{_t.player.towns.Count}");
+                        gm.ConquerTown(player, _t.position, DateTime.Now);
+                        
+                        if (Constants.TRAININGS_MODE == false) {
+                            foreach (Client _client in Server.clients.Values) {
+                                if (_client.player != null) {
+                                    ServerSend.GrantedConquer(_client.id, player, _t.position);
+                                }
                             }
                         }
+                        return;
                     }
-                    return;
                 }
             }
         }

@@ -7,10 +7,13 @@ using System.Drawing;
 using Game_Server.KI;
 using System.Threading;
 using System.Threading.Tasks;
+using Game_Server.KI.Models;
 
 namespace Game_Server {
     class GameManager {
         public Game game;
+
+        public readonly object treeLock = new object();
 
         public static void Update() {
             ThreadManager.UpdateMain();
@@ -159,50 +162,58 @@ namespace Game_Server {
         }
 
         public void AddAttackToTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
-            QuadTree tree = game.tree;
-            Town _atkTown = tree.SearchTown(tree, _atk);
-            Town _deffTown = tree.SearchTown(tree, _deff);
-            CalculateTownLife(_atkTown, _timeStamp);
-            CalculateTownLife(_deffTown, _timeStamp);
-            tree.AddTownActionReference(_atkTown, _deffTown);
+            lock (treeLock) {
+                QuadTree tree = game.tree;
+                Town _atkTown = tree.SearchTown(tree, _atk);
+                Town _deffTown = tree.SearchTown(tree, _deff);
+                CalculateTownLife(_atkTown, _timeStamp);
+                CalculateTownLife(_deffTown, _timeStamp);
+                tree.AddTownActionReference(_atkTown, _deffTown);
+            }
         }
 
         public void RemoveAttackFromTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
-            QuadTree tree = game.tree;
-            Town _atkTown = tree.SearchTown(tree, _atk);
-            Town _deffTown = tree.SearchTown(tree, _deff);
-            CalculateTownLife(_atkTown, _timeStamp);
-            CalculateTownLife(_deffTown, _timeStamp);
-            tree.RmTownActionReference(_atkTown, _deffTown);
+            lock (treeLock) {
+                QuadTree tree = game.tree;
+                Town _atkTown = tree.SearchTown(tree, _atk);
+                Town _deffTown = tree.SearchTown(tree, _deff);
+                CalculateTownLife(_atkTown, _timeStamp);
+                CalculateTownLife(_deffTown, _timeStamp);
+                tree.RmTownActionReference(_atkTown, _deffTown);
+            }
         }
 
         public void ConquerTown(Player _player, Vector3 _town, DateTime _timeStamp) {
-            QuadTree tree = game.tree;
-            Town _deffTown = tree.SearchTown(tree, _town);
-            CalculateTownLife(_deffTown, _timeStamp);
-            UpdateTown(_deffTown, _timeStamp);
+            lock (treeLock) {
+                QuadTree tree = game.tree;
+                Town _deffTown = tree.SearchTown(tree, _town);
+                CalculateTownLife(_deffTown, _timeStamp);
+                UpdateTown(_deffTown, _timeStamp);
 
-            tree.UpdateOwner(_player, _deffTown);
+                tree.UpdateOwner(_player, _deffTown);
+            }
         }
 
         public void UpdateTown(Town _town, DateTime _timeStamp) {
-            QuadTree tree = game.tree;
-            // removes all incoming atk troops and deletes references in both towns
-            for (int i = _town.attackerTowns.Count; i > 0; i--) {
-                CalculateTownLife(_town.attackerTowns[i - 1], _timeStamp);
-                tree.RmTownActionReference(_town.attackerTowns[i - 1], _town);
-            }
+            lock (treeLock) {
+                QuadTree tree = game.tree;
+                // removes all incoming atk troops and deletes references in both towns
+                for (int i = _town.attackerTowns.Count; i > 0; i--) {
+                    CalculateTownLife(_town.attackerTowns[i - 1], _timeStamp);
+                    tree.RmTownActionReference(_town.attackerTowns[i - 1], _town);
+                }
 
-            // removes all incoming support troops and deletes references in both towns
-            for (int i = _town.supporterTowns.Count; i > 0; i--) {
-                CalculateTownLife(_town.supporterTowns[i - 1], _timeStamp);
-                tree.RmTownActionReference(_town.supporterTowns[i - 1], _town);
-            }
+                // removes all incoming support troops and deletes references in both towns
+                for (int i = _town.supporterTowns.Count; i > 0; i--) {
+                    CalculateTownLife(_town.supporterTowns[i - 1], _timeStamp);
+                    tree.RmTownActionReference(_town.supporterTowns[i - 1], _town);
+                }
 
-            // removes all outgoing troops and deletes references in both towns
-            for (int i = _town.outgoing.Count; i > 0; i--) {
-                CalculateTownLife(_town.outgoing[i - 1], _timeStamp);
-                tree.RmTownActionReference(_town, _town.outgoing[i - 1]);
+                // removes all outgoing troops and deletes references in both towns
+                for (int i = _town.outgoing.Count; i > 0; i--) {
+                    CalculateTownLife(_town.outgoing[i - 1], _timeStamp);
+                    tree.RmTownActionReference(_town, _town.outgoing[i - 1]);
+                }
             }
         }
 
@@ -232,29 +243,18 @@ namespace Game_Server {
             KI_base ki1 = new KI_Stupid(this, 999, "KI999", Color.FromArgb(255, 255, 255));
             KI_base ki2 = new KI_Stupid(this, 998, "KI998", Color.FromArgb(0, 0, 0));
 
-            game.kis.Add(ki1);
-            game.kis.Add(ki2);
+            Individual referenceIndividual = new Individual(999, "AI",  new Genotype {
+                initialConquerRadius = 400,
+                maxConquerRadius = 2000
+            });
+            var t1 = ki1.Start(token, referenceIndividual);
+            var t2 = ki2.Start(token, referenceIndividual);
 
-            Task.Run(() => WinChecker(c));
-        }
-
-        public void WinChecker(CancellationTokenSource c) {
-            bool isWinner = false;
-            while (!isWinner) {
-                try {
-                    Thread.Sleep((int)(Constants.TOWN_GROTH_SECONDS * 1000 + 10));
-                }
-                catch (Exception _ex) {
-                    Console.WriteLine($"WinChecker error: {_ex}");
-                }
-                foreach (KI_base kI in game.kis) {
-                    if (kI.winner) {
-                        isWinner = true;
-                        Console.WriteLine($"{kI.player.username} has won the game");
-                        c.Cancel();
-                    }
-                }
-            }
+            Task.WhenAny(t1, t2).ContinueWith(taskInfo => { 
+                c.Cancel();
+                Console.WriteLine($"{taskInfo.Result.Result.name} has won the game!");
+            });
+            
         }
     }
 }
