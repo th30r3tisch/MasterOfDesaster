@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using System.Numerics;
 
 namespace Game_Server.KI.Models {
     class Individual {
@@ -11,12 +8,12 @@ namespace Game_Server.KI.Models {
 
         public int number;
         public string name;
+        public Vector3 startPos;
 
-        public Individual(int _number, string _name, Genotype _gene) {
+        public Individual(Genotype _gene, int _number) {
             result = new Result();
             number = _number;
             gene = _gene;
-            name = _name;
         }
     }
 }

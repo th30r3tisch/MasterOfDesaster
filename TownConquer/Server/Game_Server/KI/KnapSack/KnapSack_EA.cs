@@ -12,10 +12,10 @@ namespace Game_Server.KI.KnapSack {
         private const int noImprovementLimit = 25;
         Random r;
 
-        StatEntry average = new StatEntry("average");
-        StatEntry standardDeviation = new StatEntry("standardDeviation");
-        StatEntry maxValues = new StatEntry("maxValues");
-        StatEntry simpsonDivIndex = new StatEntry("SimpsonDivIndex");
+        KnapsackStat average = new KnapsackStat("average");
+        KnapsackStat standardDeviation = new KnapsackStat("standardDeviation");
+        KnapsackStat maxValues = new KnapsackStat("maxValues");
+        KnapsackStat simpsonDivIndex = new KnapsackStat("SimpsonDivIndex");
 
         public KnapSack_EA() {
             r = new Random(1);

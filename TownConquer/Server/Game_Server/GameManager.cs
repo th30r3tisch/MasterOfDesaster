@@ -233,20 +233,19 @@ namespace Game_Server {
             int finalNewLife = firstLifeCalc - lostLifeByIncoming;
             _town.life = finalNewLife;
             _town.creationTime = _creationTime;
-            //Console.WriteLine($"New town life is: {finalNewLife}");
         }
 
         public void CreateKis() {
             var c = new CancellationTokenSource();
             var token = c.Token;
-            //TODO here change to run with new task implementation
+
             KI_base ki1 = new KI_Stupid(this, 999, "KI999", Color.FromArgb(255, 255, 255));
             KI_base ki2 = new KI_Stupid(this, 998, "KI998", Color.FromArgb(0, 0, 0));
 
-            Individual referenceIndividual = new Individual(999, "AI",  new Genotype {
+            Individual referenceIndividual = new Individual(new Genotype {
                 initialConquerRadius = 400,
                 maxConquerRadius = 2000
-            });
+            }, 999);
             var t1 = ki1.Start(token, referenceIndividual);
             var t2 = ki2.Start(token, referenceIndividual);
 

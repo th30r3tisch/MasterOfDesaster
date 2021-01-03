@@ -11,12 +11,10 @@ using System.Threading.Tasks;
 namespace Game_Server.KI {
     class EvoAlgo_1 {
 
-        StatsWriter writer;
         const int populationNumber = 10;
         const int noImprovementLimit = 1;
 
         public EvoAlgo_1() {
-            writer = new StatsWriter("EA");
             Evolve(CreatePopulation(), 0);
         }
 
@@ -41,9 +39,9 @@ namespace Game_Server.KI {
                 CancellationTokenSource c = new CancellationTokenSource();
                 CancellationToken token = c.Token;
 
-                KI_base eaKI = new KI_Stupid(gm, individual.number, "KI-" + individual.number, Color.FromArgb(255, 255, 255));
-                KI_base referenceKI = new KI_Stupid(gm, 999, "REF-" + individual.number, Color.FromArgb(0, 0, 0));
-                Individual referenceIndividual = CreateIndividual(individual.number, "REF", 400, 2000);
+                KI_base eaKI = new KI_Stupid(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
+                KI_base referenceKI = new KI_Stupid(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
+                Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000);
 
                 var t1 = referenceKI.Start(token, referenceIndividual);
                 var t2 = eaKI.Start(token, individual);
@@ -59,17 +57,13 @@ namespace Game_Server.KI {
 
             Task.WaitAll(tasks);
 
+            WriteProtocoll(referenceCollection, "REF");
+            WriteProtocoll(resultCollection, "EA");
+
             return resultCollection;
         }
 
         private List<Individual> Evaluate(ConcurrentBag<Individual> results) {
-            StatEntry[] stats = new StatEntry[results.Count];
-            foreach (var individual in results) {
-                StatEntry stat = new StatEntry(individual.name + individual.number);
-                stat.entries = individual.result.townNumberDevelopment.ConvertAll(x => (double)x);
-                stats[individual.number] = stat;
-            }
-            writer.WriteStats(stats);
             return results.ToList();
         }
 
@@ -77,19 +71,33 @@ namespace Game_Server.KI {
             List<Individual> population = new List<Individual>();
             int populationCount = 0;
             while (populationCount < populationNumber) {
-                population.Add(CreateIndividual(populationCount, "EA", 400, 2000));
+                population.Add(CreateIndividual(populationCount, 400, 2000));
                 populationCount++;
             }
             return population;
         }
 
-        private Individual CreateIndividual(int number, string name, int icr, int mcr) {
+        private Individual CreateIndividual(int number, int icr, int mcr) {
             Genotype g = new Genotype {
                 initialConquerRadius = icr,
                 maxConquerRadius = mcr
             };
-            return new Individual(number, name, g);
+            return new Individual(g, number);
         }
 
+        private List<Individual> WriteProtocoll(ConcurrentBag<Individual> results, string filename) {
+            StatsWriter writer = new StatsWriter(filename);
+            EA_1_Stat[] stats = new EA_1_Stat[results.Count];
+            foreach (var individual in results) {
+                EA_1_Stat stat = new EA_1_Stat(individual.name) {
+                    townDevelopment = individual.result.townNumberDevelopment,
+                    timeStamps = individual.result.timestamp,
+                    startPos = individual.startPos
+                };
+                stats[individual.number] = stat;
+            }
+            writer.WriteStats(stats);
+            return results.ToList();
+        }
     }
 }

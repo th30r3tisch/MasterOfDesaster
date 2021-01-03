@@ -47,7 +47,6 @@ namespace Game_Server {
                 _packet.Write(_atkTown);
                 _packet.Write(_deffTown);
                 SendTCPData(_toClient, _packet);
-                Console.WriteLine($"Attack from Town {_atkTown} to {_deffTown} is GRANTED.");
             }
         }
 
@@ -56,7 +55,6 @@ namespace Game_Server {
                 _packet.Write(_atkTown);
                 _packet.Write(_deffTown);
                 SendTCPData(_toClient, _packet);
-                Console.WriteLine($"Retreat from Town {_atkTown} to {_deffTown} is GRANTED.");
             }
         }
 

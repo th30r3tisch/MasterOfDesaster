@@ -10,11 +10,14 @@ namespace Game_Server.KI {
 
         public Player player { get; set; }
         public GameManager gm { get; set; }
-        public bool winner = false;
 
+        protected int tickLength;
+        protected int protocollTime;
         protected Individual i;
 
         public KI_base(GameManager _gm) {
+            tickLength = (int)(Constants.TOWN_GROTH_SECONDS * 1000 + 10);
+            protocollTime = tickLength * 5;
             gm = _gm;
         }
 
@@ -39,9 +42,7 @@ namespace Game_Server.KI {
                     gm.CalculateTownLife(_t, DateTime.Now);
                     if (_t.life <= 0) {
                         _town.life = 0;
-                        //Console.WriteLine($"{player.username}-{player.towns.Count} conquers {_t.player.username}-{_t.player.towns.Count}");
                         gm.ConquerTown(player, _t.position, DateTime.Now);
-                        
                         if (Constants.TRAININGS_MODE == false) {
                             foreach (Client _client in Server.clients.Values) {
                                 if (_client.player != null) {

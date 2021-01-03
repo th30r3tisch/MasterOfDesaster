@@ -18,9 +18,12 @@ namespace Game_Server.KI {
 
         public override async Task<Individual> PlayAsync(CancellationToken ct) {
             Console.WriteLine($"{player.username} started.");
+            var startTickCount = Environment.TickCount;
+            int timePassed = 0;
+
             while (Constants.TOWN_NUMBER*0.8 > player.towns.Count || player.towns.Count == 0) {
                 try {
-                    await Task.Delay((int)(Constants.TOWN_GROTH_SECONDS * 1000 + 10));
+                    await Task.Delay(tickLength);
                 }
                 catch (Exception _ex) {
                     Console.WriteLine($"{player.username} error: {_ex}");
@@ -32,15 +35,24 @@ namespace Game_Server.KI {
                         TryAttackTown(_atkTown);
                     }
                 }
+                int timeSpan = Environment.TickCount - startTickCount;
+                if (timeSpan > protocollTime) {
+                    startTickCount = Environment.TickCount;
+                    timePassed += protocollTime;
+                    ProtocollStats(timePassed);
+                }
                 if (ct.IsCancellationRequested) {
                     return i;
                 }
             }
-            if (Constants.TOWN_NUMBER * 0.8 <= player.towns.Count) {
-                winner = true;
-                return i;
-            }
             return i;
+        }
+
+        private void ProtocollStats(int timePassed) {
+            i.name = player.username;
+            i.startPos = player.towns[0].position;
+            i.result.timestamp.Add(timePassed);
+            i.result.townNumberDevelopment.Add(player.towns.Count);
         }
 
         private void TryAttackTown(Town _atkTown) {
