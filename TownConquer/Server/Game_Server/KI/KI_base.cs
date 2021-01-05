@@ -1,4 +1,4 @@
-﻿using Game_Server.KI.Models;
+﻿using Game_Server.EA.Models;
 using SharedLibrary;
 using SharedLibrary.Models;
 using System;

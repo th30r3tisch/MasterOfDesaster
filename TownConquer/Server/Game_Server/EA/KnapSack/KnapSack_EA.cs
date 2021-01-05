@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Game_Server.KI.KnapSack {
+namespace Game_Server.EA.KnapSack {
     class KnapSack_EA {
         List<Item> items = new List<Item>();
         private const int numberOfItems = 30;

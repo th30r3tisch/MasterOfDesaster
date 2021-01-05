@@ -7,7 +7,7 @@ using System.Drawing;
 using Game_Server.KI;
 using System.Threading;
 using System.Threading.Tasks;
-using Game_Server.KI.Models;
+using Game_Server.EA.Models;
 
 namespace Game_Server {
     class GameManager {
@@ -239,8 +239,8 @@ namespace Game_Server {
             var c = new CancellationTokenSource();
             var token = c.Token;
 
-            KI_base ki1 = new KI_Stupid(this, 999, "KI999", Color.FromArgb(255, 255, 255));
-            KI_base ki2 = new KI_Stupid(this, 998, "KI998", Color.FromArgb(0, 0, 0));
+            KI_base ki1 = new KI_1(this, 999, "KI999", Color.FromArgb(255, 255, 255));
+            KI_base ki2 = new KI_1(this, 998, "KI998", Color.FromArgb(0, 0, 0));
 
             Individual referenceIndividual = new Individual(new Genotype {
                 initialConquerRadius = 400,

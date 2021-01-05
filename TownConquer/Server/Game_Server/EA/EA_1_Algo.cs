@@ -1,4 +1,5 @@
-﻿using Game_Server.KI.Models;
+﻿using Game_Server.EA.Models;
+using Game_Server.KI;
 using Game_Server.writer;
 using System;
 using System.Collections.Concurrent;
@@ -8,13 +9,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Game_Server.KI {
-    class EvoAlgo_1 {
+namespace Game_Server.EA {
+    class EA_1_Algo {
 
         const int populationNumber = 10;
         const int noImprovementLimit = 1;
 
-        public EvoAlgo_1() {
+        public EA_1_Algo() {
             Evolve(CreatePopulation(), 0);
         }
 
@@ -39,8 +40,8 @@ namespace Game_Server.KI {
                 CancellationTokenSource c = new CancellationTokenSource();
                 CancellationToken token = c.Token;
 
-                KI_base eaKI = new KI_Stupid(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
-                KI_base referenceKI = new KI_Stupid(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
+                KI_base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
+                KI_base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
                 Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000);
 
                 var t1 = referenceKI.Start(token, referenceIndividual);

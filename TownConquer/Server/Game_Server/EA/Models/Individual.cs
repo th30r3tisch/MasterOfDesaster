@@ -1,7 +1,6 @@
-﻿
-using System.Numerics;
+﻿using System.Numerics;
 
-namespace Game_Server.KI.Models {
+namespace Game_Server.EA.Models {
     class Individual {
         public Genotype gene;
         public Result result;

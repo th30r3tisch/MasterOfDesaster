@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using Game_Server.KI;
+using Game_Server.EA;
 
 namespace Game_Server {
     class Server {
@@ -99,7 +99,7 @@ namespace Game_Server {
 
             if (Constants.TRAININGS_MODE == true) {
                 //new KnapSack_EA();
-                EvoAlgo_1 ea = new EvoAlgo_1();
+                EA_1_Algo ea = new EA_1_Algo();
             }
 
             for (int i = 1; i <= MaxPlayers; i++) {

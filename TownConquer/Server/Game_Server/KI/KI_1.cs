@@ -1,4 +1,4 @@
-﻿using Game_Server.KI.Models;
+﻿using Game_Server.EA.Models;
 using SharedLibrary;
 using SharedLibrary.Models;
 using System;
@@ -8,9 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Game_Server.KI {
-    class KI_Stupid : KI_base {
+    class KI_1 : KI_base {
 
-        public KI_Stupid(GameManager _gm, int id, string name, Color color) : base(_gm) {
+        public KI_1(GameManager _gm, int id, string name, Color color) : base(_gm) {
             player = new Player(id, name, color, DateTime.Now);
             Town _t = gm.CreateTown(player);
             _t.player = player;

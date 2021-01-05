@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Game_Server.KI.KnapSack {
+namespace Game_Server.EA.KnapSack {
     class Item {
         public int value;
         public int weight;

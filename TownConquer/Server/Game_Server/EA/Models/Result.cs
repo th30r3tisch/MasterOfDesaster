@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Game_Server.KI.Models {
+namespace Game_Server.EA.Models {
     class Result {
         public List<int> townNumberDevelopment;
         public List<int> timestamp;

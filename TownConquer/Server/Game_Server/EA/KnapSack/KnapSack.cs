@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Game_Server.KI.KnapSack {
+namespace Game_Server.EA.KnapSack {
     class KnapSack {
         public List<int> content;
         public int value;
