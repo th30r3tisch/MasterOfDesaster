@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Game_Server.EA {
     class EA_1_Algo {
 
-        const int populationNumber = 10;
+        const int populationNumber = 100;
         const int noImprovementLimit = 1;
 
         public EA_1_Algo() {
@@ -93,7 +93,8 @@ namespace Game_Server.EA {
                 EA_1_Stat stat = new EA_1_Stat(individual.name) {
                     townDevelopment = individual.result.townNumberDevelopment,
                     timeStamps = individual.result.timestamp,
-                    startPos = individual.startPos
+                    startPos = individual.startPos,
+                    won = individual.won
                 };
                 stats[individual.number] = stat;
             }

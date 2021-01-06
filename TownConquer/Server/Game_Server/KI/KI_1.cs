@@ -18,6 +18,7 @@ namespace Game_Server.KI {
 
         public override async Task<Individual> PlayAsync(CancellationToken ct) {
             Console.WriteLine($"{player.username} started.");
+            i.startPos = player.towns[0].position;
             var startTickCount = Environment.TickCount;
             int timePassed = 0;
 
@@ -42,15 +43,16 @@ namespace Game_Server.KI {
                     ProtocollStats(timePassed);
                 }
                 if (ct.IsCancellationRequested) {
+                    i.won = false;
                     return i;
                 }
             }
+            i.won = true;
             return i;
         }
 
         private void ProtocollStats(int timePassed) {
             i.name = player.username;
-            i.startPos = player.towns[0].position;
             i.result.timestamp.Add(timePassed);
             i.result.townNumberDevelopment.Add(player.towns.Count);
         }

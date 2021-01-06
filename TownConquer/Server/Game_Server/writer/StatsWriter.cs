@@ -21,11 +21,13 @@ namespace Game_Server {
             using (csv) {
                 csv.WriteField("Name");
                 csv.WriteField("Coord");
+                csv.WriteField("Winner");
                 csv.WriteField(longestRecord.timeStamps);
                 csv.NextRecord();
                 foreach (var record in records) {
                     csv.WriteField(record.name);
                     csv.WriteField(record.startPos);
+                    csv.WriteField(record.won);
                     csv.WriteField(record.townDevelopment);
                     csv.NextRecord();
                 }

@@ -46,6 +46,9 @@ namespace Game_Server {
             while (_t == null) {
                 int _x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
                 int _z = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
+                if (_owner.id == 999) {
+                    Console.WriteLine($"{_owner.id} wants town at {_x }|{_z}");
+                }
                 if (tree.GetAllContentBetween(
                     (_x - Constants.TOWN_MIN_DISTANCE),
                     (_z - Constants.OBSTACLE_MAX_LENGTH / 2), // divided by 2 because point is center of object

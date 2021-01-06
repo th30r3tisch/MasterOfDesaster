@@ -8,6 +8,7 @@ namespace Game_Server.EA.Models {
         public int number;
         public string name;
         public Vector3 startPos;
+        public bool won;
 
         public Individual(Genotype _gene, int _number) {
             result = new Result();
