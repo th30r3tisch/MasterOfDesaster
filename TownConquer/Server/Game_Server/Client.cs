@@ -9,14 +9,15 @@ using System.Numerics;
 
 namespace Game_Server {
     class Client {
-        public static int dataBufferSize = 4096;
+        private static int _dataBufferSize = 4096;
+
         public Player player;
         public int id;
         public TCP tcp;
         public UDP udp;
 
-        public Client(int _clientId) {
-            id = _clientId;
+        public Client(int clientId) {
+            id = clientId;
             tcp = new TCP(id);
             udp = new UDP(id);
         }
@@ -29,29 +30,29 @@ namespace Game_Server {
             private byte[] receiveBuffer;
             private readonly int id;
 
-            public TCP(int _id) {
-                id = _id;
+            public TCP(int id) {
+                this.id = id;
             }
 
-            public void Connect(TcpClient _socket) {
-                socket = _socket;
-                socket.ReceiveBufferSize = dataBufferSize;
-                socket.SendBufferSize = dataBufferSize;
+            public void Connect(TcpClient socket) {
+                this.socket = socket;
+                this.socket.ReceiveBufferSize = _dataBufferSize;
+                this.socket.SendBufferSize = _dataBufferSize;
 
-                stream = socket.GetStream();
+                stream = this.socket.GetStream();
 
                 receivedData = new Packet();
-                receiveBuffer = new byte[dataBufferSize];
+                receiveBuffer = new byte[_dataBufferSize];
 
-                stream.BeginRead(receiveBuffer, 0, dataBufferSize, ReceiveCallback, null);
+                stream.BeginRead(receiveBuffer, 0, _dataBufferSize, ReceiveCallback, null);
 
                 ServerSend.Welcome(id, "Welcome to the server!");
             }
 
-            public void SendData(Packet _packet) {
+            public void SendData(Packet packet) {
                 try {
                     if (socket != null) {
-                        stream.BeginWrite(_packet.ToArray(), 0, _packet.Length(), null, null);
+                        stream.BeginWrite(packet.ToArray(), 0, packet.Length(), null, null);
                     }
                 }
                 catch (Exception _e) {
@@ -59,65 +60,65 @@ namespace Game_Server {
                 }
             }
 
-            private void ReceiveCallback(IAsyncResult _result) {
+            private void ReceiveCallback(IAsyncResult result) {
                 try {
-                    int _byteLength = stream.EndRead(_result);
-                    if (_byteLength <= 0) {
+                    int byteLength = stream.EndRead(result);
+                    if (byteLength <= 0) {
                         Server.clients[id].Disconnect();
                         return;
                     }
 
-                    byte[] _data = new byte[_byteLength];
-                    Array.Copy(receiveBuffer, _data, _byteLength);
+                    byte[] data = new byte[byteLength];
+                    Array.Copy(receiveBuffer, data, byteLength);
 
-                    receivedData.Reset(HandleData(_data));
-                    stream.BeginRead(receiveBuffer, 0, dataBufferSize, ReceiveCallback, null);
+                    receivedData.Reset(HandleData(data));
+                    stream.BeginRead(receiveBuffer, 0, _dataBufferSize, ReceiveCallback, null);
                 }
-                catch (Exception _e) {
-                    Console.WriteLine($"Error receiving TCP data: {_e}");
+                catch (Exception e) {
+                    Console.WriteLine($"Error receiving TCP data: {e}");
                     Server.clients[id].Disconnect();
                 }
             }
 
 
             //same as in client
-            private bool HandleData(byte[] _data) {
-                int _packetLength = 0;
+            private bool HandleData(byte[] data) {
+                int packetLength = 0;
 
-                receivedData.SetBytes(_data);
+                receivedData.SetBytes(data);
 
                 //has receivedData more than 4 unread bytes? If yes its the start of a packet.
                 //because the first data, of any packet, sent is an int with the length of the packet
                 if (receivedData.UnreadLength() >= 4) {
-                    _packetLength = receivedData.ReadInt();
+                    packetLength = receivedData.ReadInt();
 
-                    if (_packetLength <= 0) {
+                    if (packetLength <= 0) {
                         return true;
                     }
                 }
 
                 // while this is true data is received
-                while (_packetLength > 0 && _packetLength <= receivedData.UnreadLength()) {
-                    byte[] _packetBytes = receivedData.ReadBytes(_packetLength);
+                while (packetLength > 0 && packetLength <= receivedData.UnreadLength()) {
+                    byte[] packetBytes = receivedData.ReadBytes(packetLength);
                     ThreadManager.ExecuteOnMainThread(() => {
-                        using (Packet _packet = new Packet(_packetBytes)) {
-                            int _packetId = _packet.ReadInt();
-                            Server.packetHandlers[_packetId](id, _packet);
+                        using (Packet packet = new Packet(packetBytes)) {
+                            int packetId = packet.ReadInt();
+                            Server.packetHandlers[packetId](id, packet);
                         }
                     });
 
-                    _packetLength = 0;
+                    packetLength = 0;
 
                     if (receivedData.UnreadLength() >= 4) {
-                        _packetLength = receivedData.ReadInt();
+                        packetLength = receivedData.ReadInt();
 
-                        if (_packetLength <= 0) {
+                        if (packetLength <= 0) {
                             return true;
                         }
                     }
                 }
 
-                if (_packetLength <= 1) {
+                if (packetLength <= 1) {
                     return true;
                 }
 
@@ -136,28 +137,28 @@ namespace Game_Server {
         public class UDP {
             public IPEndPoint endPoint;
 
-            private int id;
+            private int _id;
 
-            public UDP(int _id) {
-                id = _id;
+            public UDP(int id) {
+                _id = id;
             }
 
-            public void Connect(IPEndPoint _endPoint) {
-                endPoint = _endPoint;
+            public void Connect(IPEndPoint endPoint) {
+                this.endPoint = endPoint;
             }
 
-            public void SendData(Packet _packet) {
-                Server.SendUDPData(endPoint, _packet);
+            public void SendData(Packet packet) {
+                Server.SendUDPData(endPoint, packet);
             }
 
-            public void HandleData(Packet _packetData) {
-                int _packetLength = _packetData.ReadInt();
-                byte[] _packetBytes = _packetData.ReadBytes(_packetLength);
+            public void HandleData(Packet packetData) {
+                int packetLength = packetData.ReadInt();
+                byte[] packetBytes = packetData.ReadBytes(packetLength);
 
                 ThreadManager.ExecuteOnMainThread(() => {
-                    using (Packet _packet = new Packet(_packetBytes)) {
-                        int _packetId = _packet.ReadInt();
-                        Server.packetHandlers[_packetId](id, _packet);
+                    using (Packet packet = new Packet(packetBytes)) {
+                        int packetId = packet.ReadInt();
+                        Server.packetHandlers[packetId](_id, packet);
                     }
                 });
             }
@@ -167,55 +168,55 @@ namespace Game_Server {
             }
         }
 
-        public void SendIntoGame(string _playerName, Color _color) {
+        public void SendIntoGame(string playerName, Color color) {
 
-            if (Server.Gm.game.kis.Count == 0) Server.Gm.CreateKis();
+            if (Server.gm.game.kis.Count == 0) Server.gm.CreateKis();
 
-            player = new Player(id, _playerName, _color, DateTime.Now);
-            Town _t = Server.Gm.CreateTown(player);
+            player = new Player(id, playerName, color, DateTime.Now);
+            Town t = Server.gm.CreateTown(player);
 
-            ServerSend.CreateWorld(id, Server.clients[id].player, Constants.RANDOM_SEED, _t); // create the world for new player
+            ServerSend.CreateWorld(id, Server.clients[id].player, Constants.RANDOM_SEED, t); // create the world for new player
 
-            foreach (KI_base _ki in Server.Gm.game.kis) {
-                ServerSend.UpdateWorld(id, _ki.player, _ki.player.towns.Count, _ki.player.towns);// send every KI player to the new player
+            foreach (KI_base ki in Server.gm.game.kis) {
+                ServerSend.UpdateWorld(id, ki.player, ki.player.towns.Count, ki.player.towns);// send every KI player to the new player
             }
 
-            foreach (Client _client in Server.clients.Values) {
-                if (_client.player != null) {
-                    if (_client.id != id) {
-                        ServerSend.UpdateWorld(id, _client.player, _client.player.towns.Count, _client.player.towns);// send every already connected player to the new player
-                        ServerSend.UpdateWorld(_client.id, player, player.towns.Count, player.towns);// send the new players info to all connected players
+            foreach (Client client in Server.clients.Values) {
+                if (client.player != null) {
+                    if (client.id != id) {
+                        ServerSend.UpdateWorld(id, client.player, client.player.towns.Count, client.player.towns);// send every already connected player to the new player
+                        ServerSend.UpdateWorld(client.id, player, player.towns.Count, player.towns);// send the new players info to all connected players
                     }
                 }
             }
         }
 
-        public void AttackTown(Vector3 _atkTown, Vector3 _deffTown, DateTime _timeStamp) {
-            if (!Server.Gm.IsIntersecting(_atkTown, _deffTown)) {
-                Server.Gm.AddAttackToTown(_atkTown, _deffTown, _timeStamp);
-                foreach (Client _client in Server.clients.Values) {
-                    if (_client.player != null) {
-                        ServerSend.GrantedAttack(_client.id, _atkTown, _deffTown);
+        public void AttackTown(Vector3 atkTown, Vector3 deffTown, DateTime timeStamp) {
+            if (!Server.gm.IsIntersecting(atkTown, deffTown)) {
+                Server.gm.AddAttackToTown(atkTown, deffTown, timeStamp);
+                foreach (Client client in Server.clients.Values) {
+                    if (client.player != null) {
+                        ServerSend.GrantedAttack(client.id, atkTown, deffTown);
                     }
                 }
             }
         }
 
-        public void RetreatTown(Vector3 _atkTown, Vector3 _deffTown, DateTime _timeStamp) {
-            Server.Gm.RemoveAttackFromTown(_atkTown, _deffTown, _timeStamp);
-            foreach (Client _client in Server.clients.Values) {
-                if (_client.player != null) {
-                    ServerSend.GrantedRetreat(_client.id, _atkTown, _deffTown);
+        public void RetreatTown(Vector3 atkTown, Vector3 deffTown, DateTime timeStamp) {
+            Server.gm.RemoveAttackFromTown(atkTown, deffTown, timeStamp);
+            foreach (Client client in Server.clients.Values) {
+                if (client.player != null) {
+                    ServerSend.GrantedRetreat(client.id, atkTown, deffTown);
                 }
             }
         }
 
-        public void ConquerTown(int _attackerId, Vector3 _deffTown, DateTime _timeStamp) {
-            Player _conquerer = Server.clients[_attackerId].player;
-            Server.Gm.ConquerTown(_conquerer, _deffTown, _timeStamp);
-            foreach (Client _client in Server.clients.Values) {
-                if (_client.player != null) {
-                    ServerSend.GrantedConquer(_client.id, _conquerer, _deffTown);
+        public void ConquerTown(int attackerId, Vector3 deffTown, DateTime timeStamp) {
+            Player conquerer = Server.clients[attackerId].player;
+            Server.gm.ConquerTown(conquerer, deffTown, timeStamp);
+            foreach (Client client in Server.clients.Values) {
+                if (client.player != null) {
+                    ServerSend.GrantedConquer(client.id, conquerer, deffTown);
                 }
             }
         }

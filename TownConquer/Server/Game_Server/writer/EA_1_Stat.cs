@@ -2,7 +2,7 @@
 using System.Numerics;
 
 namespace Game_Server.writer {
-    class EA_1_Stat : StatEntry{
+    class EA_1_Stat : StatEntry {
 
         public bool won { get; set; }
         public Vector3 startPos { get; set; }

@@ -1,37 +1,37 @@
-﻿using System.Globalization;
-using System.IO;
-using CsvHelper;
+﻿using CsvHelper;
 using Game_Server.writer;
+using System.Globalization;
+using System.IO;
 
 namespace Game_Server {
     class StatsWriter {
-        StreamWriter writer;
-        CsvWriter csv;
+        private StreamWriter _writer;
+        private CsvWriter _csv;
 
         public StatsWriter(string filename) {
-            string path = $"..\\..\\..\\..\\Statistics\\venv\\Scripts\\Stats\\{filename}.csv";
-            writer = new StreamWriter(path);
-            csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-            csv.Configuration.Delimiter = ";";
+            string path = $"..\\..\\..\\..\\Statistics\\venv\\Scripts\\Stats\\Data\\{filename}.csv";
+            _writer = new StreamWriter(path);
+            _csv = new CsvWriter(_writer, CultureInfo.InvariantCulture);
+            _csv.Configuration.Delimiter = ";";
         }
 
         public void WriteStats(EA_1_Stat[] records) {
             EA_1_Stat longestRecord = PrepareStats(records);
-            using (writer)
-            using (csv) {
-                csv.WriteField("Name");
-                csv.WriteField("Coord");
-                csv.WriteField("Winner");
-                csv.WriteField(longestRecord.timeStamps);
-                csv.NextRecord();
+            using (_writer)
+            using (_csv) {
+                _csv.WriteField("Name");
+                _csv.WriteField("Coord");
+                _csv.WriteField("Winner");
+                _csv.WriteField(longestRecord.timeStamps);
+                _csv.NextRecord();
                 foreach (var record in records) {
-                    csv.WriteField(record.name);
-                    csv.WriteField(record.startPos);
-                    csv.WriteField(record.won);
-                    csv.WriteField(record.townDevelopment);
-                    csv.NextRecord();
+                    _csv.WriteField(record.name);
+                    _csv.WriteField(record.startPos);
+                    _csv.WriteField(record.won);
+                    _csv.WriteField(record.townDevelopment);
+                    _csv.NextRecord();
                 }
-                writer.Flush();
+                _writer.Flush();
             }
         }
 
@@ -60,14 +60,14 @@ namespace Game_Server {
 
         #region KnapsackRegion
         public void WriteStats(KnapsackStat[] records) {
-            using (writer)
-            using (csv) {
+            using (_writer)
+            using (_csv) {
                 foreach (var record in records) {
-                    csv.WriteField(record.name);
-                    csv.WriteField(record.entries);
-                    csv.NextRecord();
+                    _csv.WriteField(record.name);
+                    _csv.WriteField(record.entries);
+                    _csv.NextRecord();
                 }
-                writer.Flush();
+                _writer.Flush();
             }
         }
         #endregion

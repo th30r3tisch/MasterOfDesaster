@@ -13,10 +13,10 @@ public class GameManager : MonoBehaviour {
     public GameObject obstaclePrefab;
     public Canvas ui;
 
-    private static QuadTree world;
-    private static Player game;
-    private Quaternion horizontalOrientation = new Quaternion(0, 0, 0, 0);
-    private static System.Random r;
+    private static QuadTree _world;
+    private static Player _game;
+    private Quaternion _horizontalOrientation = new Quaternion(0, 0, 0, 0);
+    private static System.Random _r;
 
     private void Awake() {
         if (instance == null) {
@@ -28,209 +28,209 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public void AddEnemies(Player _enemy, List<Vector3> _towns) {
-        foreach (Vector3 _townPos in _towns) {
-            UTown _town = (UTown)world.SearchTown(world, ConversionManager.ToNumericVector( _townPos));
-            if (_town == null) {
-                CreateTown(Constants.TOWN_NUMBER + Client.instance.enemies.Count + 1, _townPos, _enemy);
+    public void AddEnemies(Player enemy, List<Vector3> towns) {
+        foreach (Vector3 townPos in towns) {
+            UTown town = (UTown)_world.SearchTown(_world, ConversionManager.ToNumericVector( townPos));
+            if (town == null) {
+                CreateTown(Constants.TOWN_NUMBER + Client.instance.enemies.Count + 1, townPos, enemy);
             }
             else {
-                TownManager _tm = _town.go.GetComponent<TownManager>();
-                _enemy.towns.Add(_town);
-                _town.player = _enemy;
-                _tm.ownerid = _enemy.id;
-                _tm.ownerName = _enemy.username;
-                _town.go.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(_enemy.color);
+                TownManager tm = town.go.GetComponent<TownManager>();
+                enemy.towns.Add(town);
+                town.player = enemy;
+                tm.ownerid = enemy.id;
+                tm.ownerName = enemy.username;
+                town.go.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(enemy.color);
             }
         }
-        Client.instance.enemies.Add(_enemy);
+        Client.instance.enemies.Add(enemy);
     }
 
-    public void InitMap(int _seed, Vector3 _townPos, Player _player, DateTime _creationTime) {
-        GameObject _ground;
-        r = new System.Random(_seed);
+    public void InitMap(int seed, Vector3 townPos, Player player, DateTime creationTime) {
+        GameObject ground;
+        _r = new System.Random(seed);
 
-        world = new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT));
-        game = new Player(-1, "game", System.Drawing.Color.FromArgb(100, 100, 100), _creationTime);
-        _ground = Instantiate(landPrefab, new Vector3(Constants.MAP_WIDTH / 2, 0, Constants.MAP_HEIGHT / 2), horizontalOrientation);
-        _ground.transform.localScale = new Vector3(Constants.MAP_WIDTH, 1, Constants.MAP_HEIGHT);
+        _world = new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT));
+        _game = new Player(-1, "game", System.Drawing.Color.FromArgb(100, 100, 100), creationTime);
+        ground = Instantiate(landPrefab, new Vector3(Constants.MAP_WIDTH / 2, 0, Constants.MAP_HEIGHT / 2), _horizontalOrientation);
+        ground.transform.localScale = new Vector3(Constants.MAP_WIDTH, 1, Constants.MAP_HEIGHT);
 
         CreateObstacles();
         CreateTowns();
 
-        CreateTown(Constants.TOWN_NUMBER, _townPos, _player);
+        CreateTown(Constants.TOWN_NUMBER, townPos, player);
         ui.GetComponent<GameUIManager>().Init();
     }
 
     private void CreateTowns() {
-        for (int _i = 0; _i < Constants.TOWN_NUMBER; _i++) {
-            SearchTownPos(_i);
+        for (int i = 0; i < Constants.TOWN_NUMBER; i++) {
+            SearchTownPos(i);
         }
     }
 
-    private void SearchTownPos(int _i) {
+    private void SearchTownPos(int i) {
         bool flag = false;
         while (flag == false) {
-            int _x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
-            int _z = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
-            if (world.GetAllContentBetween(
-                (_x - Constants.TOWN_MIN_DISTANCE),
-                    (_z - Constants.OBSTACLE_MAX_LENGTH / 2), // divided by 2 because point is center of object
-                    (_x + Constants.TOWN_MIN_DISTANCE),
-                    (_z + Constants.OBSTACLE_MAX_LENGTH / 2)).Count == 0) { // check vertical objects
-                if (world.GetAllContentBetween(
-                    (_x - Constants.OBSTACLE_MAX_LENGTH / 2),
-                    (_z - Constants.TOWN_MIN_DISTANCE),
-                    (_x + Constants.OBSTACLE_MAX_LENGTH / 2),
-                    (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check horizontal objects
-                    CreateTown(_i, new Vector3(_x, 5, _z), game);
+            int x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
+            int z = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
+            if (_world.GetAllContentBetween(
+                (x - Constants.TOWN_MIN_DISTANCE),
+                    (z - Constants.OBSTACLE_MAX_LENGTH / 2), // divided by 2 because point is center of object
+                    (x + Constants.TOWN_MIN_DISTANCE),
+                    (z + Constants.OBSTACLE_MAX_LENGTH / 2)).Count == 0) { // check vertical objects
+                if (_world.GetAllContentBetween(
+                    (x - Constants.OBSTACLE_MAX_LENGTH / 2),
+                    (z - Constants.TOWN_MIN_DISTANCE),
+                    (x + Constants.OBSTACLE_MAX_LENGTH / 2),
+                    (z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check horizontal objects
+                    CreateTown(i, new Vector3(x, 5, z), _game);
                     flag = true;
                 }
             }
         }
     }
 
-    private void CreateTown(int _i, Vector3 _position, Player _owner) {
-        GameObject _town;
-        UTown _t;
+    private void CreateTown(int i, Vector3 position, Player owner) {
+        GameObject town;
+        UTown t;
 
-        _t = new UTown(ConversionManager.ToNumericVector(_position)) {
-            player = _owner
+        t = new UTown(ConversionManager.ToNumericVector(position)) {
+            player = owner
         };
 
-        _town = Instantiate(townPrefab, _position, horizontalOrientation);
-        _town.GetComponent<TownManager>().id = _i;
-        _town.GetComponent<TownManager>().ownerName = _owner.username;
-        _town.GetComponent<TownManager>().ownerid = _owner.id;
-        _town.GetComponent<TownManager>().life = _t.life;
-        _town.GetComponent<TownManager>().town = _t;
-        _town.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(_owner.color);
+        town = Instantiate(townPrefab, position, _horizontalOrientation);
+        town.GetComponent<TownManager>().id = i;
+        town.GetComponent<TownManager>().ownerName = owner.username;
+        town.GetComponent<TownManager>().ownerid = owner.id;
+        town.GetComponent<TownManager>().life = t.life;
+        town.GetComponent<TownManager>().town = t;
+        town.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(owner.color);
 
-        _t.go = _town;
-        _t.creationTime = _owner.creationTime;
-        _owner.towns.Add(_t);
-        world.Insert(_t);
+        t.go = town;
+        t.creationTime = owner.creationTime;
+        owner.towns.Add(t);
+        _world.Insert(t);
     }
 
     private void CreateObstacles() {
-        GameObject _obstacle;
-        Obstacle _o;
+        GameObject obstacle;
+        Obstacle o;
         for (int i = 0; i < Constants.OBSTACLE_NUMBER; i++) {
-            Vector3 _position = new Vector3(
+            Vector3 position = new Vector3(
                         RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES),
                         1,
                         RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES));
-            int _orientation = RandomNumber(0, 1);
-            int _length = RandomNumber(Constants.OBSTACLE_MIN_LENGTH, Constants.OBSTACLE_MAX_LENGTH);
-            _o = new Obstacle(ConversionManager.ToNumericVector(_position), _orientation, _length);
-            world.Insert(_o);
-            _obstacle = Instantiate(obstaclePrefab, _position, horizontalOrientation);
-            _obstacle.transform.localScale = new Vector3(_o.width, 8, _o.length);
+            int orientation = RandomNumber(0, 1);
+            int length = RandomNumber(Constants.OBSTACLE_MIN_LENGTH, Constants.OBSTACLE_MAX_LENGTH);
+            o = new Obstacle(ConversionManager.ToNumericVector(position), orientation, length);
+            _world.Insert(o);
+            obstacle = Instantiate(obstaclePrefab, position, _horizontalOrientation);
+            obstacle.transform.localScale = new Vector3(o.width, 8, o.length);
         }
     }
 
-    public void AttackTown(Vector3 _lineStart, Vector3 _lineEnd) {
-        UTown _deffT = (UTown)world.SearchTown(world, ConversionManager.ToNumericVector(_lineEnd));
-        UTown _atkT = (UTown)world.SearchTown(world, ConversionManager.ToNumericVector(_lineStart));
-        GameObject _line;
+    public void AttackTown(Vector3 lineStart, Vector3 lineEnd) {
+        UTown deffT = (UTown)_world.SearchTown(_world, ConversionManager.ToNumericVector(lineEnd));
+        UTown atkT = (UTown)_world.SearchTown(_world, ConversionManager.ToNumericVector(lineStart));
+        GameObject line;
 
-        if (_deffT.player.id == _atkT.player.id) {
-            _line = CreateLineMesh(_atkT.player.id, _atkT, _deffT, "sup");
+        if (deffT.player.id == atkT.player.id) {
+            line = CreateLineMesh(atkT.player.id, atkT, deffT, "sup");
         }
         else {
-            _line = CreateLineMesh(_atkT.player.id, _atkT, _deffT, "atk");
+            line = CreateLineMesh(atkT.player.id, atkT, deffT, "atk");
         }
-        _atkT.outgoingActions.Add(_line);
-        world.AddTownActionReference(_atkT, _deffT);
+        atkT.outgoingActions.Add(line);
+        _world.AddTownActionReference(atkT, deffT);
     }
 
-    public void RetreatTroops(Vector3 _lineStart, Vector3 _lineEnd) {
-        UTown _atkT = (UTown)world.SearchTown(world, ConversionManager.ToNumericVector(_lineStart));
-        UTown _deffT = (UTown)world.SearchTown(world, ConversionManager.ToNumericVector(_lineEnd));
-        TownManager _atkTm = _atkT.go.GetComponent<TownManager>();
-        _atkTm.RetreatTroopsFromTown(_deffT);
+    public void RetreatTroops(Vector3 lineStart, Vector3 lineEnd) {
+        UTown atkT = (UTown)_world.SearchTown(_world, ConversionManager.ToNumericVector(lineStart));
+        UTown deffT = (UTown)_world.SearchTown(_world, ConversionManager.ToNumericVector(lineEnd));
+        TownManager atkTm = atkT.go.GetComponent<TownManager>();
+        atkTm.RetreatTroopsFromTown(deffT);
 
-        world.RmTownActionReference(_atkT, _deffT);
+        _world.RmTownActionReference(atkT, deffT);
     }
 
-    public void ConquerTown(int _conquererId, Vector3 _conqueredTownCoord) {
-        UTown _conqueredT = (UTown)world.SearchTown(world, ConversionManager.ToNumericVector(_conqueredTownCoord));
-        Player _conquerer = GetPlayer(_conquererId);
+    public void ConquerTown(int conquererId, Vector3 conqueredTownCoord) {
+        UTown conqueredT = (UTown)_world.SearchTown(_world, ConversionManager.ToNumericVector(conqueredTownCoord));
+        Player conquerer = GetPlayer(conquererId);
 
-        UpdateTownReferences(_conqueredT, _conquerer);
+        UpdateTownReferences(conqueredT, conquerer);
     }
 
     /// <summary>
     /// Searches and returns the player with the given id
     /// </summary>
-    /// <param name="_id">Id of the searched player</param>
+    /// <param name="id">Id of the searched player</param>
     /// <returns>Player with the id or null if no player is found</returns>
-    private Player GetPlayer(int _id) {
-        foreach (Player _player in Client.instance.enemies) {
-            if (_player.id == _id) {
-                return _player;
+    private Player GetPlayer(int id) {
+        foreach (Player player in Client.instance.enemies) {
+            if (player.id == id) {
+                return player;
             }
         }
-        if (_id == Client.instance.myId) {
+        if (id == Client.instance.myId) {
             return Client.instance.me;
         }
         return null;
     }
 
-    private void UpdateTownReferences(UTown _conqueredT, Player _conquerer) {
-        TownManager _conqueredTm = _conqueredT.go.GetComponent<TownManager>();
+    private void UpdateTownReferences(UTown conqueredT, Player conquerer) {
+        TownManager conqueredTm = conqueredT.go.GetComponent<TownManager>();
 
         // removes all attacking troops and deletes references in both towns
-        for (int i = _conqueredT.attackerTowns.Count; i > 0; i--) {
-            UTown _atkT = (UTown)_conqueredT.attackerTowns[i - 1];
-            _atkT.go.GetComponent<TownManager>().RetreatTroopsFromTown(_conqueredT);
-            world.RmTownActionReference(_atkT, _conqueredT);
+        for (int i = conqueredT.attackerTowns.Count; i > 0; i--) {
+            UTown atkT = (UTown)conqueredT.attackerTowns[i - 1];
+            atkT.go.GetComponent<TownManager>().RetreatTroopsFromTown(conqueredT);
+            _world.RmTownActionReference(atkT, conqueredT);
         }
 
         // removes all attacking troops and deletes references in both towns
-        for (int i = _conqueredT.supporterTowns.Count; i > 0; i--) {
-            UTown _supT = (UTown)_conqueredT.supporterTowns[i - 1];
-            _supT.go.GetComponent<TownManager>().RetreatTroopsFromTown(_conqueredT);
-            world.RmTownActionReference(_supT, _conqueredT);
+        for (int i = conqueredT.supporterTowns.Count; i > 0; i--) {
+            UTown supT = (UTown)conqueredT.supporterTowns[i - 1];
+            supT.go.GetComponent<TownManager>().RetreatTroopsFromTown(conqueredT);
+            _world.RmTownActionReference(supT, conqueredT);
         }
 
         // removes all outgoing troops and deletes references in both towns
-        for (int i = _conqueredT.outgoing.Count; i > 0; i--) {
-            UTown _targetT = (UTown)_conqueredT.outgoing[i - 1];
-            _conqueredTm.RetreatTroopsFromTown(_targetT);
-            world.RmTownActionReference(_conqueredT, _targetT);
+        for (int i = conqueredT.outgoing.Count; i > 0; i--) {
+            UTown targetT = (UTown)conqueredT.outgoing[i - 1];
+            conqueredTm.RetreatTroopsFromTown(targetT);
+            _world.RmTownActionReference(conqueredT, targetT);
         }
 
-        _conqueredTm.ownerid = _conquerer.id;
-        _conqueredTm.ownerName = _conquerer.username;
-        world.UpdateOwner(_conquerer, _conqueredT);
-        _conqueredT.go.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(_conquerer.color);
+        conqueredTm.ownerid = conquerer.id;
+        conqueredTm.ownerName = conquerer.username;
+        _world.UpdateOwner(conquerer, conqueredT);
+        conqueredT.go.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(conquerer.color);
     }
 
     /// <summary>
     /// Creates a mesh line that indicates an attack between towns.
     /// </summary>
-    /// <param name="_ownerId">Player id who sent the attack</param>
-    /// <param name="_startTown">Town from where the attack starts</param>
-    /// <param name="_endTown">Town where the attack ends</param>
-    /// <param name="_type">Type of the line (atk, deff)</param>
+    /// <param name="ownerId">Player id who sent the attack</param>
+    /// <param name="startTown">Town from where the attack starts</param>
+    /// <param name="endTown">Town where the attack ends</param>
+    /// <param name="type">Type of the line (atk, deff)</param>
     /// <returns>The Gameobject of the mesh line</returns>
-    private GameObject CreateLineMesh(int _ownerId, UTown _startTown, UTown _endTown, string _type) {
-        GameObject _atkLine = new GameObject();
-        MeshRenderer _meshRenderer = _atkLine.AddComponent<MeshRenderer>();
-        MeshFilter _meshFilter = _atkLine.AddComponent<MeshFilter>();
-        Mesh _mesh = new Mesh();
-        Vector3 _lineStart = ConversionManager.ToUnityVector( _startTown.position);
-        Vector3 _lineEnd = ConversionManager.ToUnityVector(_endTown.position);
-        Vector3 _direction = _lineEnd - _lineStart;
+    private GameObject CreateLineMesh(int ownerId, UTown startTown, UTown endTown, string type) {
+        GameObject atkLine = new GameObject();
+        MeshRenderer meshRenderer = atkLine.AddComponent<MeshRenderer>();
+        MeshFilter meshFilter = atkLine.AddComponent<MeshFilter>();
+        Mesh mesh = new Mesh();
+        Vector3 lineStart = ConversionManager.ToUnityVector( startTown.position);
+        Vector3 lineEnd = ConversionManager.ToUnityVector(endTown.position);
+        Vector3 direction = lineEnd - lineStart;
 
-        _meshRenderer.sharedMaterial = Resources.Load("Line", typeof(Material)) as Material;
+        meshRenderer.sharedMaterial = Resources.Load("Line", typeof(Material)) as Material;
 
         Vector3[] _vertices = new Vector3[4]{
-            Vector3.Cross(_direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + _lineStart,
-            Vector3.Cross(_direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + _lineStart,
-            Vector3.Cross(_direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + _lineEnd,
-            Vector3.Cross(_direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + _lineEnd
+            Vector3.Cross(direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + lineStart,
+            Vector3.Cross(direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + lineStart,
+            Vector3.Cross(direction, Vector3.up).normalized * Constants.ATTACK_LINE_WIDTH + lineEnd,
+            Vector3.Cross(direction, Vector3.up).normalized * (-Constants.ATTACK_LINE_WIDTH) + lineEnd
         };
         int[] _tris = new int[6]{
             // lower left triangle
@@ -251,29 +251,29 @@ public class GameManager : MonoBehaviour {
             new Vector2(1, 1)
         };
 
-        _mesh.vertices = _vertices;
-        _mesh.triangles = _tris;
-        _mesh.normals = normals;
-        _mesh.uv = uv;
-        _meshFilter.mesh = _mesh;
-        _atkLine.name = "atk";
-        _atkLine.AddComponent<AttackManager>();
-        _atkLine.GetComponent<AttackManager>().ownerid = _ownerId;
-        _atkLine.GetComponent<AttackManager>().start = _startTown;
-        _atkLine.GetComponent<AttackManager>().end = _endTown;
-        _atkLine.GetComponent<AttackManager>().type = _type;
-        _atkLine.AddComponent<MeshCollider>();
+        mesh.vertices = _vertices;
+        mesh.triangles = _tris;
+        mesh.normals = normals;
+        mesh.uv = uv;
+        meshFilter.mesh = mesh;
+        atkLine.name = "atk";
+        atkLine.AddComponent<AttackManager>();
+        atkLine.GetComponent<AttackManager>().ownerid = ownerId;
+        atkLine.GetComponent<AttackManager>().start = startTown;
+        atkLine.GetComponent<AttackManager>().end = endTown;
+        atkLine.GetComponent<AttackManager>().type = type;
+        atkLine.AddComponent<MeshCollider>();
 
-        return _atkLine;
+        return atkLine;
     }
 
     /// <summary>
     /// Generates a random number within the bounds min/max.
     /// </summary>
-    /// <param name="_min">min random number created</param>
-    /// <param name="_max">max random number created</param>
+    /// <param name="min">min random number created</param>
+    /// <param name="max">max random number created</param>
     /// <returns>The created random number</returns>
-    private static int RandomNumber(int _min, int _max) {
-        return r.Next(_max - _min + 1) + _min;
+    private static int RandomNumber(int min, int max) {
+        return _r.Next(max - min + 1) + min;
     }
 }

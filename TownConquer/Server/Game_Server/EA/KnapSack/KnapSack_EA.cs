@@ -4,26 +4,26 @@ using System.Collections.Generic;
 
 namespace Game_Server.EA.KnapSack {
     class KnapSack_EA {
-        List<Item> items = new List<Item>();
-        private const int numberOfItems = 30;
-        private const int numberOfKnapSacks = 200;
-        private const double recombinationProbability = 0.7;
-        private const double mutationProbability = 1 / numberOfItems;
-        private const int noImprovementLimit = 25;
-        Random r;
+        private const int _numberOfItems = 30;
+        private const int _numberOfKnapSacks = 200;
+        private const double _recombinationProbability = 0.7;
+        private const double _mutationProbability = 1 / _numberOfItems;
+        private const int _noImprovementLimit = 25;
 
-        KnapsackStat average = new KnapsackStat("average");
-        KnapsackStat standardDeviation = new KnapsackStat("standardDeviation");
-        KnapsackStat maxValues = new KnapsackStat("maxValues");
-        KnapsackStat simpsonDivIndex = new KnapsackStat("SimpsonDivIndex");
+        private readonly Random _r;
+        private List<Item> _items = new List<Item>();
+        private KnapsackStat _average = new KnapsackStat("average");
+        private KnapsackStat _standardDeviation = new KnapsackStat("standardDeviation");
+        private KnapsackStat _maxValues = new KnapsackStat("maxValues");
+        private KnapsackStat _simpsonDivIndex = new KnapsackStat("SimpsonDivIndex");
 
         public KnapSack_EA() {
-            r = new Random(1);
+            _r = new Random(1);
 
             GenerateItems();
             Evolve(GenerateInitPopulation(), 0, 0);
             StatsWriter writer = new StatsWriter("KnapSack");
-            writer.WriteStats(new[] { average, standardDeviation, maxValues, simpsonDivIndex });
+            writer.WriteStats(new[] { _average, _standardDeviation, _maxValues, _simpsonDivIndex });
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Game_Server.EA.KnapSack {
         /// <param name="oldavg">last avg of the population</param>
         /// <param name="noImprovmentCount">counter of how many generations without improvement</param>
         private void Evolve(List<KnapSack> population, int oldavg, int noImprovmentCount) {
-            if (noImprovmentCount < noImprovementLimit) {
+            if (noImprovmentCount < _noImprovementLimit) {
                 Evaluate(population);
 
                 int avg = AverageValueInPopulation(population);
@@ -45,10 +45,10 @@ namespace Game_Server.EA.KnapSack {
                     noImprovmentCount = 0;
                 }
 
-                average.entries.Add(avg);
-                standardDeviation.entries.Add(StandardDeviationInPopulation(population, avg));
-                maxValues.entries.Add(MaxValueInPopulation(population).first.value);
-                simpsonDivIndex.entries.Add(SimpsonsDiversityIndexOfPopulation(population));
+                _average.entries.Add(avg);
+                _standardDeviation.entries.Add(StandardDeviationInPopulation(population, avg));
+                _maxValues.entries.Add(MaxValueInPopulation(population).first.value);
+                _simpsonDivIndex.entries.Add(SimpsonsDiversityIndexOfPopulation(population));
 
                 Evolve(CreateOffspring(population), oldavg, noImprovmentCount);
             }
@@ -65,7 +65,7 @@ namespace Game_Server.EA.KnapSack {
             (KnapSack, KnapSack) elite = MaxValueInPopulation(population);
             newPopulation.Add(elite.Item1);
             newPopulation.Add(elite.Item2);
-            for (int i = 0; i < (numberOfKnapSacks) / 2; i++) {
+            for (int i = 0; i < (_numberOfKnapSacks) / 2; i++) {
                 children = TournamentSelection(population);
                 children = Mutate(children);
                 newPopulation.AddRange(children);
@@ -82,7 +82,7 @@ namespace Game_Server.EA.KnapSack {
             foreach (KnapSack child in children) {
                 List<int> content = child.content;
                 for (int i = 0; i < content.Count; i++) {
-                    if (r.NextDouble() < mutationProbability) {
+                    if (_r.NextDouble() < _mutationProbability) {
                         content[i] = 1 - content[i];
                     }
                 }
@@ -95,19 +95,19 @@ namespace Game_Server.EA.KnapSack {
         /// </summary>
         /// <param name="population">population to evaluate</param>
         private void Evaluate(List<KnapSack> population) {
-            for (int i = 0; i < numberOfKnapSacks; i++) {
+            for (int i = 0; i < _numberOfKnapSacks; i++) {
                 KnapSack knapSack = population[i];
                 List<int> knapSackContent = knapSack.content;
                 knapSack.value = 0;
                 // iterates through the binary content of a knapsack
-                for (int j = 0; j < numberOfItems; j++) {
+                for (int j = 0; j < _numberOfItems; j++) {
                     int item = knapSackContent[j];
                     // look for the coresponding item in the itemlist and add value and weight to the knapsack
-                    knapSack.capasity += items[j].weight * item;
-                    knapSack.value += items[j].value * item;
+                    knapSack.capasity += _items[j].weight * item;
+                    knapSack.value += _items[j].value * item;
                     if (knapSack.capasity > knapSack.maxCapasity) {
                         knapSack.value = 0;
-                        j = numberOfItems + 1;
+                        j = _numberOfItems + 1;
                     }
 
                 }
@@ -123,8 +123,8 @@ namespace Game_Server.EA.KnapSack {
         private List<KnapSack> TournamentSelection(List<KnapSack> population) {
             List<KnapSack> parents = new List<KnapSack>();
             while (parents.Count < 2) {
-                KnapSack contestantOne = population[r.Next(0, numberOfKnapSacks)];
-                KnapSack contestantTwo = population[r.Next(0, numberOfKnapSacks)];
+                KnapSack contestantOne = population[_r.Next(0, _numberOfKnapSacks)];
+                KnapSack contestantTwo = population[_r.Next(0, _numberOfKnapSacks)];
                 if (contestantOne.value > contestantTwo.value) {
                     parents.Add(contestantOne);
                 }
@@ -132,7 +132,7 @@ namespace Game_Server.EA.KnapSack {
                     parents.Add(contestantTwo);
                 }
             }
-            if (r.NextDouble() > recombinationProbability) {
+            if (_r.NextDouble() > _recombinationProbability) {
                 return parents;
             }
             else {
@@ -147,12 +147,12 @@ namespace Game_Server.EA.KnapSack {
         /// <returns>the new children</returns>
         private List<KnapSack> Recombinate(List<KnapSack> parents) {
             List<KnapSack> children = new List<KnapSack>();
-            int splitListAt = r.Next(1, numberOfItems);
+            int splitListAt = _r.Next(1, _numberOfItems);
 
             List<int> content1 = parents[0].content.GetRange(0, splitListAt);
             List<int> content2 = parents[1].content.GetRange(0, splitListAt);
-            content1.AddRange(parents[1].content.GetRange(splitListAt, numberOfItems - splitListAt));
-            content2.AddRange(parents[0].content.GetRange(splitListAt, numberOfItems - splitListAt));
+            content1.AddRange(parents[1].content.GetRange(splitListAt, _numberOfItems - splitListAt));
+            content2.AddRange(parents[0].content.GetRange(splitListAt, _numberOfItems - splitListAt));
 
             KnapSack child1 = new KnapSack();
             KnapSack child2 = new KnapSack();
@@ -169,9 +169,9 @@ namespace Game_Server.EA.KnapSack {
         private List<KnapSack> GenerateInitPopulation() {
             List<KnapSack> population = new List<KnapSack>();
             int i = 0;
-            while (i < numberOfKnapSacks) {
+            while (i < _numberOfKnapSacks) {
                 KnapSack knapSack = new KnapSack();
-                knapSack.CreateRandomContent(numberOfItems, r);
+                knapSack.CreateRandomContent(_numberOfItems, _r);
                 population.Add(knapSack);
                 i++;
             }
@@ -183,8 +183,8 @@ namespace Game_Server.EA.KnapSack {
         /// </summary>
         private void GenerateItems() {
             int i = 0;
-            while (i < numberOfItems) {
-                items.Add(new Item(r));
+            while (i < _numberOfItems) {
+                _items.Add(new Item(_r));
                 i++;
             }
         }

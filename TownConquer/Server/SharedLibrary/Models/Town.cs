@@ -13,39 +13,27 @@ namespace SharedLibrary.Models {
         public List<Town> supporterTowns = new List<Town>();
         public List<Town> outgoing = new List<Town>();
 
-        public Town(Vector3 _spawnPos) {
-            position = _spawnPos;
+        public Town(Vector3 spawnPos) {
+            position = spawnPos;
             life = Constants.TOWN_INITIAL_LIFE;
             attackerTowns = new List<Town>();
         }
 
-        public void AddAttackTown(Town _town) {
-            attackerTowns.Add(_town);
-        }
-
-        public void RemoveAttackTown(Town _town) {
+        public void RemoveAttackTown(Town town) {
             if (attackerTowns.Count > 0) {
-                attackerTowns.Remove(_town);
+                attackerTowns.Remove(town);
             }
         }
 
-        public void AddSupporterTown(Town _town) {
-            supporterTowns.Add(_town);
-        }
-
-        public void RemoveSupporterTown(Town _town) {
+        public void RemoveSupporterTown(Town town) {
             if (supporterTowns.Count > 0) {
-                supporterTowns.Remove(_town);
+                supporterTowns.Remove(town);
             }
         }
 
-        public void AddOutgoingTown(Town _town) {
-            outgoing.Add(_town);
-        }
-
-        public void RemoveOutgoingTown(Town _town) {
+        public void RemoveOutgoingTown(Town town) {
             if (outgoing.Count > 0) {
-                outgoing.Remove(_town);
+                outgoing.Remove(town);
             }
         }
     }

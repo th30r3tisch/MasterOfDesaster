@@ -6,13 +6,11 @@ namespace Game_Server.EA.KnapSack {
         public List<int> content;
         public int value;
         public int capasity;
-        public int maxCapasity = 40;
+        public readonly int maxCapasity = 40;
 
         /// <summary>
-        /// A knapsack represens one possible solution
+        /// A knapsack, representing one possible solution
         /// </summary>
-        /// <param name="_itemNumber">number of all different items existing</param>
-        /// <param name="r">Random number generator</param>
         public KnapSack() {
             value = 0;
             capasity = 0;
@@ -23,12 +21,12 @@ namespace Game_Server.EA.KnapSack {
         /// Fills the backpack. The content is represented as a string of bytes. The index of each byte coresponds to one item in the itemlist. 
         /// The value of the byte shows whether the item exists in the knapsack.(1 yes, 0 no)
         /// </summary>
-        /// <param name="_itemNumber">number of all different items existing</param>
+        /// <param name="itemNumber">number of all different items existing</param>
         /// <param name="r">Random number generator</param>
-        public void CreateRandomContent(int _itemNumber, Random r) {
+        public void CreateRandomContent(int itemNumber, Random r) {
             int i = 0;
-            while (i < _itemNumber) {
-                content.Add(r.Next(0,2));
+            while (i < itemNumber) {
+                content.Add(r.Next(0, 2));
                 i++;
             }
         }

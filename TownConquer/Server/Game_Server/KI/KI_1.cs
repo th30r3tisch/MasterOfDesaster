@@ -10,19 +10,19 @@ using System.Threading.Tasks;
 namespace Game_Server.KI {
     class KI_1 : KI_base {
 
-        public KI_1(GameManager _gm, int id, string name, Color color) : base(_gm) {
+        public KI_1(GameManager gm, int id, string name, Color color) : base(gm) {
             player = new Player(id, name, color, DateTime.Now);
-            Town _t = gm.CreateTown(player);
-            _t.player = player;
+            Town t = base.gm.CreateTown(player);
+            t.player = player;
         }
 
-        public override async Task<Individual> PlayAsync(CancellationToken ct) {
+        protected override async Task<Individual> PlayAsync(CancellationToken ct) {
             Console.WriteLine($"{player.username} started.");
             i.startPos = player.towns[0].position;
             var startTickCount = Environment.TickCount;
             int timePassed = 0;
 
-            while (Constants.TOWN_NUMBER*0.8 > player.towns.Count || player.towns.Count == 0) {
+            while (Constants.TOWN_NUMBER * 0.8 > player.towns.Count || player.towns.Count == 0) {
                 try {
                     await Task.Delay(tickLength);
                 }
@@ -57,15 +57,15 @@ namespace Game_Server.KI {
             i.result.townNumberDevelopment.Add(player.towns.Count);
         }
 
-        private void TryAttackTown(Town _atkTown) {
-            if (_atkTown.life > 10 && _atkTown.outgoing.Count < 2) {
-                Town _deffTown = GetPossibleAttackTarget(_atkTown);
-                if (_deffTown != null) {
-                    gm.AddAttackToTown(_atkTown.position, _deffTown.position, DateTime.Now);
+        private void TryAttackTown(Town atkTown) {
+            if (atkTown.life > 10 && atkTown.outgoing.Count < 2) {
+                Town deffTown = GetPossibleAttackTarget(atkTown);
+                if (deffTown != null) {
+                    gm.AddAttackToTown(atkTown.position, deffTown.position, DateTime.Now);
                     if (Constants.TRAININGS_MODE == false) {
-                        foreach (Client _client in Server.clients.Values) {
-                            if (_client.player != null) {
-                                ServerSend.GrantedAttack(_client.id, _atkTown.position, _deffTown.position);
+                        foreach (Client client in Server.clients.Values) {
+                            if (client.player != null) {
+                                ServerSend.GrantedAttack(client.id, atkTown.position, deffTown.position);
                             }
                         }
                     }
@@ -73,40 +73,40 @@ namespace Game_Server.KI {
             }
         }
 
-        private Town GetPossibleAttackTarget(Town _atkTown) {
-            int _conquerRadius = i.gene.initialConquerRadius;
-            Town _target = null;
+        private Town GetPossibleAttackTarget(Town atkTown) {
+            int conquerRadius = i.gene.initialConquerRadius;
+            Town target = null;
             QuadTree tree = gm.game.tree;
 
-            while (_target == null && _conquerRadius < i.gene.maxConquerRadius) {
-                List<TreeNode> _townsInRange;
-                List<Town> _enemyTowns = new List<Town>();
-                Random _r = new Random();
-                _townsInRange = tree.GetAllContentBetween(
-                    (int)(_atkTown.position.X - _conquerRadius),
-                    (int)(_atkTown.position.Z - _conquerRadius),
-                    (int)(_atkTown.position.X + _conquerRadius),
-                    (int)(_atkTown.position.Z + _conquerRadius));
+            while (target == null && conquerRadius < i.gene.maxConquerRadius) {
+                List<TreeNode> townsInRange;
+                List<Town> enemyTowns = new List<Town>();
+                Random r = new Random();
+                townsInRange = tree.GetAllContentBetween(
+                    (int)(atkTown.position.X - conquerRadius),
+                    (int)(atkTown.position.Z - conquerRadius),
+                    (int)(atkTown.position.X + conquerRadius),
+                    (int)(atkTown.position.Z + conquerRadius));
 
-                for(int i = 0; i < _townsInRange.Count; i++) {
-                    if (_townsInRange[i] is Town _deffTown) {
-                        if (!_deffTown.player.username.Equals(_atkTown.player.username) &&
-                        !gm.IsIntersecting(_atkTown.position, _deffTown.position) &&
-                        !_atkTown.outgoing.Contains(_deffTown)) {
-                            _enemyTowns.Add(_deffTown);
+                for (int i = 0; i < townsInRange.Count; i++) {
+                    if (townsInRange[i] is Town deffTown) {
+                        if (!deffTown.player.username.Equals(atkTown.player.username) &&
+                        !gm.IsIntersecting(atkTown.position, deffTown.position) &&
+                        !atkTown.outgoing.Contains(deffTown)) {
+                            enemyTowns.Add(deffTown);
                         }
                     }
                 }
-                if (_enemyTowns.Count > 0) {
-                    return _enemyTowns[_r.Next(0, _enemyTowns.Count - 1)];
+                if (enemyTowns.Count > 0) {
+                    return enemyTowns[r.Next(0, enemyTowns.Count - 1)];
                 }
-                else _conquerRadius += 100;
+                else conquerRadius += 100;
             }
             return null;
         }
 
-        public void GetPossibleSupportTarget(Town _t, QuadTree _quadTree) {
-            int _supportRadius = 400;
+        public void GetPossibleSupportTarget(Town t, QuadTree quadTree) {
+            int supportRadius = 400;
         }
     }
 }

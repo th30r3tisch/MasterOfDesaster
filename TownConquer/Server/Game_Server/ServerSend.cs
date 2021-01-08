@@ -7,92 +7,92 @@ using System.Collections.Generic;
 namespace Game_Server {
     class ServerSend {
 
-        public static void Welcome(int _toClient, string _msg) {
-            using (Packet _packet = new Packet((int)ServerPackets.welcome)) {
-                _packet.Write(_msg);
-                _packet.Write(_toClient);
-                SendTCPData(_toClient, _packet);
+        public static void Welcome(int toClient, string msg) {
+            using (Packet packet = new Packet((int)ServerPackets.welcome)) {
+                packet.Write(msg);
+                packet.Write(toClient);
+                SendTCPData(toClient, packet);
             }
         }
 
-        public static void CreateWorld(int _toClient, Player _player, int _seed, Town _town) {
-            using (Packet _packet = new Packet((int)ServerPackets.createWorld)) {
-                _packet.Write(_player.id);
-                _packet.Write(_player.username);
-                _packet.Write(_player.color);
-                _packet.Write(_player.creationTime.ToBinary());
-                _packet.Write(_seed);
-                _packet.Write(_town.position);
+        public static void CreateWorld(int toClient, Player player, int seed, Town town) {
+            using (Packet packet = new Packet((int)ServerPackets.createWorld)) {
+                packet.Write(player.id);
+                packet.Write(player.username);
+                packet.Write(player.color);
+                packet.Write(player.creationTime.ToBinary());
+                packet.Write(seed);
+                packet.Write(town.position);
 
-                SendTCPData(_toClient, _packet);
+                SendTCPData(toClient, packet);
             }
         }
 
-        public static void UpdateWorld(int _toClient, Player _player, int townNumber, List<Town> _towns) {
-            using (Packet _packet = new Packet((int)ServerPackets.updateWorld)) {
-                _packet.Write(_player.id);
-                _packet.Write(_player.username);
-                _packet.Write(_player.color);
-                _packet.Write(_player.creationTime.ToBinary());
-                _packet.Write(townNumber);
-                foreach (Town _town in _towns) {
-                    _packet.Write(_town.position);
+        public static void UpdateWorld(int toClient, Player player, int townNumber, List<Town> towns) {
+            using (Packet packet = new Packet((int)ServerPackets.updateWorld)) {
+                packet.Write(player.id);
+                packet.Write(player.username);
+                packet.Write(player.color);
+                packet.Write(player.creationTime.ToBinary());
+                packet.Write(townNumber);
+                foreach (Town _town in towns) {
+                    packet.Write(_town.position);
                 }
-                SendTCPData(_toClient, _packet);
+                SendTCPData(toClient, packet);
             }
         }
 
-        public static void GrantedAttack(int _toClient, Vector3 _atkTown, Vector3 _deffTown) {
-            using (Packet _packet = new Packet((int)ServerPackets.grantedAttack)) {
-                _packet.Write(_atkTown);
-                _packet.Write(_deffTown);
-                SendTCPData(_toClient, _packet);
+        public static void GrantedAttack(int toClient, Vector3 atkTown, Vector3 deffTown) {
+            using (Packet packet = new Packet((int)ServerPackets.grantedAttack)) {
+                packet.Write(atkTown);
+                packet.Write(deffTown);
+                SendTCPData(toClient, packet);
             }
         }
 
-        public static void GrantedRetreat(int _toClient, Vector3 _atkTown, Vector3 _deffTown) {
-            using (Packet _packet = new Packet((int)ServerPackets.grantedRetreat)) {
-                _packet.Write(_atkTown);
-                _packet.Write(_deffTown);
-                SendTCPData(_toClient, _packet);
+        public static void GrantedRetreat(int toClient, Vector3 atkTown, Vector3 deffTown) {
+            using (Packet packet = new Packet((int)ServerPackets.grantedRetreat)) {
+                packet.Write(atkTown);
+                packet.Write(deffTown);
+                SendTCPData(toClient, packet);
             }
         }
 
-        public static void GrantedConquer(int _toClient, Player _player, Vector3 _deffTown) {
-            using (Packet _packet = new Packet((int)ServerPackets.grantedConquer)) {
-                _packet.Write(_player.id);
-                _packet.Write(_deffTown);
-                SendTCPData(_toClient, _packet);
-                Console.WriteLine($"Conquer of {_deffTown} is GRANTED.");
+        public static void GrantedConquer(int toClient, Player player, Vector3 deffTown) {
+            using (Packet packet = new Packet((int)ServerPackets.grantedConquer)) {
+                packet.Write(player.id);
+                packet.Write(deffTown);
+                SendTCPData(toClient, packet);
+                Console.WriteLine($"Conquer of {deffTown} is GRANTED.");
             }
         }
 
-        public static void PlayerDisconneced(int _playerId) {
-            using (Packet _packet = new Packet((int)ServerPackets.playerDisconnected)) {
-                _packet.Write(_playerId);
-                SendTCPDataToAll(_packet);
-                Console.WriteLine($"Player with ID: {_playerId} disconnected.");
+        public static void PlayerDisconneced(int playerId) {
+            using (Packet packet = new Packet((int)ServerPackets.playerDisconnected)) {
+                packet.Write(playerId);
+                SendTCPDataToAll(packet);
+                Console.WriteLine($"Player with ID: {playerId} disconnected.");
             }
         }
 
         #region TCP
 
-        private static void SendTCPData(int _toClient, Packet _packet) {
-            _packet.WriteLength();
-            Server.clients[_toClient].tcp.SendData(_packet);
+        private static void SendTCPData(int toClient, Packet packet) {
+            packet.WriteLength();
+            Server.clients[toClient].tcp.SendData(packet);
         }
 
-        private static void SendTCPDataToAll(Packet _packet) {
-            _packet.WriteLength();
-            for (int i = 1; i <= Server.MaxPlayers; i++) {
-                Server.clients[i].tcp.SendData(_packet);
+        private static void SendTCPDataToAll(Packet packet) {
+            packet.WriteLength();
+            for (int i = 1; i <= Server.maxPlayers; i++) {
+                Server.clients[i].tcp.SendData(packet);
             }
         }
-        private static void SendTCPDataToAll(int _exceptClient, Packet _packet) {
-            _packet.WriteLength();
-            for (int i = 1; i <= Server.MaxPlayers; i++) {
-                if (i != _exceptClient) {
-                    Server.clients[i].tcp.SendData(_packet);
+        private static void SendTCPDataToAll(int exceptClient, Packet packet) {
+            packet.WriteLength();
+            for (int i = 1; i <= Server.maxPlayers; i++) {
+                if (i != exceptClient) {
+                    Server.clients[i].tcp.SendData(packet);
                 }
             }
         }
@@ -100,22 +100,22 @@ namespace Game_Server {
         #endregion
         #region UDP
 
-        private static void SendUDPData(int _toClient, Packet _packet) {
-            _packet.WriteLength();
-            Server.clients[_toClient].udp.SendData(_packet);
+        private static void SendUDPData(int toClient, Packet packet) {
+            packet.WriteLength();
+            Server.clients[toClient].udp.SendData(packet);
         }
 
-        private static void SendUDPDataToAll(Packet _packet) {
-            _packet.WriteLength();
-            for (int i = 1; i <= Server.MaxPlayers; i++) {
-                Server.clients[i].udp.SendData(_packet);
+        private static void SendUDPDataToAll(Packet packet) {
+            packet.WriteLength();
+            for (int i = 1; i <= Server.maxPlayers; i++) {
+                Server.clients[i].udp.SendData(packet);
             }
         }
-        private static void SendUDPDataToAll(int _exceptClient, Packet _packet) {
-            _packet.WriteLength();
-            for (int i = 1; i <= Server.MaxPlayers; i++) {
-                if (i != _exceptClient) {
-                    Server.clients[i].udp.SendData(_packet);
+        private static void SendUDPDataToAll(int exceptClient, Packet packet) {
+            packet.WriteLength();
+            for (int i = 1; i <= Server.maxPlayers; i++) {
+                if (i != exceptClient) {
+                    Server.clients[i].udp.SendData(packet);
                 }
             }
         }

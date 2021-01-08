@@ -5,190 +5,191 @@ using System.Numerics;
 namespace SharedLibrary.Models {
 
     public class QuadTree {
-        int MAX_CAPACITY = 4;
-        private int level = 0;
-        private List<TreeNode> treeNodes;
-        private QuadTree northWest = null;
-        private QuadTree northEast = null;
-        private QuadTree southWest = null;
-        private QuadTree southEast = null;
-        private TreeBoundry boundry;
+        private const int MAX_CAPACITY = 4;
 
-        public QuadTree(int _level, TreeBoundry _boundry) {
-            level = _level;
-            treeNodes = new List<TreeNode>();
-            boundry = _boundry;
+        private int _level = 0;
+        private List<TreeNode> _treeNodes;
+        private QuadTree _northWest = null;
+        private QuadTree _northEast = null;
+        private QuadTree _southWest = null;
+        private QuadTree _southEast = null;
+        private TreeBoundry _boundry;
+
+        public QuadTree(int level, TreeBoundry boundry) {
+            _level = level;
+            _treeNodes = new List<TreeNode>();
+            _boundry = boundry;
         }
 
         void Split() {
-            int _xOffset = boundry.xMin
-                    + (boundry.xMax - boundry.xMin) / 2;
-            int _zOffset = boundry.zMin
-                    + (boundry.zMax - boundry.zMin) / 2;
+            int xOffset = _boundry.xMin
+                    + (_boundry.xMax - _boundry.xMin) / 2;
+            int zOffset = _boundry.zMin
+                    + (_boundry.zMax - _boundry.zMin) / 2;
 
-            northWest = new QuadTree(level + 1, new TreeBoundry(
-                    boundry.xMin,
-                    boundry.zMin,
-                    _xOffset,
-                    _zOffset));
-            northEast = new QuadTree(level + 1, new TreeBoundry(
-                    _xOffset,
-                    boundry.zMin,
-                    boundry.xMax,
-                    _zOffset));
-            southWest = new QuadTree(level + 1, new TreeBoundry(
-                    boundry.xMin,
-                    _zOffset,
-                    _xOffset,
-                    boundry.zMax));
-            southEast = new QuadTree(level + 1, new TreeBoundry(
-                    _xOffset,
-                    _zOffset,
-                    boundry.xMax,
-                    boundry.zMax));
+            _northWest = new QuadTree(_level + 1, new TreeBoundry(
+                    _boundry.xMin,
+                    _boundry.zMin,
+                    xOffset,
+                    zOffset));
+            _northEast = new QuadTree(_level + 1, new TreeBoundry(
+                    xOffset,
+                    _boundry.zMin,
+                    _boundry.xMax,
+                    zOffset));
+            _southWest = new QuadTree(_level + 1, new TreeBoundry(
+                    _boundry.xMin,
+                    zOffset,
+                    xOffset,
+                    _boundry.zMax));
+            _southEast = new QuadTree(_level + 1, new TreeBoundry(
+                    xOffset,
+                    zOffset,
+                    _boundry.xMax,
+                    _boundry.zMax));
 
         }
 
         /// <summary>
         /// Inserts a node into the quadtree
         /// </summary>
-        /// <param name="_treeNode">The node to insert</param>
-        public void Insert(TreeNode _treeNode) {
-            float _x = _treeNode.position.X;
-            float _z = _treeNode.position.Z;
-            if (!boundry.inRange(_x, _z)) {
+        /// <param name="treeNode">The node to insert</param>
+        public void Insert(TreeNode treeNode) {
+            float x = treeNode.position.X;
+            float z = treeNode.position.Z;
+            if (!_boundry.InRange(x, z)) {
                 return;
             }
 
-            if (treeNodes.Count < MAX_CAPACITY) {
-                treeNodes.Add(_treeNode);
+            if (_treeNodes.Count < MAX_CAPACITY) {
+                _treeNodes.Add(treeNode);
                 return;
             }
             // Exceeded the capacity so split it in FOUR
-            if (northWest == null) {
+            if (_northWest == null) {
                 Split();
             }
 
             // Check to which partition coordinates belong
-            if (northWest.boundry.inRange(_x, _z))
-                northWest.Insert(_treeNode);
-            else if (northEast.boundry.inRange(_x, _z))
-                northEast.Insert(_treeNode);
-            else if (southWest.boundry.inRange(_x, _z))
-                southWest.Insert(_treeNode);
-            else if (southEast.boundry.inRange(_x, _z))
-                southEast.Insert(_treeNode);
+            if (_northWest._boundry.InRange(x, z))
+                _northWest.Insert(treeNode);
+            else if (_northEast._boundry.InRange(x, z))
+                _northEast.Insert(treeNode);
+            else if (_southWest._boundry.InRange(x, z))
+                _southWest.Insert(treeNode);
+            else if (_southEast._boundry.InRange(x, z))
+                _southEast.Insert(treeNode);
             else
-                Console.WriteLine($"ERROR : Unhandled partition {_x} {_z}");
+                Console.WriteLine($"ERROR : Unhandled partition {x} {z}");
         }
 
         /// <summary>
         /// Searches and returns all content of the quadtree within the specified bounds
         /// </summary>
-        /// <param name="_tree">The quadtree to search in</param>
-        /// <param name="_startX">start x</param>
-        /// <param name="_startZ">start z</param>
-        /// <param name="_endX">end x</param>
-        /// <param name="_endZ">end z</param>
-        /// <param name="_wholeMap">List of all found objects</param>
-        private void GetAreaContent(QuadTree _tree, int _startX, int _startZ, int _endX, int _endZ, List<TreeNode> _wholeMap) {
-            if (_tree == null) return;
+        /// <param name="tree">The quadtree to search in</param>
+        /// <param name="startX">start x</param>
+        /// <param name="startZ">start z</param>
+        /// <param name="endX">end x</param>
+        /// <param name="endZ">end z</param>
+        /// <param name="wholeMap">List of all found objects</param>
+        private void GetAreaContent(QuadTree tree, int startX, int startZ, int endX, int endZ, List<TreeNode> wholeMap) {
+            if (tree == null) return;
 
-            if (!(_startX > _tree.boundry.xMax) && !(_endX < _tree.boundry.xMin) && !(_startZ > _tree.boundry.zMax) && !(_endZ < _tree.boundry.zMin)) {
-                foreach (TreeNode _treeNode in _tree.treeNodes) {
-                    if (_treeNode.InRange(_startX, _startZ, _endX, _endZ)) {
-                        _wholeMap.Add(_treeNode);
+            if (!(startX > tree._boundry.xMax) && !(endX < tree._boundry.xMin) && !(startZ > tree._boundry.zMax) && !(endZ < tree._boundry.zMin)) {
+                foreach (TreeNode treeNode in tree._treeNodes) {
+                    if (treeNode.InRange(startX, startZ, endX, endZ)) {
+                        wholeMap.Add(treeNode);
                     }
                 }
             }
-            GetAreaContent(_tree.northWest, _startX, _startZ, _endX, _endZ, _wholeMap);
-            GetAreaContent(_tree.northEast, _startX, _startZ, _endX, _endZ, _wholeMap);
-            GetAreaContent(_tree.southWest, _startX, _startZ, _endX, _endZ, _wholeMap);
-            GetAreaContent(_tree.southEast, _startX, _startZ, _endX, _endZ, _wholeMap);
+            GetAreaContent(tree._northWest, startX, startZ, endX, endZ, wholeMap);
+            GetAreaContent(tree._northEast, startX, startZ, endX, endZ, wholeMap);
+            GetAreaContent(tree._southWest, startX, startZ, endX, endZ, wholeMap);
+            GetAreaContent(tree._southEast, startX, startZ, endX, endZ, wholeMap);
         }
 
-        public List<TreeNode> GetAllContentBetween(int _startX, int _startZ, int _endX, int _endZ) {
-            List<TreeNode> _wholeMap = new List<TreeNode>();
-            GetAreaContent(this, _startX, _startZ, _endX, _endZ, _wholeMap);
-            return _wholeMap;
+        public List<TreeNode> GetAllContentBetween(int startX, int startZ, int endX, int endZ) {
+            List<TreeNode> wholeMap = new List<TreeNode>();
+            GetAreaContent(this, startX, startZ, endX, endZ, wholeMap);
+            return wholeMap;
         }
 
         /// <summary>
         /// Adds the attack or support reference between two towns
         /// </summary>
-        /// <param name="_atkTown">the origin of the action</param>
-        /// <param name="_deffTown">the target of the action</param>
-        public void AddTownActionReference(Town _atkTown, Town _deffTown) {
-            if (_atkTown.player == _deffTown.player) {
-                if (!_deffTown.supporterTowns.Contains(_atkTown)) {
-                    _deffTown.AddSupporterTown(_atkTown);
+        /// <param name="atkTown">the origin of the action</param>
+        /// <param name="deffTown">the target of the action</param>
+        public void AddTownActionReference(Town atkTown, Town deffTown) {
+            if (atkTown.player == deffTown.player) {
+                if (!deffTown.supporterTowns.Contains(atkTown)) {
+                    deffTown.supporterTowns.Add(atkTown);
                 }
             }
             else {
-                if (!_deffTown.attackerTowns.Contains(_atkTown)) {
-                    _deffTown.AddAttackTown(_atkTown);
+                if (!deffTown.attackerTowns.Contains(atkTown)) {
+                    deffTown.attackerTowns.Add(atkTown);
                 }
             }
-            _atkTown.AddOutgoingTown(_deffTown);
+            atkTown.outgoing.Add(deffTown);
         }
 
         /// <summary>
         /// Removes the attack or support reference between two towns
         /// </summary>
-        /// <param name="_atkTown">the origin of the action</param>
-        /// <param name="_deffTown">the target of the action</param>
-        public void RmTownActionReference(Town _atkTown, Town _deffTown) {
-            if (_atkTown.player == _deffTown.player) {
-                _deffTown.RemoveSupporterTown(_atkTown);
+        /// <param name="atkTown">the origin of the action</param>
+        /// <param name="deffTown">the target of the action</param>
+        public void RmTownActionReference(Town atkTown, Town deffTown) {
+            if (atkTown.player == deffTown.player) {
+                deffTown.RemoveSupporterTown(atkTown);
             }
             else {
-                _deffTown.RemoveAttackTown(_atkTown);
+                deffTown.RemoveAttackTown(atkTown);
             }
-            _atkTown.RemoveOutgoingTown(_deffTown);
+            atkTown.RemoveOutgoingTown(deffTown);
         }
 
         /// <summary>
         /// Updates the owner of a town when conquered
         /// </summary>
-        /// <param name="_player">The player who conquered the town</param>
-        /// <param name="_town">The town which is conquered</param>
-        public void UpdateOwner(Player _player, Town _town) {
-            Player _oldOwner = _town.player;
-            _oldOwner.towns.Remove(_town);
+        /// <param name="player">The player who conquered the town</param>
+        /// <param name="town">The town which is conquered</param>
+        public void UpdateOwner(Player player, Town town) {
+            Player oldOwner = town.player;
+            oldOwner.towns.Remove(town);
 
-            _town.creationTime = DateTime.Now;
-            _town.player = _player;
-            _player.towns.Add(_town);
+            town.creationTime = DateTime.Now;
+            town.player = player;
+            player.towns.Add(town);
         }
 
         /// <summary>
         /// Searches a town within the quadtree and returns it
         /// </summary>
-        /// <param name="_tree">The quadtree</param>
-        /// <param name="_town">The coord of the town to look for</param>
+        /// <param name="tree">The quadtree</param>
+        /// <param name="town">The coord of the town to look for</param>
         /// <returns>the town object or null if no town is found</returns>
-        public Town SearchTown(QuadTree _tree, Vector3 _town) {
+        public Town SearchTown(QuadTree tree, Vector3 town) {
 
-            if (_tree == null) return null;
+            if (tree == null) return null;
 
-            if (!(_town.X > _tree.boundry.xMax) && !(_town.X < _tree.boundry.xMin) && !(_town.Z > _tree.boundry.zMax) && !(_town.Z < _tree.boundry.zMin)) {
-                for (int i = 0; i < _tree.treeNodes.Count; i++) {
-                    if (_tree.treeNodes[i].IsNode(_town.X, _town.Z)) {
-                        return (Town)_tree.treeNodes[i];
+            if (!(town.X > tree._boundry.xMax) && !(town.X < tree._boundry.xMin) && !(town.Z > tree._boundry.zMax) && !(town.Z < tree._boundry.zMin)) {
+                for (int i = 0; i < tree._treeNodes.Count; i++) {
+                    if (tree._treeNodes[i].IsNode(town.X, town.Z)) {
+                        return (Town)tree._treeNodes[i];
                     }
                 }
             }
-            if (SearchTown(_tree.northWest, _town) != null) {
-                return SearchTown(_tree.northWest, _town);
+            if (SearchTown(tree._northWest, town) != null) {
+                return SearchTown(tree._northWest, town);
             }
-            if (SearchTown(_tree.northEast, _town) != null) {
-                return SearchTown(_tree.northEast, _town);
+            if (SearchTown(tree._northEast, town) != null) {
+                return SearchTown(tree._northEast, town);
             }
-            if (SearchTown(_tree.southWest, _town) != null) {
-                return SearchTown(_tree.southWest, _town);
+            if (SearchTown(tree._southWest, town) != null) {
+                return SearchTown(tree._southWest, town);
             }
-            if (SearchTown(_tree.southEast, _town) != null) {
-                return SearchTown(_tree.southEast, _town);
+            if (SearchTown(tree._southEast, town) != null) {
+                return SearchTown(tree._southEast, town);
             }
             return null;
         }

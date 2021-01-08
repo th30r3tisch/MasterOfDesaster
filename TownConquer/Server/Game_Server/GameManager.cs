@@ -35,39 +35,37 @@ namespace Game_Server {
         }
 
         private void CreateTowns() {
-            for (int _i = 0; _i < Constants.TOWN_NUMBER; _i++) {
+            for (int i = 0; i < Constants.TOWN_NUMBER; i++) {
                 CreateTown(game.initOwner);
             }
         }
 
-        public Town CreateTown(Player _owner) {
-            Town _t = null;
+        public Town CreateTown(Player owner) {
+            Town t = null;
             QuadTree tree = game.tree;
-            while (_t == null) {
-                int _x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
-                int _z = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
-                if (_owner.id == 999) {
-                    Console.WriteLine($"{_owner.id} wants town at {_x }|{_z}");
-                }
+            while (t == null) {
+                int x = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES);
+                int z = RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES);
+
                 if (tree.GetAllContentBetween(
-                    (_x - Constants.TOWN_MIN_DISTANCE),
-                    (_z - Constants.OBSTACLE_MAX_LENGTH / 2), // divided by 2 because point is center of object
-                    (_x + Constants.TOWN_MIN_DISTANCE),
-                    (_z + Constants.OBSTACLE_MAX_LENGTH / 2)).Count == 0) { // check vertical objects
+                    (x - Constants.TOWN_MIN_DISTANCE),
+                    (z - Constants.OBSTACLE_MAX_LENGTH / 2), // divided by 2 because point is center of object
+                    (x + Constants.TOWN_MIN_DISTANCE),
+                    (z + Constants.OBSTACLE_MAX_LENGTH / 2)).Count == 0) { // check vertical objects
                     if (tree.GetAllContentBetween(
-                        (_x - Constants.OBSTACLE_MAX_LENGTH / 2),
-                        (_z - Constants.TOWN_MIN_DISTANCE),
-                        (_x + Constants.OBSTACLE_MAX_LENGTH / 2),
-                        (_z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check horizontal objects
-                        _t = new Town(new Vector3(_x, 5, _z));
+                        (x - Constants.OBSTACLE_MAX_LENGTH / 2),
+                        (z - Constants.TOWN_MIN_DISTANCE),
+                        (x + Constants.OBSTACLE_MAX_LENGTH / 2),
+                        (z + Constants.TOWN_MIN_DISTANCE)).Count == 0) { // check horizontal objects
+                        t = new Town(new Vector3(x, 5, z));
                     }
                 }
             }
-            _t.player = _owner;
-            _t.creationTime = _owner.creationTime;
-            _owner.towns.Add(_t);
-            tree.Insert(_t);
-            return _t;
+            t.player = owner;
+            t.creationTime = owner.creationTime;
+            owner.towns.Add(t);
+            tree.Insert(t);
+            return t;
         }
 
         private void CreateObstacles() {
@@ -83,13 +81,13 @@ namespace Game_Server {
             }
         }
 
-        public bool IsIntersecting(Vector3 _atkTown, Vector3 _deffTown) {
+        public bool IsIntersecting(Vector3 atkTown, Vector3 deffTown) {
             QuadTree tree = game.tree;
             List<TreeNode> intersectionObjs = new List<TreeNode>();
-            int t1x = (int)_atkTown.X;
-            int t1z = (int)_atkTown.Z;
-            int t2x = (int)_deffTown.X;
-            int t2z = (int)_deffTown.Z;
+            int t1x = (int)atkTown.X;
+            int t1z = (int)atkTown.Z;
+            int t2x = (int)deffTown.X;
+            int t2z = (int)deffTown.Z;
             int startX = Math.Min(t1x, t2x);
             int startZ = Math.Min(t1z, t2z);
             int endX = Math.Max(t1x, t2x);
@@ -107,30 +105,30 @@ namespace Game_Server {
                 endX + Constants.OBSTACLE_MAX_LENGTH / 2,
                 endZ));
             if (intersectionObjs.Count != 0) {
-                foreach (TreeNode _node in intersectionObjs) {
-                    if (_node.GetType() == typeof(Obstacle)) {
+                foreach (TreeNode node in intersectionObjs) {
+                    if (node.GetType() == typeof(Obstacle)) {
 
-                        Obstacle _o = (Obstacle)_node;
-                        bool _intersecting = false;
+                        Obstacle o = (Obstacle)node;
+                        bool intersecting;
 
-                        if (_o.orientation == 1) { // horizontal
-                            _intersecting = LineSegmentsIntersection(
-                                new Vector2(_atkTown.X, _atkTown.Z),
-                                new Vector2(_deffTown.X, _deffTown.Z),
-                                new Vector2(_node.position.X - (_o.width / 2), _node.position.Z),
-                                new Vector2(_node.position.X + (_o.width / 2), _node.position.Z)
+                        if (o.orientation == 1) { // horizontal
+                            intersecting = LineSegmentsIntersection(
+                                new Vector2(atkTown.X, atkTown.Z),
+                                new Vector2(deffTown.X, deffTown.Z),
+                                new Vector2(node.position.X - (o.width / 2), node.position.Z),
+                                new Vector2(node.position.X + (o.width / 2), node.position.Z)
                                 );
                         }
                         else { // vertical
-                            _intersecting = LineSegmentsIntersection(
-                                new Vector2(_atkTown.X, _atkTown.Z),
-                                new Vector2(_deffTown.X, _deffTown.Z),
-                                new Vector2(_node.position.X, _node.position.Z - (_o.length / 2)),
-                                new Vector2(_node.position.X, _node.position.Z + (_o.length / 2))
+                            intersecting = LineSegmentsIntersection(
+                                new Vector2(atkTown.X, atkTown.Z),
+                                new Vector2(deffTown.X, deffTown.Z),
+                                new Vector2(node.position.X, node.position.Z - (o.length / 2)),
+                                new Vector2(node.position.X, node.position.Z + (o.length / 2))
                                 );
                         }
 
-                        if (_intersecting) return true;
+                        if (intersecting) return true;
                     }
                 }
             }
@@ -138,7 +136,7 @@ namespace Game_Server {
         }
 
         // https://github.com/setchi/Unity-LineSegmentsIntersection
-        public bool LineSegmentsIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4) {
+        private bool LineSegmentsIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4) {
             Vector2 intersection = Vector2.Zero;
 
             var d = (p2.X - p1.X) * (p4.Y - p3.Y) - (p2.Y - p1.Y) * (p4.X - p3.X);
@@ -160,82 +158,82 @@ namespace Game_Server {
             return true;
         }
 
-        private int RandomNumber(int _min, int _max) {
-            return game.r.Next(_max - _min + 1) + _min;
+        private int RandomNumber(int min, int max) {
+            return game.r.Next(max - min + 1) + min;
         }
 
-        public void AddAttackToTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
+        public void AddAttackToTown(Vector3 atk, Vector3 deff, DateTime timeStamp) {
             lock (treeLock) {
                 QuadTree tree = game.tree;
-                Town _atkTown = tree.SearchTown(tree, _atk);
-                Town _deffTown = tree.SearchTown(tree, _deff);
-                CalculateTownLife(_atkTown, _timeStamp);
-                CalculateTownLife(_deffTown, _timeStamp);
-                tree.AddTownActionReference(_atkTown, _deffTown);
+                Town atkTown = tree.SearchTown(tree, atk);
+                Town deffTown = tree.SearchTown(tree, deff);
+                CalculateTownLife(atkTown, timeStamp);
+                CalculateTownLife(deffTown, timeStamp);
+                tree.AddTownActionReference(atkTown, deffTown);
             }
         }
 
-        public void RemoveAttackFromTown(Vector3 _atk, Vector3 _deff, DateTime _timeStamp) {
+        public void RemoveAttackFromTown(Vector3 atk, Vector3 deff, DateTime timeStamp) {
             lock (treeLock) {
                 QuadTree tree = game.tree;
-                Town _atkTown = tree.SearchTown(tree, _atk);
-                Town _deffTown = tree.SearchTown(tree, _deff);
-                CalculateTownLife(_atkTown, _timeStamp);
-                CalculateTownLife(_deffTown, _timeStamp);
-                tree.RmTownActionReference(_atkTown, _deffTown);
+                Town atkTown = tree.SearchTown(tree, atk);
+                Town deffTown = tree.SearchTown(tree, deff);
+                CalculateTownLife(atkTown, timeStamp);
+                CalculateTownLife(deffTown, timeStamp);
+                tree.RmTownActionReference(atkTown, deffTown);
             }
         }
 
-        public void ConquerTown(Player _player, Vector3 _town, DateTime _timeStamp) {
+        public void ConquerTown(Player player, Vector3 town, DateTime timeStamp) {
             lock (treeLock) {
                 QuadTree tree = game.tree;
-                Town _deffTown = tree.SearchTown(tree, _town);
-                CalculateTownLife(_deffTown, _timeStamp);
-                UpdateTown(_deffTown, _timeStamp);
+                Town deffTown = tree.SearchTown(tree, town);
+                CalculateTownLife(deffTown, timeStamp);
+                UpdateTown(deffTown, timeStamp);
 
-                tree.UpdateOwner(_player, _deffTown);
+                tree.UpdateOwner(player, deffTown);
             }
         }
 
-        public void UpdateTown(Town _town, DateTime _timeStamp) {
+        public void UpdateTown(Town town, DateTime timeStamp) {
             lock (treeLock) {
                 QuadTree tree = game.tree;
                 // removes all incoming atk troops and deletes references in both towns
-                for (int i = _town.attackerTowns.Count; i > 0; i--) {
-                    CalculateTownLife(_town.attackerTowns[i - 1], _timeStamp);
-                    tree.RmTownActionReference(_town.attackerTowns[i - 1], _town);
+                for (int i = town.attackerTowns.Count; i > 0; i--) {
+                    CalculateTownLife(town.attackerTowns[i - 1], timeStamp);
+                    tree.RmTownActionReference(town.attackerTowns[i - 1], town);
                 }
 
                 // removes all incoming support troops and deletes references in both towns
-                for (int i = _town.supporterTowns.Count; i > 0; i--) {
-                    CalculateTownLife(_town.supporterTowns[i - 1], _timeStamp);
-                    tree.RmTownActionReference(_town.supporterTowns[i - 1], _town);
+                for (int i = town.supporterTowns.Count; i > 0; i--) {
+                    CalculateTownLife(town.supporterTowns[i - 1], timeStamp);
+                    tree.RmTownActionReference(town.supporterTowns[i - 1], town);
                 }
 
                 // removes all outgoing troops and deletes references in both towns
-                for (int i = _town.outgoing.Count; i > 0; i--) {
-                    CalculateTownLife(_town.outgoing[i - 1], _timeStamp);
-                    tree.RmTownActionReference(_town, _town.outgoing[i - 1]);
+                for (int i = town.outgoing.Count; i > 0; i--) {
+                    CalculateTownLife(town.outgoing[i - 1], timeStamp);
+                    tree.RmTownActionReference(town, town.outgoing[i - 1]);
                 }
             }
         }
 
-        public void CalculateTownLife(Town _town, DateTime _creationTime) {
-            TimeSpan span = _creationTime.Subtract(_town.creationTime);
+        public void CalculateTownLife(Town town, DateTime creationTime) {
+            TimeSpan span = creationTime.Subtract(town.creationTime);
             float timePassed = (float)span.TotalSeconds;
-            int firstLifeCalc = _town.life;
+            int firstLifeCalc = town.life;
 
-            if (_town.player.id != -1) {
+            if (town.player.id != -1) {
                 int rawTownLife = (int)(timePassed / Constants.TOWN_GROTH_SECONDS);
-                int lostLifeByOutgoing = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * _town.outgoing.Count);
-                int gotLifeByIncoming = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * _town.supporterTowns.Count);
+                int lostLifeByOutgoing = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * town.outgoing.Count);
+                int gotLifeByIncoming = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * town.supporterTowns.Count);
                 firstLifeCalc += rawTownLife - lostLifeByOutgoing + gotLifeByIncoming;
             }
-            int lostLifeByIncoming = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * _town.attackerTowns.Count);
+            int lostLifeByIncoming = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * town.attackerTowns.Count);
 
             int finalNewLife = firstLifeCalc - lostLifeByIncoming;
-            _town.life = finalNewLife;
-            _town.creationTime = _creationTime;
+            town.life = finalNewLife;
+            town.creationTime = creationTime;
         }
 
         public void CreateKis() {

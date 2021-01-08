@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Game_Server.writer {
     class KnapsackStat : StatEntry {

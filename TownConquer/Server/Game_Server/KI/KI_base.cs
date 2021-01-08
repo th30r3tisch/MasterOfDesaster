@@ -9,44 +9,44 @@ namespace Game_Server.KI {
     abstract class KI_base {
 
         public Player player { get; set; }
-        public GameManager gm { get; set; }
 
+        protected GameManager gm { get; set; }
         protected int tickLength;
         protected int protocollTime;
         protected Individual i;
 
-        public KI_base(GameManager _gm) {
+        public KI_base(GameManager gm) {
             tickLength = (int)(Constants.TOWN_GROTH_SECONDS * 1000 + 10);
             protocollTime = tickLength * 5;
-            gm = _gm;
+            this.gm = gm;
         }
 
-        public Task<Individual> Start(CancellationToken _ct, Individual _i) {
-            i = _i;
+        public Task<Individual> Start(CancellationToken ct, Individual i) {
+            this.i = i;
             gm.game.kis.Add(this);
-            return Task.Run(() => PlayAsync(_ct));
+            return Task.Run(() => PlayAsync(ct));
         }
 
-        public abstract Task<Individual> PlayAsync(CancellationToken ct);
+        protected abstract Task<Individual> PlayAsync(CancellationToken ct);
 
-        protected void CheckKITownLifes(Town _town) {
-            gm.CalculateTownLife(_town, DateTime.Now);
-            if (_town.life <= 0) {
-                _town.life = 0;
-                for (int i = _town.outgoing.Count; i > 0; i--) {
-                    gm.RemoveAttackFromTown(_town.position, _town.outgoing[i-1].position, DateTime.Now);
+        protected void CheckKITownLifes(Town town) {
+            gm.CalculateTownLife(town, DateTime.Now);
+            if (town.life <= 0) {
+                town.life = 0;
+                for (int i = town.outgoing.Count; i > 0; i--) {
+                    gm.RemoveAttackFromTown(town.position, town.outgoing[i - 1].position, DateTime.Now);
                 }
             }
             lock (gm.treeLock) {
-                foreach (Town _t in _town.outgoing) {
-                    gm.CalculateTownLife(_t, DateTime.Now);
-                    if (_t.life <= 0) {
-                        _town.life = 0;
-                        gm.ConquerTown(player, _t.position, DateTime.Now);
+                foreach (Town t in town.outgoing) {
+                    gm.CalculateTownLife(t, DateTime.Now);
+                    if (t.life <= 0) {
+                        town.life = 0;
+                        gm.ConquerTown(player, t.position, DateTime.Now);
                         if (Constants.TRAININGS_MODE == false) {
-                            foreach (Client _client in Server.clients.Values) {
-                                if (_client.player != null) {
-                                    ServerSend.GrantedConquer(_client.id, player, _t.position);
+                            foreach (Client client in Server.clients.Values) {
+                                if (client.player != null) {
+                                    ServerSend.GrantedConquer(client.id, player, t.position);
                                 }
                             }
                         }

@@ -1,5 +1,5 @@
 ﻿namespace Game_Server.EA.Models {
-    internal class Genotype {
+    class Genotype {
         public int initialConquerRadius;
         public int maxConquerRadius;
     }

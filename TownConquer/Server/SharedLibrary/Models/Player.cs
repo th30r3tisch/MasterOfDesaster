@@ -11,12 +11,13 @@ namespace SharedLibrary.Models {
         public List<Town> towns;
         public DateTime creationTime;
 
-        public Player(int _id, string _username, Color _color, DateTime _creationTime) {
-            id = _id;
-            username = _username;
-            color = _color;
+        public Player(int id, string username, Color color, DateTime creationTime) {
+            this.id = id;
+            this.username = username;
+            this.color = color;
+            this.creationTime = creationTime;
+
             towns = new List<Town>();
-            creationTime = _creationTime;
         }
     }
 }

@@ -8,31 +8,31 @@ public class CameraController : MonoBehaviour {
     public float maxY = 1000; // max scroll height
     public LayerMask mask;
 
-    private RaycastHit oldMousePos;
-    private bool topdown = false;
+    private RaycastHit _oldMousePos;
+    private bool _topdown = false;
 
 
     void Update() {
 
-        Vector3 _pos = transform.position;
+        Vector3 pos = transform.position;
 
-        _pos = DragWorld(_pos);
-        _pos = ZoomWorld(_pos);
-        _pos = LimitCameraMovement(_pos);
+        pos = DragWorld(pos);
+        pos = ZoomWorld(pos);
+        pos = LimitCameraMovement(pos);
 
-        transform.position = _pos;
+        transform.position = pos;
 
         ToggleTopdownView();
     }
 
     private void ToggleTopdownView() {
-        if (Input.GetKeyDown(KeyCode.Space) && !topdown) {
+        if (Input.GetKeyDown(KeyCode.Space) && !_topdown) {
             transform.rotation = Quaternion.Euler(90, 0, 0);
-            topdown = true;
+            _topdown = true;
         }
-        else if (Input.GetKeyDown(KeyCode.Space) && topdown) {
+        else if (Input.GetKeyDown(KeyCode.Space) && _topdown) {
             transform.rotation = Quaternion.Euler(30, 0, 0);
-            topdown = false;
+            _topdown = false;
         }
     }
 
@@ -40,49 +40,48 @@ public class CameraController : MonoBehaviour {
     /// <summary>
     /// drags the camera through the world
     /// </summary>
-    /// <param name="_pos">current position of the camera</param>
+    /// <param name="pos">current position of the camera</param>
     /// <returns>new position of the camera</returns>
-    Vector3 DragWorld(Vector3 _pos) {
+    Vector3 DragWorld(Vector3 pos) {
 
         if (Input.GetKey(KeyCode.LeftAlt)) {
             // on mouse btn click
             if (Input.GetMouseButtonDown(0)) {
-                Ray _ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                Physics.Raycast(_ray, out oldMousePos, Mathf.Infinity, mask);
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                Physics.Raycast(ray, out _oldMousePos, Mathf.Infinity, mask);
             }
 
 
             // during mouse button hold down
             if (Input.GetMouseButton(0)) {
-                Ray _ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit currentMousePos;
-                Physics.Raycast(_ray, out currentMousePos, Mathf.Infinity, mask);
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                Physics.Raycast(ray, out RaycastHit currentMousePos, Mathf.Infinity, mask);
 
-                _pos.z += oldMousePos.point.z - currentMousePos.point.z;
-                _pos.x += oldMousePos.point.x - currentMousePos.point.x;
-                _pos.y = transform.position.y;
+                pos.z += _oldMousePos.point.z - currentMousePos.point.z;
+                pos.x += _oldMousePos.point.x - currentMousePos.point.x;
+                pos.y = transform.position.y;
             }
         }
 
-        return _pos;
+        return pos;
     }
 
 
     /// <summary>
     /// Zoomes the world in or out in scrolling with the mouse wheel
     /// </summary>
-    /// <param name="_pos">current position of the camera</param>
+    /// <param name="pos">current position of the camera</param>
     /// <returns>new position of the camera</returns>
-    Vector3 ZoomWorld(Vector3 _pos) {
-        float _scroll = Input.GetAxis("Mouse ScrollWheel");
-        _pos.y -= _scroll * scrollspeed * 50f * Time.deltaTime;
-        _pos.y = Mathf.Clamp(_pos.y, minY, maxY);
+    Vector3 ZoomWorld(Vector3 pos) {
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        pos.y -= scroll * scrollspeed * 50f * Time.deltaTime;
+        pos.y = Mathf.Clamp(pos.y, minY, maxY);
 
-        return _pos;
+        return pos;
     }
 
-    Vector3 LimitCameraMovement(Vector3 _pos) {
-        return new Vector3(Mathf.Clamp(_pos.x, 0, Constants.MAP_WIDTH), Mathf.Clamp(_pos.y, minY, maxY), Mathf.Clamp(_pos.z, -600, Constants.MAP_HEIGHT));
+    Vector3 LimitCameraMovement(Vector3 pos) {
+        return new Vector3(Mathf.Clamp(pos.x, 0, Constants.MAP_WIDTH), Mathf.Clamp(pos.y, minY, maxY), Mathf.Clamp(pos.z, -600, Constants.MAP_HEIGHT));
     }
 
 }

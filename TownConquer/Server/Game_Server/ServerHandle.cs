@@ -5,49 +5,49 @@ using System.Numerics;
 
 namespace Game_Server {
     class ServerHandle {
-        public static void WelcomeReceived(int _fromClient, Packet _packet) {
-            int _clientIdCheck = _packet.ReadInt();
-            string _username = _packet.ReadString();
-            Color _color = _packet.ReadColor();
+        public static void WelcomeReceived(int fromClient, Packet packet) {
+            int clientIdCheck = packet.ReadInt();
+            string username = packet.ReadString();
+            Color color = packet.ReadColor();
 
-            Console.WriteLine($"{Server.clients[_fromClient].tcp.socket.Client.RemoteEndPoint} connected successfully and is now player {_fromClient} - {_username}.");
-            if (_fromClient != _clientIdCheck) {
-                Console.WriteLine($"Player \" {_username}\" (ID:{_fromClient}) has assumed the wrong client ID ({_clientIdCheck})!");
+            Console.WriteLine($"{Server.clients[fromClient].tcp.socket.Client.RemoteEndPoint} connected successfully and is now player {fromClient} - {username}.");
+            if (fromClient != clientIdCheck) {
+                Console.WriteLine($"Player \" {username}\" (ID:{fromClient}) has assumed the wrong client ID ({clientIdCheck})!");
             }
 
-            Server.clients[_fromClient].SendIntoGame(_username, _color);
+            Server.clients[fromClient].SendIntoGame(username, color);
         }
 
-        public static void AttackRequest(int _fromClient, Packet _packet) {
-            int _clientIdCheck = _packet.ReadInt();
-            Vector3 _atkTown = _packet.ReadVector3();
-            Vector3 _deffTown = _packet.ReadVector3();
-            DateTime _timeStamp = DateTime.FromBinary(_packet.ReadLong());
+        public static void AttackRequest(int fromClient, Packet packet) {
+            int clientIdCheck = packet.ReadInt();
+            Vector3 atkTown = packet.ReadVector3();
+            Vector3 deffTown = packet.ReadVector3();
+            DateTime timeStamp = DateTime.FromBinary(packet.ReadLong());
 
-            Console.WriteLine($"{Server.clients[_fromClient].tcp.socket.Client.RemoteEndPoint} requested an attack at town {_deffTown}.");
+            Console.WriteLine($"{Server.clients[fromClient].tcp.socket.Client.RemoteEndPoint} requested an attack at town {deffTown}.");
 
-            Server.clients[_fromClient].AttackTown(_atkTown, _deffTown, _timeStamp);
+            Server.clients[fromClient].AttackTown(atkTown, deffTown, timeStamp);
         }
 
-        public static void RetreatRequest(int _fromClient, Packet _packet) {
-            int _clientIdCheck = _packet.ReadInt();
-            Vector3 _atkTown = _packet.ReadVector3();
-            Vector3 _deffTown = _packet.ReadVector3();
-            DateTime _timeStamp = DateTime.FromBinary(_packet.ReadLong());
+        public static void RetreatRequest(int fromClient, Packet packet) {
+            int clientIdCheck = packet.ReadInt();
+            Vector3 atkTown = packet.ReadVector3();
+            Vector3 deffTown = packet.ReadVector3();
+            DateTime timeStamp = DateTime.FromBinary(packet.ReadLong());
 
-            Console.WriteLine($"{Server.clients[_fromClient].tcp.socket.Client.RemoteEndPoint} requested an retreat of troops from town {_deffTown}.");
+            Console.WriteLine($"{Server.clients[fromClient].tcp.socket.Client.RemoteEndPoint} requested an retreat of troops from town {deffTown}.");
 
-            Server.clients[_fromClient].RetreatTown(_atkTown, _deffTown, _timeStamp);
+            Server.clients[fromClient].RetreatTown(atkTown, deffTown, timeStamp);
         }
 
-        public static void ConquerRequest(int _fromClient, Packet _packet) {
-            int _clientId = _packet.ReadInt();
-            Vector3 _deffTown = _packet.ReadVector3();
-            DateTime _timeStamp = DateTime.FromBinary(_packet.ReadLong());
+        public static void ConquerRequest(int fromClient, Packet packet) {
+            int clientId = packet.ReadInt();
+            Vector3 deffTown = packet.ReadVector3();
+            DateTime timeStamp = DateTime.FromBinary(packet.ReadLong());
 
-            Console.WriteLine($"{Server.clients[_fromClient].tcp.socket.Client.RemoteEndPoint} requested to conquer {_deffTown}.");
+            Console.WriteLine($"{Server.clients[fromClient].tcp.socket.Client.RemoteEndPoint} requested to conquer {deffTown}.");
 
-            Server.clients[_fromClient].ConquerTown(_clientId, _deffTown, _timeStamp);
+            Server.clients[fromClient].ConquerTown(clientId, deffTown, timeStamp);
         }
     }
 }

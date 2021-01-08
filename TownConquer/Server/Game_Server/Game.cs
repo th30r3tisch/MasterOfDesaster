@@ -11,10 +11,10 @@ namespace Game_Server {
         public Random r;
         public List<KI_base> kis;
 
-        public Game(QuadTree _world, Player _game, Random _r) {
-            tree = _world;
-            initOwner = _game;
-            r = _r;
+        public Game(QuadTree world, Player game, Random r) {
+            tree = world;
+            initOwner = game;
+            this.r = r;
             kis = new List<KI_base>();
         }
     }

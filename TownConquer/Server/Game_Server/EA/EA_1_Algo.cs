@@ -11,16 +11,15 @@ using System.Threading.Tasks;
 
 namespace Game_Server.EA {
     class EA_1_Algo {
-
-        const int populationNumber = 100;
-        const int noImprovementLimit = 1;
+        private const int _populationNumber = 100;
+        private const int _noImprovementLimit = 1;
 
         public EA_1_Algo() {
             Evolve(CreatePopulation(), 0);
         }
 
         private void Evolve(List<Individual> population, int counter) {
-            if (counter < noImprovementLimit) {
+            if (counter < _noImprovementLimit) {
                 population = Evaluate(TrainKis(population));
                 counter++;
                 Evolve(population, counter);
@@ -40,7 +39,7 @@ namespace Game_Server.EA {
                 CancellationTokenSource c = new CancellationTokenSource();
                 CancellationToken token = c.Token;
 
-                KI_base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
+                KI_base eaKI = new KI_1(gm, individual.number, "STATIC" + individual.number, Color.FromArgb(255, 255, 255));
                 KI_base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
                 Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000);
 
@@ -59,7 +58,7 @@ namespace Game_Server.EA {
             Task.WaitAll(tasks);
 
             WriteProtocoll(referenceCollection, "REF");
-            WriteProtocoll(resultCollection, "EA");
+            WriteProtocoll(resultCollection, "STATIC");
 
             return resultCollection;
         }
@@ -71,7 +70,7 @@ namespace Game_Server.EA {
         private List<Individual> CreatePopulation() {
             List<Individual> population = new List<Individual>();
             int populationCount = 0;
-            while (populationCount < populationNumber) {
+            while (populationCount < _populationNumber) {
                 population.Add(CreateIndividual(populationCount, 400, 2000));
                 populationCount++;
             }

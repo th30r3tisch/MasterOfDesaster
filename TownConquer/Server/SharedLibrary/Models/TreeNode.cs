@@ -8,13 +8,13 @@ namespace SharedLibrary.Models {
 
         public TreeNode() { }
 
-        public bool InRange(int _startX, int _startZ, int _endX, int _endZ) {
-            return (position.X >= _startX && position.X <= _endX
-                    && position.Z >= _startZ && position.Z <= _endZ);
+        public bool InRange(int startX, int startZ, int endX, int endZ) {
+            return (position.X >= startX && position.X <= endX
+                    && position.Z >= startZ && position.Z <= endZ);
         }
 
-        public bool IsNode(float _x, float _z) {
-            return (position.X == _x && position.Z == _z);
+        public bool IsNode(float x, float z) {
+            return (position.X == x && position.Z == z);
         }
     }
 }

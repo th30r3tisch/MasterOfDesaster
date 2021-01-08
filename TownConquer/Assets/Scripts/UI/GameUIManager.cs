@@ -12,25 +12,25 @@ public class GameUIManager : MonoBehaviour {
     public Text life;
     public Text ownedSince;
 
-    private Player me;
+    private Player _me;
 
     public void Init() {
-        me = Client.instance.me;
-        playerName.text = me.username;
-        playerName.color = new Color(me.color.R, me.color.G, me.color.B, me.color.A);
+        _me = Client.instance.me;
+        playerName.text = _me.username;
+        playerName.color = new Color(_me.color.R, _me.color.G, _me.color.B, _me.color.A);
     }
 
     void Update() {
-        townNumber.text = me.towns.Count + " towns";
+        townNumber.text = _me.towns.Count + " towns";
     }
 
     public void Close() {
         Application.Quit();
     }
 
-    public void DisplayTownInfo(string _name, float _life, DateTime creation) {
-        owner.text = _name;
-        life.text = _life.ToString();
+    public void DisplayTownInfo(string name, float life, DateTime creation) {
+        owner.text = name;
+        this.life.text = life.ToString();
         ownedSince.text = creation.ToString("HH:mm");
     }
 }

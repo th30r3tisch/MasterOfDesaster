@@ -4,9 +4,8 @@ namespace Game_Server.EA.KnapSack {
     class Item {
         public int value;
         public int weight;
-
-        int maxWeight = 10;
-        int maxValue = 20;
+        private readonly int _maxWeight = 10;
+        private readonly int _maxValue = 20;
 
         public Item(Random r) {
             Create(r);
@@ -17,8 +16,8 @@ namespace Game_Server.EA.KnapSack {
         /// </summary>
         /// <param name="r">Random number generator</param>
         private void Create(Random r) {
-            value = r.Next(1, maxValue);
-            weight = r.Next(1, maxWeight);
+            value = r.Next(1, _maxValue);
+            weight = r.Next(1, _maxWeight);
         }
     }
 }

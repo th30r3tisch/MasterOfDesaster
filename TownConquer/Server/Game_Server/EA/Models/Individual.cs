@@ -4,16 +4,15 @@ namespace Game_Server.EA.Models {
     class Individual {
         public Genotype gene;
         public Result result;
-
         public int number;
         public string name;
         public Vector3 startPos;
         public bool won;
 
-        public Individual(Genotype _gene, int _number) {
+        public Individual(Genotype gene, int number) {
             result = new Result();
-            number = _number;
-            gene = _gene;
+            this.number = number;
+            this.gene = gene;
         }
     }
 }
