@@ -35,6 +35,40 @@ namespace Game_Server.EA {
             }
         }
 
+        private ConcurrentBag<Individual> TrainKis(List<Individual> population) {
+            ConcurrentBag<Individual> resultCollection = new ConcurrentBag<Individual>();
+            ConcurrentBag<Individual> referenceCollection = new ConcurrentBag<Individual>();
+
+            Task[] tasks = population.Select(async individual => {
+                GameManager gm = new GameManager();
+
+                CancellationTokenSource c = new CancellationTokenSource();
+                CancellationToken token = c.Token;
+
+                KI_base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
+                KI_base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
+                Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000, 100, 10);
+
+                var t1 = referenceKI.Start(token, referenceIndividual);
+                var t2 = eaKI.Start(token, individual);
+
+                await Task.WhenAny(t1, t2);
+                c.Cancel();
+                await Task.WhenAll(t1, t2);
+                var result1 = await t1;
+                var result2 = await t2;
+                referenceCollection.Add(result1);
+                resultCollection.Add(result2);
+            }).ToArray();
+
+            Task.WaitAll(tasks);
+
+            WriteProtocoll(referenceCollection, "REF");
+            WriteProtocoll(resultCollection, "EA");
+
+            return resultCollection;
+        }
+
         private List<Individual> CreateOffspring(List<Individual> population) {
             List<Individual> newPopulation = new List<Individual>();
             Individual child;
@@ -72,13 +106,6 @@ namespace Game_Server.EA {
             return child;
         }
 
-        private int Gauss(double deviation, int mutationSize) {
-            double mean = 0;
-            Normal normalDist = new Normal(mean, deviation);
-            int gaussNum = (int) Math.Round(normalDist.Sample(), 1) * mutationSize;
-            return gaussNum;
-        }
-
         private Individual TournamentSelection(List<Individual> population) {
             List<Individual> parents = new List<Individual>();
             int populationSize = population.Count;
@@ -100,11 +127,6 @@ namespace Game_Server.EA {
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="parents"></param>
-        /// <returns></returns>
         private Individual Recombinate(List<Individual> parents) {
             double u = RandomDouble();
             var parentOneProps = parents[0].gene.properties;
@@ -116,44 +138,6 @@ namespace Game_Server.EA {
             }
 
             return parents[0];
-        }
-
-        private double RandomDouble() {
-            return _r.NextDouble() + _r.NextDouble();
-        }
-
-        private ConcurrentBag<Individual> TrainKis(List<Individual> population) {
-            ConcurrentBag<Individual> resultCollection = new ConcurrentBag<Individual>();
-            ConcurrentBag<Individual> referenceCollection = new ConcurrentBag<Individual>();
-
-            Task[] tasks = population.Select(async individual => {
-                GameManager gm = new GameManager();
-
-                CancellationTokenSource c = new CancellationTokenSource();
-                CancellationToken token = c.Token;
-
-                KI_base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
-                KI_base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
-                Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000, 100, 10);
-
-                var t1 = referenceKI.Start(token, referenceIndividual);
-                var t2 = eaKI.Start(token, individual);
-
-                await Task.WhenAny(t1, t2);
-                c.Cancel();
-                await Task.WhenAll(t1, t2);
-                var result1 = await t1;
-                var result2 = await t2;
-                referenceCollection.Add(result1);
-                resultCollection.Add(result2);
-            }).ToArray();
-
-            Task.WaitAll(tasks);
-
-            WriteProtocoll(referenceCollection, "REF");
-            WriteProtocoll(resultCollection, "EA");
-
-            return resultCollection;
         }
 
         private List<Individual> Evaluate(ConcurrentBag<Individual> results) {
@@ -207,6 +191,27 @@ namespace Game_Server.EA {
             }
             writer.WriteStats(stats);
             return results.ToList();
+        }
+
+        /// <summary>
+        /// calculates a random number based on gauss
+        /// </summary>
+        /// <param name="deviation">standard deviation</param>
+        /// <param name="mutationSize">size of the mutation. preferably powers of ten</param>
+        /// <returns>random number based on gauss distribution</returns>
+        private int Gauss(double deviation, int mutationSize) {
+            double mean = 0;
+            Normal normalDist = new Normal(mean, deviation);
+            int gaussNum = (int)Math.Round(normalDist.Sample(), 1) * mutationSize;
+            return gaussNum;
+        }
+
+        /// <summary>
+        /// calculates a random double between 0 and 2
+        /// </summary>
+        /// <returns>random double between 0 and 2</returns>
+        private double RandomDouble() {
+            return _r.NextDouble() + _r.NextDouble();
         }
     }
 }

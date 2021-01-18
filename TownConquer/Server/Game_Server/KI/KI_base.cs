@@ -21,12 +21,23 @@ namespace Game_Server.KI {
             this.gm = gm;
         }
 
+        /// <summary>
+        /// adds the ki to the game and starts the task
+        /// </summary>
+        /// <param name="ct">CancellationToken</param>
+        /// <param name="i">individual</param>
+        /// <returns>task with individual</returns>
         public Task<Individual> Start(CancellationToken ct, Individual i) {
             this.i = i;
             gm.game.kis.Add(this);
             return Task.Run(() => PlayAsync(ct));
         }
 
+        /// <summary>
+        /// includes the play routine of the ki
+        /// </summary>
+        /// <param name="ct">CancellationToken</param>
+        /// <returns>task with individual</returns>
         protected abstract Task<Individual> PlayAsync(CancellationToken ct);
 
         protected void CheckKITownLifes(Town town) {

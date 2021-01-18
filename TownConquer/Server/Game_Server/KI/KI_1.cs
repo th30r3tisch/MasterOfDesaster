@@ -16,6 +16,11 @@ namespace Game_Server.KI {
             t.player = player;
         }
 
+        /// <summary>
+        /// includes the play routine of the ki
+        /// </summary>
+        /// <param name="ct">CancellationToken</param>
+        /// <returns>task with individual</returns>
         protected override async Task<Individual> PlayAsync(CancellationToken ct) {
             Console.WriteLine($"{player.username} started.");
             i.startPos = player.towns[0].position;
@@ -77,7 +82,7 @@ namespace Game_Server.KI {
         }
 
         private void TryAttackTown(Town atkTown) {
-            if (atkTown.life > i.gene.attackMinLife && atkTown.outgoing.Count < 2) {
+            if (atkTown.life > i.gene.properties["attackMinLife"] && atkTown.outgoing.Count < 2) {
                 Town deffTown = GetPossibleAttackTarget(atkTown);
                 if (deffTown != null) {
                     gm.AddAttackToTown(atkTown.position, deffTown.position, DateTime.Now);
@@ -93,12 +98,12 @@ namespace Game_Server.KI {
         }
 
         private Town GetPossibleAttackTarget(Town atkTown) {
-            int conquerRadius = i.gene.initialConquerRadius;
+            int conquerRadius = i.gene.properties["initialConquerRadius"];
             Town target = null;
             QuadTree tree = gm.game.tree;
 
-            while (target == null && conquerRadius < i.gene.maxConquerRadius) {
-                List<TreeNode> townsInRange;
+            while (target == null && conquerRadius < i.gene.properties["maxConquerRadius"]) {
+                List <TreeNode> townsInRange;
                 List<Town> enemyTowns = new List<Town>();
                 Random r = new Random();
                 townsInRange = tree.GetAllContentBetween(
@@ -119,7 +124,7 @@ namespace Game_Server.KI {
                 if (enemyTowns.Count > 0) {
                     return enemyTowns[r.Next(0, enemyTowns.Count - 1)];
                 }
-                else conquerRadius += i.gene.radiusExpansionStep;
+                else conquerRadius += i.gene.properties["radiusExpansionStep"];
             }
             return null;
         }
