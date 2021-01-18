@@ -1,6 +1,8 @@
 ﻿using Game_Server.EA.Models;
 using Game_Server.KI;
 using Game_Server.writer;
+using MathNet.Numerics.Distributions;
+using SharedLibrary;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,8 +15,12 @@ namespace Game_Server.EA {
     class EA_1_Algo {
         private const int _populationNumber = 100;
         private const int _noImprovementLimit = 1;
+        private const double _recombinationProbability = 0.7;
+
+        private readonly Random _r;
 
         public EA_1_Algo() {
+            _r = new Random();
             Evolve(CreatePopulation(), 0);
         }
 
@@ -22,11 +28,98 @@ namespace Game_Server.EA {
             if (counter < _noImprovementLimit) {
                 population = Evaluate(TrainKis(population));
                 counter++;
-                Evolve(population, counter);
+                Evolve(CreateOffspring(population), counter);
             }
             else {
                 Console.WriteLine("FINISHED");
             }
+        }
+
+        private List<Individual> CreateOffspring(List<Individual> population) {
+            List<Individual> newPopulation = new List<Individual>();
+            Individual child;
+
+            for (int i = 0; i < population.Count; i++) {
+                child = TournamentSelection(population);
+                child = Mutate(child);
+                newPopulation.Add(child);
+            }
+
+            ResetNewPopulation(newPopulation);
+            return newPopulation;
+        }
+
+        private void ResetNewPopulation(List<Individual> newPopulation) {
+            for(int i = 0; i < newPopulation.Count; i++) {
+                Individual individual = newPopulation[i];
+                individual.number = i;
+                individual.townNumberDevelopment.Clear();
+                individual.timestamp.Clear();
+                individual.score = 0;
+                individual.townLifeSum = 0;
+    }
+        }
+
+        private Individual Mutate(Individual child) {
+            var childProps = child.gene.properties;
+            double mutationProbability = 1 / childProps.Count();
+            foreach (string key in childProps.Keys.ToList()) {
+                if (_r.NextDouble() < mutationProbability) {
+                    //add or substract a small amount to the value (gauss)
+                    childProps[key] = Math.Abs(childProps[key] + Gauss(0.5, 10));
+                }
+            }
+            return child;
+        }
+
+        private int Gauss(double deviation, int mutationSize) {
+            double mean = 0;
+            Normal normalDist = new Normal(mean, deviation);
+            int gaussNum = (int) Math.Round(normalDist.Sample(), 1) * mutationSize;
+            return gaussNum;
+        }
+
+        private Individual TournamentSelection(List<Individual> population) {
+            List<Individual> parents = new List<Individual>();
+            int populationSize = population.Count;
+            while (parents.Count < 2) {
+                Individual contestantOne = population[_r.Next(0, populationSize)];
+                Individual contestantTwo = population[_r.Next(0, populationSize)];
+                if (contestantOne.fitness > contestantTwo.fitness) {
+                    parents.Add(contestantOne);
+                }
+                else {
+                    parents.Add(contestantTwo);
+                }
+            }
+            if (_r.NextDouble() > _recombinationProbability) {
+                return parents[0];
+            }
+            else {
+                return Recombinate(parents);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="parents"></param>
+        /// <returns></returns>
+        private Individual Recombinate(List<Individual> parents) {
+            double u = RandomDouble();
+            var parentOneProps = parents[0].gene.properties;
+            var parentTwoProps = parents[1].gene.properties;
+
+            foreach (string key in parentOneProps.Keys.ToList()) {
+                // Kind.Ai = u · Elter1.Ai + (1 - u) · Elter2.Ai
+                parentOneProps[key] = (int)(u * parentOneProps[key] + (1 - u) * parentTwoProps[key]);
+            }
+
+            return parents[0];
+        }
+
+        private double RandomDouble() {
+            return _r.NextDouble() + _r.NextDouble();
         }
 
         private ConcurrentBag<Individual> TrainKis(List<Individual> population) {
@@ -39,9 +132,9 @@ namespace Game_Server.EA {
                 CancellationTokenSource c = new CancellationTokenSource();
                 CancellationToken token = c.Token;
 
-                KI_base eaKI = new KI_1(gm, individual.number, "STATIC" + individual.number, Color.FromArgb(255, 255, 255));
+                KI_base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
                 KI_base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
-                Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000);
+                Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000, 100, 10);
 
                 var t1 = referenceKI.Start(token, referenceIndividual);
                 var t2 = eaKI.Start(token, individual);
@@ -58,29 +151,44 @@ namespace Game_Server.EA {
             Task.WaitAll(tasks);
 
             WriteProtocoll(referenceCollection, "REF");
-            WriteProtocoll(resultCollection, "STATIC");
+            WriteProtocoll(resultCollection, "EA");
 
             return resultCollection;
         }
 
         private List<Individual> Evaluate(ConcurrentBag<Individual> results) {
-            return results.ToList();
+            List<Individual> individualList = new List<Individual>();
+            foreach (Individual individual in results) {
+                individual.CalcFitness();
+                individualList.Add(individual);
+            }
+            return individualList;
         }
 
         private List<Individual> CreatePopulation() {
             List<Individual> population = new List<Individual>();
             int populationCount = 0;
             while (populationCount < _populationNumber) {
-                population.Add(CreateIndividual(populationCount, 400, 2000));
+                Random r = new Random();
+                population.Add(CreateIndividual(
+                    populationCount, 
+                    r.Next(5, Constants.MAP_HEIGHT), 
+                    r.Next(5, Constants.MAP_HEIGHT), 
+                    r.Next(- Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5), 
+                    r.Next(5, 100)));
                 populationCount++;
             }
             return population;
         }
 
-        private Individual CreateIndividual(int number, int icr, int mcr) {
+        private Individual CreateIndividual(int number, int initialConquerRadius, int maxConquerRadius, int radiusExpansionStep, int attackMinLife) {
             Genotype g = new Genotype {
-                initialConquerRadius = icr,
-                maxConquerRadius = mcr
+                properties = new Dictionary<string, int>() {
+                    { "initialConquerRadius", initialConquerRadius },
+                    { "maxConquerRadius", maxConquerRadius },
+                    { "radiusExpansionStep", radiusExpansionStep },
+                    { "attackMinLife", attackMinLife }
+                }
             };
             return new Individual(g, number);
         }
@@ -90,8 +198,8 @@ namespace Game_Server.EA {
             EA_1_Stat[] stats = new EA_1_Stat[results.Count];
             foreach (var individual in results) {
                 EA_1_Stat stat = new EA_1_Stat(individual.name) {
-                    townDevelopment = individual.result.townNumberDevelopment,
-                    timeStamps = individual.result.timestamp,
+                    townDevelopment = individual.townNumberDevelopment,
+                    timeStamps = individual.timestamp,
                     startPos = individual.startPos,
                     won = individual.won
                 };

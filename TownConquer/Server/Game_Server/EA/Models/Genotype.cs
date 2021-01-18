@@ -1,6 +1,8 @@
-﻿namespace Game_Server.EA.Models {
+﻿using System.Collections.Generic;
+
+namespace Game_Server.EA.Models {
     class Genotype {
-        public int initialConquerRadius;
-        public int maxConquerRadius;
+        public Dictionary<string, int> properties;
     }
+
 }

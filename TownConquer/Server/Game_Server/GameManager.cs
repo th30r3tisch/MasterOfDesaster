@@ -245,7 +245,9 @@ namespace Game_Server {
 
             Individual referenceIndividual = new Individual(new Genotype {
                 initialConquerRadius = 400,
-                maxConquerRadius = 2000
+                maxConquerRadius = 2000,
+                radiusExpansionStep = 100,
+                attackMinLife = 10
             }, 999);
             var t1 = ki1.Start(token, referenceIndividual);
             var t2 = ki2.Start(token, referenceIndividual);

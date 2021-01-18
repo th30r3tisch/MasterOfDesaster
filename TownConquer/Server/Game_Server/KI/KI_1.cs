@@ -21,6 +21,7 @@ namespace Game_Server.KI {
             i.startPos = player.towns[0].position;
             var startTickCount = Environment.TickCount;
             int timePassed = 0;
+            int townCount = 0;
 
             while (Constants.TOWN_NUMBER * 0.8 > player.towns.Count || player.towns.Count == 0) {
                 try {
@@ -28,6 +29,14 @@ namespace Game_Server.KI {
                 }
                 catch (Exception _ex) {
                     Console.WriteLine($"{player.username} error: {_ex}");
+                }
+
+                if (townCount <= player.towns.Count) {
+                    townCount = player.towns.Count;
+                }
+                else {
+                    townCount = player.towns.Count;
+                    i.score -= 5;
                 }
                 lock (gm.treeLock) {
                     for (int i = player.towns.Count; i > 0; i--) {
@@ -48,17 +57,27 @@ namespace Game_Server.KI {
                 }
             }
             i.won = true;
+            CalcTownLifeSum();
+            ProtocollStats(timePassed + Environment.TickCount - startTickCount);
             return i;
+        }
+
+        private void CalcTownLifeSum() {
+            int life = 0;
+            foreach (Town town in player.towns) {
+                life += town.life;
+            }
+            i.townLifeSum = life;
         }
 
         private void ProtocollStats(int timePassed) {
             i.name = player.username;
-            i.result.timestamp.Add(timePassed);
-            i.result.townNumberDevelopment.Add(player.towns.Count);
+            i.timestamp.Add(timePassed);
+            i.townNumberDevelopment.Add(player.towns.Count);
         }
 
         private void TryAttackTown(Town atkTown) {
-            if (atkTown.life > 10 && atkTown.outgoing.Count < 2) {
+            if (atkTown.life > i.gene.attackMinLife && atkTown.outgoing.Count < 2) {
                 Town deffTown = GetPossibleAttackTarget(atkTown);
                 if (deffTown != null) {
                     gm.AddAttackToTown(atkTown.position, deffTown.position, DateTime.Now);
@@ -100,7 +119,7 @@ namespace Game_Server.KI {
                 if (enemyTowns.Count > 0) {
                     return enemyTowns[r.Next(0, enemyTowns.Count - 1)];
                 }
-                else conquerRadius += 100;
+                else conquerRadius += i.gene.radiusExpansionStep;
             }
             return null;
         }
