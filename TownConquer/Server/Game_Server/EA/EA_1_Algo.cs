@@ -14,19 +14,23 @@ using System.Threading.Tasks;
 namespace Game_Server.EA {
     class EA_1_Algo {
         private const int _populationNumber = 100;
-        private const int _noImprovementLimit = 1;
+        private const int _noImprovementLimit = 2;
         private const double _recombinationProbability = 0.7;
 
         private readonly Random _r;
+        private readonly StatsWriter _writer;
 
         public EA_1_Algo() {
             _r = new Random();
+            _writer = new StatsWriter("EA");
             Evolve(CreatePopulation(), 0);
         }
 
         private void Evolve(List<Individual> population, int counter) {
             if (counter < _noImprovementLimit) {
+                Console.WriteLine($"______________Evo {counter}________");
                 population = Evaluate(TrainKis(population));
+                WriteProtocoll(population);
                 counter++;
                 Evolve(CreateOffspring(population), counter);
             }
@@ -63,8 +67,7 @@ namespace Game_Server.EA {
 
             Task.WaitAll(tasks);
 
-            WriteProtocoll(referenceCollection, "REF");
-            WriteProtocoll(resultCollection, "EA");
+            //WriteProtocoll(referenceCollection, "REF");
 
             return resultCollection;
         }
@@ -74,7 +77,7 @@ namespace Game_Server.EA {
             Individual child;
 
             for (int i = 0; i < population.Count; i++) {
-                child = TournamentSelection(population);
+                child = TournamentSelection(population).DeepCopy();
                 child = Mutate(child);
                 newPopulation.Add(child);
             }
@@ -91,7 +94,7 @@ namespace Game_Server.EA {
                 individual.timestamp.Clear();
                 individual.score = 0;
                 individual.townLifeSum = 0;
-    }
+            }
         }
 
         private Individual Mutate(Individual child) {
@@ -153,13 +156,12 @@ namespace Game_Server.EA {
             List<Individual> population = new List<Individual>();
             int populationCount = 0;
             while (populationCount < _populationNumber) {
-                Random r = new Random();
                 population.Add(CreateIndividual(
                     populationCount, 
-                    r.Next(5, Constants.MAP_HEIGHT), 
-                    r.Next(5, Constants.MAP_HEIGHT), 
-                    r.Next(- Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5), 
-                    r.Next(5, 100)));
+                    _r.Next(100, Constants.MAP_HEIGHT), 
+                    _r.Next(100, Constants.MAP_HEIGHT), 
+                    _r.Next(100, Constants.MAP_HEIGHT / 5), 
+                    _r.Next(5, 100)));
                 populationCount++;
             }
             return population;
@@ -177,20 +179,30 @@ namespace Game_Server.EA {
             return new Individual(g, number);
         }
 
-        private List<Individual> WriteProtocoll(ConcurrentBag<Individual> results, string filename) {
-            StatsWriter writer = new StatsWriter(filename);
+        private void WriteProtocoll(List<Individual> results) {
             EA_1_Stat[] stats = new EA_1_Stat[results.Count];
+            List<int> test = new List<int>();
             foreach (var individual in results) {
                 EA_1_Stat stat = new EA_1_Stat(individual.name) {
-                    townDevelopment = individual.townNumberDevelopment,
-                    timeStamps = individual.timestamp,
+                    //townDevelopment = individual.townNumberDevelopment,
+                    //timeStamps = individual.timestamp,
+                    gameTime = individual.timestamp.Last(),
                     startPos = individual.startPos,
-                    won = individual.won
+                    won = individual.won,
+                    fitness = individual.fitness,
+                    score = individual.score,
+                    townLifeSum = individual.townLifeSum,
+                    number = individual.number
                 };
+                if (test.Contains(individual.number)) {
+                    Console.WriteLine("t");
+                }
+                else {
+                    test.Add(individual.number);
+                }
                 stats[individual.number] = stat;
             }
-            writer.WriteStats(stats);
-            return results.ToList();
+            _writer.WriteStats(stats);
         }
 
         /// <summary>

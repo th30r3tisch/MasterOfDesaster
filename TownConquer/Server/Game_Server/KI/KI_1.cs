@@ -58,6 +58,7 @@ namespace Game_Server.KI {
                 }
                 if (ct.IsCancellationRequested) {
                     i.won = false;
+                    CalcTownLifeSum();
                     return i;
                 }
             }

@@ -32,5 +32,10 @@ namespace Game_Server.EA.Models {
                 fitness = - (townLifeSum + score) / timestamp.Last();
             }
         }
+        public Individual DeepCopy() {
+            Individual other = (Individual)MemberwiseClone();
+            other.gene = gene.ShallowCopy();
+            return other;
+        }
     }
 }

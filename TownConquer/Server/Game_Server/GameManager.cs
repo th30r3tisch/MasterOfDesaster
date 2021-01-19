@@ -244,10 +244,12 @@ namespace Game_Server {
             KI_base ki2 = new KI_1(this, 998, "KI998", Color.FromArgb(0, 0, 0));
 
             Individual referenceIndividual = new Individual(new Genotype {
-                initialConquerRadius = 400,
-                maxConquerRadius = 2000,
-                radiusExpansionStep = 100,
-                attackMinLife = 10
+                properties = new Dictionary<string, int>() {
+                    { "initialConquerRadius", 400 },
+                    { "maxConquerRadius", 2000 },
+                    { "radiusExpansionStep", 100 },
+                    { "attackMinLife", 10 }
+                }
             }, 999);
             var t1 = ki1.Start(token, referenceIndividual);
             var t2 = ki2.Start(token, referenceIndividual);
