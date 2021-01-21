@@ -13,8 +13,10 @@ using System.Threading.Tasks;
 
 namespace Game_Server.EA {
     class EA_1_Algo {
+        public delegate double GaussDelegate(double deviation);
+
         private const int _populationNumber = 100;
-        private const int _noImprovementLimit = 2;
+        private const int _noImprovementLimit = 10;
         private const double _recombinationProbability = 0.7;
 
         private readonly Random _r;
@@ -28,7 +30,8 @@ namespace Game_Server.EA {
 
         private void Evolve(List<Individual> population, int counter) {
             if (counter < _noImprovementLimit) {
-                Console.WriteLine($"______________Evo {counter}________");
+                Console.WriteLine($"_________Evo {counter}________");
+
                 population = Evaluate(TrainKis(population));
                 WriteProtocoll(population);
                 counter++;
@@ -74,11 +77,13 @@ namespace Game_Server.EA {
 
         private List<Individual> CreateOffspring(List<Individual> population) {
             List<Individual> newPopulation = new List<Individual>();
+            GaussDelegate gauss = new GaussDelegate(Gauss);
             Individual child;
 
             for (int i = 0; i < population.Count; i++) {
                 child = TournamentSelection(population).DeepCopy();
-                child = Mutate(child);
+                //TODO get elite
+                child.Mutate(_r, gauss);
                 newPopulation.Add(child);
             }
 
@@ -95,18 +100,6 @@ namespace Game_Server.EA {
                 individual.score = 0;
                 individual.townLifeSum = 0;
             }
-        }
-
-        private Individual Mutate(Individual child) {
-            var childProps = child.gene.properties;
-            double mutationProbability = 1 / childProps.Count();
-            foreach (string key in childProps.Keys.ToList()) {
-                if (_r.NextDouble() < mutationProbability) {
-                    //add or substract a small amount to the value (gauss)
-                    childProps[key] = Math.Abs(childProps[key] + Gauss(0.5, 10));
-                }
-            }
-            return child;
         }
 
         private Individual TournamentSelection(List<Individual> population) {
@@ -126,29 +119,23 @@ namespace Game_Server.EA {
                 return parents[0];
             }
             else {
-                return Recombinate(parents);
+                return parents[0].Recombinate(parents[1], _r);
             }
-        }
-
-        private Individual Recombinate(List<Individual> parents) {
-            double u = RandomDouble();
-            var parentOneProps = parents[0].gene.properties;
-            var parentTwoProps = parents[1].gene.properties;
-
-            foreach (string key in parentOneProps.Keys.ToList()) {
-                // Kind.Ai = u · Elter1.Ai + (1 - u) · Elter2.Ai
-                parentOneProps[key] = (int)(u * parentOneProps[key] + (1 - u) * parentTwoProps[key]);
-            }
-
-            return parents[0];
         }
 
         private List<Individual> Evaluate(ConcurrentBag<Individual> results) {
             List<Individual> individualList = new List<Individual>();
+            double bestFitness = 0;
+            Individual eliteIndividual = null;
             foreach (Individual individual in results) {
                 individual.CalcFitness();
+                if (individual.fitness > bestFitness) {
+                    eliteIndividual = individual;
+                    bestFitness = individual.fitness;
+                }
                 individualList.Add(individual);
             }
+            eliteIndividual.isElite = true;
             return individualList;
         }
 
@@ -158,9 +145,9 @@ namespace Game_Server.EA {
             while (populationCount < _populationNumber) {
                 population.Add(CreateIndividual(
                     populationCount, 
-                    _r.Next(100, Constants.MAP_HEIGHT), 
-                    _r.Next(100, Constants.MAP_HEIGHT), 
-                    _r.Next(100, Constants.MAP_HEIGHT / 5), 
+                    _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT), 
+                    _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT), 
+                    _r.Next(- Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5), 
                     _r.Next(5, 100)));
                 populationCount++;
             }
@@ -181,7 +168,6 @@ namespace Game_Server.EA {
 
         private void WriteProtocoll(List<Individual> results) {
             EA_1_Stat[] stats = new EA_1_Stat[results.Count];
-            List<int> test = new List<int>();
             foreach (var individual in results) {
                 EA_1_Stat stat = new EA_1_Stat(individual.name) {
                     //townDevelopment = individual.townNumberDevelopment,
@@ -194,12 +180,6 @@ namespace Game_Server.EA {
                     townLifeSum = individual.townLifeSum,
                     number = individual.number
                 };
-                if (test.Contains(individual.number)) {
-                    Console.WriteLine("t");
-                }
-                else {
-                    test.Add(individual.number);
-                }
                 stats[individual.number] = stat;
             }
             _writer.WriteStats(stats);
@@ -211,19 +191,11 @@ namespace Game_Server.EA {
         /// <param name="deviation">standard deviation</param>
         /// <param name="mutationSize">size of the mutation. preferably powers of ten</param>
         /// <returns>random number based on gauss distribution</returns>
-        private int Gauss(double deviation, int mutationSize) {
+        public static double Gauss(double deviation) {
             double mean = 0;
             Normal normalDist = new Normal(mean, deviation);
-            int gaussNum = (int)Math.Round(normalDist.Sample(), 1) * mutationSize;
+            double gaussNum = Math.Round(normalDist.Sample(), 1);
             return gaussNum;
-        }
-
-        /// <summary>
-        /// calculates a random double between 0 and 2
-        /// </summary>
-        /// <returns>random double between 0 and 2</returns>
-        private double RandomDouble() {
-            return _r.NextDouble() + _r.NextDouble();
         }
     }
 }

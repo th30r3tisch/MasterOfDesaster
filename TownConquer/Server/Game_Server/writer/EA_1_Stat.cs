@@ -6,7 +6,7 @@ namespace Game_Server.writer {
 
         public bool won { get; set; }
         public Vector3 startPos { get; set; }
-        public int fitness { get; set; }
+        public double fitness { get; set; }
         public int score { get; set; }
         public int townLifeSum { get; set; }
         public int gameTime { get; set; }

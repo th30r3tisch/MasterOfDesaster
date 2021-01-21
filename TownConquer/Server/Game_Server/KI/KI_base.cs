@@ -54,7 +54,7 @@ namespace Game_Server.KI {
                     if (t.life <= 0) {
                         town.life = 0;
                         gm.ConquerTown(player, t.position, DateTime.Now);
-                        i.score += 10;
+                        i.score += 20;
                         if (Constants.TRAININGS_MODE == false) {
                             foreach (Client client in Server.clients.Values) {
                                 if (client.player != null) {

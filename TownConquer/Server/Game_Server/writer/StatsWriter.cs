@@ -24,6 +24,7 @@ namespace Game_Server {
             using (var csv = new CsvWriter(writer, _config)) {
                 //_csv.WriteField(longestRecord.timeStamps);
                 foreach (var record in records) {
+                    csv.NextRecord();
                     csv.WriteField(record.name);
                     csv.WriteField(record.startPos);
                     csv.WriteField(record.won);
@@ -32,7 +33,6 @@ namespace Game_Server {
                     csv.WriteField(record.score);
                     csv.WriteField(record.gameTime);
                     //_csv.WriteField(record.townDevelopment);
-                    csv.NextRecord();
                 }
                 writer.Flush();
             }

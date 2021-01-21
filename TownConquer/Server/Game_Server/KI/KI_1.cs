@@ -22,7 +22,6 @@ namespace Game_Server.KI {
         /// <param name="ct">CancellationToken</param>
         /// <returns>task with individual</returns>
         protected override async Task<Individual> PlayAsync(CancellationToken ct) {
-            Console.WriteLine($"{player.username} started.");
             i.startPos = player.towns[0].position;
             var startTickCount = Environment.TickCount;
             int timePassed = 0;
@@ -103,7 +102,7 @@ namespace Game_Server.KI {
             Town target = null;
             QuadTree tree = gm.game.tree;
 
-            while (target == null && conquerRadius < i.gene.properties["maxConquerRadius"]) {
+            while (target == null && conquerRadius < i.gene.properties["maxConquerRadius"] && conquerRadius > 0) {
                 List <TreeNode> townsInRange;
                 List<Town> enemyTowns = new List<Town>();
                 Random r = new Random();
