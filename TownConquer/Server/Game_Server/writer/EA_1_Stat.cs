@@ -13,6 +13,7 @@ namespace Game_Server.writer {
 
         public List<int> timeStamps { get; set; }
         public List<int> townDevelopment { get; set; }
+        public Dictionary<string, int> properties { get; set; }
 
         public EA_1_Stat(string name) : base(name) {
             timeStamps = new List<int>();

@@ -32,6 +32,10 @@ namespace Game_Server {
                     csv.WriteField(record.townLifeSum);
                     csv.WriteField(record.score);
                     csv.WriteField(record.gameTime);
+                    csv.WriteField(record.properties["initialConquerRadius"]);
+                    csv.WriteField(record.properties["maxConquerRadius"]);
+                    csv.WriteField(record.properties["radiusExpansionStep"]);
+                    csv.WriteField(record.properties["attackMinLife"]);
                     //_csv.WriteField(record.townDevelopment);
                 }
                 writer.Flush();
@@ -74,6 +78,10 @@ namespace Game_Server {
                 csv.WriteField("TownLifeSum");
                 csv.WriteField("Score");
                 csv.WriteField("GameTime");
+                csv.WriteField("InitialConquerRadius");
+                csv.WriteField("MaxConquerRadius");
+                csv.WriteField("RadiusExpansionStep");
+                csv.WriteField("AttackMinLife");
                 writer.Flush();
             }
         }

@@ -16,7 +16,7 @@ namespace Game_Server.EA {
         public delegate double GaussDelegate(double deviation);
 
         private const int _populationNumber = 100;
-        private const int _noImprovementLimit = 10;
+        private const int _noImprovementLimit = 100;
         private const double _recombinationProbability = 0.7;
 
         private readonly Random _r;
@@ -56,8 +56,8 @@ namespace Game_Server.EA {
                 KI_base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
                 Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000, 100, 10);
 
-                var t1 = referenceKI.Start(token, referenceIndividual);
                 var t2 = eaKI.Start(token, individual);
+                var t1 = referenceKI.Start(token, referenceIndividual);
 
                 await Task.WhenAny(t1, t2);
                 c.Cancel();
@@ -80,9 +80,10 @@ namespace Game_Server.EA {
             GaussDelegate gauss = new GaussDelegate(Gauss);
             Individual child;
 
-            for (int i = 0; i < population.Count; i++) {
+            newPopulation.Add(GetElite(population));
+
+            for (int i = 0; i < population.Count - 1; i++) {
                 child = TournamentSelection(population).DeepCopy();
-                //TODO get elite
                 child.Mutate(_r, gauss);
                 newPopulation.Add(child);
             }
@@ -125,18 +126,24 @@ namespace Game_Server.EA {
 
         private List<Individual> Evaluate(ConcurrentBag<Individual> results) {
             List<Individual> individualList = new List<Individual>();
-            double bestFitness = 0;
-            Individual eliteIndividual = null;
             foreach (Individual individual in results) {
                 individual.CalcFitness();
+                individualList.Add(individual);
+            }
+            return individualList;
+        }
+
+        private Individual GetElite(List<Individual> individualList) {
+            double bestFitness = -9999;
+            Individual eliteIndividual = null;
+            foreach (Individual individual in individualList) {
                 if (individual.fitness > bestFitness) {
                     eliteIndividual = individual;
                     bestFitness = individual.fitness;
                 }
-                individualList.Add(individual);
             }
             eliteIndividual.isElite = true;
-            return individualList;
+            return eliteIndividual;
         }
 
         private List<Individual> CreatePopulation() {
@@ -178,7 +185,8 @@ namespace Game_Server.EA {
                     fitness = individual.fitness,
                     score = individual.score,
                     townLifeSum = individual.townLifeSum,
-                    number = individual.number
+                    number = individual.number,
+                    properties = individual.gene.properties
                 };
                 stats[individual.number] = stat;
             }
