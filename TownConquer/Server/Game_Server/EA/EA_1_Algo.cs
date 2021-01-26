@@ -56,8 +56,9 @@ namespace Game_Server.EA {
                 KI_base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
                 Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000, 100, 10);
 
-                var t2 = eaKI.Start(token, individual);
+                
                 var t1 = referenceKI.Start(token, referenceIndividual);
+                var t2 = eaKI.Start(token, individual);
 
                 await Task.WhenAny(t1, t2);
                 c.Cancel();
