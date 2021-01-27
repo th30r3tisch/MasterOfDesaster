@@ -52,8 +52,8 @@ namespace Game_Server.EA {
                 CancellationTokenSource c = new CancellationTokenSource();
                 CancellationToken token = c.Token;
 
-                KI_base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
                 KI_base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
+                KI_base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
                 Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000, 100, 10);
 
                 
@@ -144,6 +144,7 @@ namespace Game_Server.EA {
                 }
             }
             eliteIndividual.isElite = true;
+            
             return eliteIndividual;
         }
 
@@ -198,7 +199,6 @@ namespace Game_Server.EA {
         /// calculates a random number based on gauss
         /// </summary>
         /// <param name="deviation">standard deviation</param>
-        /// <param name="mutationSize">size of the mutation. preferably powers of ten</param>
         /// <returns>random number based on gauss distribution</returns>
         public static double Gauss(double deviation) {
             double mean = 0;

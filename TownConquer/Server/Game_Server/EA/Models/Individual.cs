@@ -29,12 +29,7 @@ namespace Game_Server.EA.Models {
         }
 
         public void CalcFitness() {
-            if (won) {
-                fitness = townLifeSum + score - (timestamp.Last() / 1000);
-            }
-            else {
-                fitness = - (townLifeSum + score) / (timestamp.Last() / 1000);
-            }
+            fitness = score - (timestamp.Last() / 1000);
         }
 
         public Individual Mutate(Random r, GaussDelegate gauss) {
