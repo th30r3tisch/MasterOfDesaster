@@ -162,7 +162,7 @@ namespace Game_Server {
             return game.r.Next(max - min + 1) + min;
         }
 
-        public void AddAttackToTown(Vector3 atk, Vector3 deff, DateTime timeStamp) {
+        public void AddActionToTown(Vector3 atk, Vector3 deff, DateTime timeStamp) {
             lock (treeLock) {
                 QuadTree tree = game.tree;
                 Town atkTown = tree.SearchTown(tree, atk);
@@ -173,7 +173,7 @@ namespace Game_Server {
             }
         }
 
-        public void RemoveAttackFromTown(Vector3 atk, Vector3 deff, DateTime timeStamp) {
+        public void RemoveActionFromTown(Vector3 atk, Vector3 deff, DateTime timeStamp) {
             lock (treeLock) {
                 QuadTree tree = game.tree;
                 Town atkTown = tree.SearchTown(tree, atk);

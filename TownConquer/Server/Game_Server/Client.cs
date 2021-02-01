@@ -193,17 +193,17 @@ namespace Game_Server {
 
         public void AttackTown(Vector3 atkTown, Vector3 deffTown, DateTime timeStamp) {
             if (!Server.gm.IsIntersecting(atkTown, deffTown)) {
-                Server.gm.AddAttackToTown(atkTown, deffTown, timeStamp);
+                Server.gm.AddActionToTown(atkTown, deffTown, timeStamp);
                 foreach (Client client in Server.clients.Values) {
                     if (client.player != null) {
-                        ServerSend.GrantedAttack(client.id, atkTown, deffTown);
+                        ServerSend.GrantedAction(client.id, atkTown, deffTown);
                     }
                 }
             }
         }
 
         public void RetreatTown(Vector3 atkTown, Vector3 deffTown, DateTime timeStamp) {
-            Server.gm.RemoveAttackFromTown(atkTown, deffTown, timeStamp);
+            Server.gm.RemoveActionFromTown(atkTown, deffTown, timeStamp);
             foreach (Client client in Server.clients.Values) {
                 if (client.player != null) {
                     ServerSend.GrantedRetreat(client.id, atkTown, deffTown);

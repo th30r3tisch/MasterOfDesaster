@@ -46,7 +46,12 @@ namespace Game_Server.KI {
                     for (int i = player.towns.Count; i > 0; i--) {
                         Town _atkTown = player.towns[i - 1];
                         CheckKITownLifes(_atkTown);
-                        TryAttackTown(_atkTown);
+                        if (IsSupportTown(_atkTown)) {
+                            TrySupportTown(_atkTown);
+                        }
+                        else {
+                            TryAttackTown(_atkTown);
+                        }
                     }
                 }
                 int timeSpan = Environment.TickCount - startTickCount;
@@ -67,6 +72,57 @@ namespace Game_Server.KI {
             return i;
         }
 
+        private void TrySupportTown(Town atkTown) {
+            List<Town> ownTowns = player.towns;
+            foreach (Town supptown in ownTowns) {
+                if (supptown.life < i.gene.properties["supportMinCap"]) {
+                    if (!gm.IsIntersecting(atkTown.position, supptown.position) &&
+                    !atkTown.outgoing.Contains(supptown)) {
+                        DoAction(atkTown, supptown);
+                    }
+                }
+            }   
+        }
+
+        private void DoAction(Town startTown, Town endtown) {
+            gm.AddActionToTown(startTown.position, endtown.position, DateTime.Now);
+            if (Constants.TRAININGS_MODE == false) {
+                foreach (Client client in Server.clients.Values) {
+                    if (client.player != null) {
+                        ServerSend.GrantedAction(client.id, startTown.position, endtown.position);
+                    }
+                }
+            }
+        }
+
+        private bool IsSupportTown(Town atkTown) {
+            int supportRadius = i.gene.properties["supportRadius"];
+            int friendlyTownNumber = 0;
+            int hostileTownNumber = 0;
+            bool isSupTown = false;
+            List<TreeNode> objects = gm.game.tree.GetAllContentBetween(
+                (int)atkTown.position.X - supportRadius,
+                (int)atkTown.position.Z - supportRadius,
+                (int)atkTown.position.X + supportRadius,
+                (int)atkTown.position.Z + supportRadius);
+            foreach (TreeNode node in objects) {
+                if (node is Town) {
+                    Town t = (Town)node;
+                    if (t.player == player) {
+                        friendlyTownNumber++;
+                    }
+                    else {
+                        hostileTownNumber++;
+                    }
+                }
+            }
+            int friendlyPercent = friendlyTownNumber / (friendlyTownNumber + hostileTownNumber);
+            if (friendlyPercent >= i.gene.properties["supportTownRatio"]) {
+                isSupTown = true;
+            }
+            return isSupTown;
+        }
+
         private void CalcTownLifeSum() {
             int life = 0;
             foreach (Town town in player.towns) {
@@ -85,14 +141,7 @@ namespace Game_Server.KI {
             if (atkTown.life > i.gene.properties["attackMinLife"] && atkTown.outgoing.Count < 2) {
                 Town deffTown = GetPossibleAttackTarget(atkTown);
                 if (deffTown != null) {
-                    gm.AddAttackToTown(atkTown.position, deffTown.position, DateTime.Now);
-                    if (Constants.TRAININGS_MODE == false) {
-                        foreach (Client client in Server.clients.Values) {
-                            if (client.player != null) {
-                                ServerSend.GrantedAttack(client.id, atkTown.position, deffTown.position);
-                            }
-                        }
-                    }
+                    DoAction(atkTown, deffTown);
                 }
             }
         }
@@ -127,10 +176,6 @@ namespace Game_Server.KI {
                 else conquerRadius += i.gene.properties["radiusExpansionStep"];
             }
             return null;
-        }
-
-        public void GetPossibleSupportTarget(Town t, QuadTree quadTree) {
-            int supportRadius = 400;
         }
     }
 }

@@ -45,24 +45,31 @@ namespace Game_Server.KI {
             if (town.life <= 0) {
                 town.life = 0;
                 for (int i = town.outgoing.Count; i > 0; i--) {
-                    gm.RemoveAttackFromTown(town.position, town.outgoing[i - 1].position, DateTime.Now);
+                    gm.RemoveActionFromTown(town.position, town.outgoing[i - 1].position, DateTime.Now);
                 }
             }
             lock (gm.treeLock) {
                 foreach (Town t in town.outgoing) {
                     gm.CalculateTownLife(t, DateTime.Now);
                     if (t.life <= 0) {
-                        town.life = 0;
-                        gm.ConquerTown(player, t.position, DateTime.Now);
-                        i.score += 20;
-                        if (Constants.TRAININGS_MODE == false) {
-                            foreach (Client client in Server.clients.Values) {
-                                if (client.player != null) {
-                                    ServerSend.GrantedConquer(client.id, player, t.position);
-                                }
-                            }
-                        }
+                        ConquerTown(town, t);
                         return;
+                    }
+                    else if (t.life > i.gene.properties["supportMaxCap"]) {
+                        gm.RemoveActionFromTown(town.position, t.position, DateTime.Now);
+                    }
+                }
+            }
+        }
+
+        private void ConquerTown(Town town, Town t) {
+            town.life = 0;
+            gm.ConquerTown(player, t.position, DateTime.Now);
+            i.score += 20;
+            if (Constants.TRAININGS_MODE == false) {
+                foreach (Client client in Server.clients.Values) {
+                    if (client.player != null) {
+                        ServerSend.GrantedConquer(client.id, player, t.position);
                     }
                 }
             }

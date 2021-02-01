@@ -42,7 +42,7 @@ namespace Game_Server {
             }
         }
 
-        public static void GrantedAttack(int toClient, Vector3 atkTown, Vector3 deffTown) {
+        public static void GrantedAction(int toClient, Vector3 atkTown, Vector3 deffTown) {
             using (Packet packet = new Packet((int)ServerPackets.grantedAttack)) {
                 packet.Write(atkTown);
                 packet.Write(deffTown);

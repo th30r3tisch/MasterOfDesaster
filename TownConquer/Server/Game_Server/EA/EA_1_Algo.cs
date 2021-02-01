@@ -15,7 +15,7 @@ namespace Game_Server.EA {
     class EA_1_Algo {
         public delegate double GaussDelegate(double deviation);
 
-        private const int _populationNumber = 100;
+        private const int _populationNumber = 200;
         private const int _noImprovementLimit = 100;
         private const double _recombinationProbability = 0.7;
 
@@ -54,7 +54,7 @@ namespace Game_Server.EA {
 
                 KI_base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
                 KI_base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
-                Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000, 100, 10);
+                Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000, 100, 10, 500, 600, 50, 85);
 
                 
                 var t1 = referenceKI.Start(token, referenceIndividual);
@@ -157,19 +157,27 @@ namespace Game_Server.EA {
                     _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT), 
                     _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT), 
                     _r.Next(- Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5), 
-                    _r.Next(5, 100)));
+                    _r.Next(5, 100),
+                    _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
+                    _r.Next(5, 1000),
+                    _r.Next(5, 1000),
+                    _r.Next(0, 100)));
                 populationCount++;
             }
             return population;
         }
 
-        private Individual CreateIndividual(int number, int initialConquerRadius, int maxConquerRadius, int radiusExpansionStep, int attackMinLife) {
+        private Individual CreateIndividual(int number, int initialConquerRadius, int maxConquerRadius, int radiusExpansionStep, int attackMinLife, int supportRadius, int supportMaxCap, int supportMinCap, int supportTownRatio) {
             Genotype g = new Genotype {
                 properties = new Dictionary<string, int>() {
                     { "initialConquerRadius", initialConquerRadius },
                     { "maxConquerRadius", maxConquerRadius },
                     { "radiusExpansionStep", radiusExpansionStep },
-                    { "attackMinLife", attackMinLife }
+                    { "attackMinLife", attackMinLife },
+                    { "supportRadius", supportRadius },
+                    { "supportMaxCap", supportMaxCap },
+                    { "supportMinCap", supportMinCap },
+                    { "supportTownRatio", supportTownRatio }
                 }
             };
             return new Individual(g, number);
