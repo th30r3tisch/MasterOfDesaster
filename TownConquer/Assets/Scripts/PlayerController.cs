@@ -12,11 +12,11 @@ public class PlayerController : MonoBehaviour {
     private GameObject _startTown = null;
 
     private void Update() {
-        CheckIfAttackIsHappening();
-        CheckIfAttackIsAborted();
+        CheckIfInteractionIsHappening();
+        CheckIfInteractionIsAborted();
     }
 
-    private void CheckIfAttackIsHappening() {
+    private void CheckIfInteractionIsHappening() {
         if (!Input.GetKey(KeyCode.LeftAlt)) {
 
             if (Input.GetMouseButtonDown(0)) {
@@ -36,13 +36,13 @@ public class PlayerController : MonoBehaviour {
                     go.GetInstanceID() != _startTown.GetInstanceID() &&
                     !go.GetComponent<TownManager>().town.outgoing.Contains(_startTown.GetComponent<TownManager>().town)) {
                     _lineEnd = go.transform.position;
-                    ClientSend.AttackRequest(_lineStart, _lineEnd);
+                    ClientSend.InteractionRequest(_lineStart, _lineEnd);
                 }
             }
         }
     }
 
-    private void CheckIfAttackIsAborted() {
+    private void CheckIfInteractionIsAborted() {
         if (!Input.GetKey(KeyCode.LeftAlt)) {
             if (Input.GetMouseButtonUp(1)) {
                 RaycastHit hitInfo = GetRayCastHitInfo();

@@ -8,13 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Game_Server.KI {
-    class KI_1 : KI_base {
+    class KI_1 : KI_Base {
 
-        public KI_1(GameManager gm, int id, string name, Color color) : base(gm) {
-            player = new Player(id, name, color, DateTime.Now);
-            Town t = base.gm.CreateTown(player);
-            t.player = player;
-        }
+        public KI_1(GameManager gm, int id, string name, Color color) : base(gm, id, name, color) { }
 
         /// <summary>
         /// includes the play routine of the ki
@@ -27,7 +23,7 @@ namespace Game_Server.KI {
             int timePassed = 0;
             int townCount = 0;
 
-            while (Constants.TOWN_NUMBER * 0.8 > player.towns.Count || player.towns.Count == 0) {
+            while (Constants.TOWN_NUMBER * 0.9 > player.towns.Count) { //  && player.towns.Count != 0
                 try {
                     await Task.Delay(tickLength);
                 }
@@ -44,13 +40,13 @@ namespace Game_Server.KI {
                 }
                 lock (gm.treeLock) {
                     for (int i = player.towns.Count; i > 0; i--) {
-                        Town _atkTown = player.towns[i - 1];
-                        CheckKITownLifes(_atkTown);
-                        if (IsSupportTown(_atkTown)) {
-                            TrySupportTown(_atkTown);
+                        Town atkTown = player.towns[i - 1];
+                        CheckKITownLifes(atkTown);
+                        if (IsSupportTown(atkTown)) {
+                            TrySupportTown(atkTown);
                         }
                         else {
-                            TryAttackTown(_atkTown);
+                            TryAttackTown(atkTown);
                         }
                     }
                 }
@@ -75,24 +71,14 @@ namespace Game_Server.KI {
         private void TrySupportTown(Town atkTown) {
             List<Town> ownTowns = player.towns;
             foreach (Town supptown in ownTowns) {
-                if (supptown.life < i.gene.properties["supportMinCap"]) {
-                    if (!gm.IsIntersecting(atkTown.position, supptown.position) &&
-                    !atkTown.outgoing.Contains(supptown)) {
-                        DoAction(atkTown, supptown);
-                    }
+                if (supptown.life < i.gene.properties["supportMinCap"] && 
+                    atkTown.outgoing.Count < 2 && 
+                    !supptown.outgoing.Contains(atkTown) &&
+                    !atkTown.outgoing.Contains(supptown) && 
+                    atkTown != supptown) {
+                        InteractWithTown(atkTown.position, supptown.position, DateTime.Now);
                 }
             }   
-        }
-
-        private void DoAction(Town startTown, Town endtown) {
-            gm.AddActionToTown(startTown.position, endtown.position, DateTime.Now);
-            if (Constants.TRAININGS_MODE == false) {
-                foreach (Client client in Server.clients.Values) {
-                    if (client.player != null) {
-                        ServerSend.GrantedAction(client.id, startTown.position, endtown.position);
-                    }
-                }
-            }
         }
 
         private bool IsSupportTown(Town atkTown) {
@@ -100,6 +86,11 @@ namespace Game_Server.KI {
             int friendlyTownNumber = 0;
             int hostileTownNumber = 0;
             bool isSupTown = false;
+
+            if (atkTown.life < i.gene.properties["supportMinCap"]) {
+                return false;
+            }
+
             List<TreeNode> objects = gm.game.tree.GetAllContentBetween(
                 (int)atkTown.position.X - supportRadius,
                 (int)atkTown.position.Z - supportRadius,
@@ -116,8 +107,10 @@ namespace Game_Server.KI {
                     }
                 }
             }
-            int friendlyPercent = friendlyTownNumber / (friendlyTownNumber + hostileTownNumber);
-            if (friendlyPercent >= i.gene.properties["supportTownRatio"]) {
+            float allTowns = friendlyTownNumber + hostileTownNumber;
+            float friendlyPercent = friendlyTownNumber / allTowns;
+            float test = i.gene.properties["supportTownRatio"] / 100f;
+            if (friendlyPercent >= test && allTowns > 1) {
                 isSupTown = true;
             }
             return isSupTown;
@@ -141,7 +134,7 @@ namespace Game_Server.KI {
             if (atkTown.life > i.gene.properties["attackMinLife"] && atkTown.outgoing.Count < 2) {
                 Town deffTown = GetPossibleAttackTarget(atkTown);
                 if (deffTown != null) {
-                    DoAction(atkTown, deffTown);
+                    InteractWithTown(atkTown.position, deffTown.position, DateTime.Now);
                 }
             }
         }

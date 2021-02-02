@@ -51,12 +51,12 @@ public class ClientHandle : MonoBehaviour
         GameManager.instance.AddEnemies(enemy, towns);
     }
 
-    public static void GrantedAttack(Packet packet) {
+    public static void GrantedInteraction(Packet packet) {
         System.Numerics.Vector3 v1 = packet.ReadVector3();
         Vector3 atkTown = new Vector3(v1.X, v1.Y, v1.Z);
         System.Numerics.Vector3 v2 = packet.ReadVector3();
         Vector3 deffTown = new Vector3(v2.X, v2.Y, v2.Z);
-        GameManager.instance.AttackTown(atkTown, deffTown);
+        GameManager.instance.AddInteractionToTown(atkTown, deffTown);
     }
 
     public static void GrantedRetreat(Packet packet) {

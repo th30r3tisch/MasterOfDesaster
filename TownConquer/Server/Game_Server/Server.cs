@@ -1,4 +1,5 @@
 ﻿using Game_Server.EA;
+using Game_Server.KI;
 using SharedLibrary;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace Game_Server {
         public static int maxPlayers { get; private set; }
         public static int port { get; private set; }
         public static Dictionary<int, Client> clients = new Dictionary<int, Client>();
+        public static Dictionary<int, KI_Base> kis = new Dictionary<int, KI_Base>();
         public static Dictionary<int, PacketHandler> packetHandlers;
 
         private static TcpListener _tcpListener;
@@ -85,7 +87,7 @@ namespace Game_Server {
             Console.WriteLine($"Incoming connection from {client.Client.RemoteEndPoint}.");
 
             for (int i = 1; i <= maxPlayers; i++) {
-                if (clients[i].tcp.socket == null) {
+                if (clients[i] != null && clients[i].tcp.socket == null) {
                     clients[i].tcp.Connect(client);
                     return;
                 }
@@ -109,7 +111,7 @@ namespace Game_Server {
 
             packetHandlers = new Dictionary<int, PacketHandler>() {
                 {(int)ClientPackets.welcomeReceived, ServerHandle.WelcomeReceived },
-                {(int)ClientPackets.attackRequest, ServerHandle.AttackRequest },
+                {(int)ClientPackets.interactionRequest, ServerHandle.InteractionRequest },
                 {(int)ClientPackets.retreatRequest, ServerHandle.RetreatRequest },
                 {(int)ClientPackets.conquerRequest, ServerHandle.ConquerRequest },
             };

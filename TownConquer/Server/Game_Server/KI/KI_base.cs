@@ -2,23 +2,24 @@
 using SharedLibrary;
 using SharedLibrary.Models;
 using System;
+using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Game_Server.KI {
-    abstract class KI_base {
-
-        public Player player { get; set; }
+    abstract class KI_Base: User {
 
         protected GameManager gm { get; set; }
         protected int tickLength;
         protected int protocollTime;
         protected Individual i;
 
-        public KI_base(GameManager gm) {
+        public KI_Base(GameManager gm, int kiId, string name, Color color) {
+            id = kiId;
             tickLength = (int)(Constants.TOWN_GROTH_SECONDS * 1000 + 10);
             protocollTime = tickLength * 5;
             this.gm = gm;
+            SetupUser(name, color);
         }
 
         /// <summary>
@@ -27,9 +28,9 @@ namespace Game_Server.KI {
         /// <param name="ct">CancellationToken</param>
         /// <param name="i">individual</param>
         /// <returns>task with individual</returns>
-        public Task<Individual> Start(CancellationToken ct, Individual i) {
+        public Task<Individual> SendIntoGame(CancellationToken ct, Individual i) {
             this.i = i;
-            gm.game.kis.Add(this);
+            Server.kis.Add(Server.kis.Count, this);
             return Task.Run(() => PlayAsync(ct));
         }
 
@@ -45,34 +46,27 @@ namespace Game_Server.KI {
             if (town.life <= 0) {
                 town.life = 0;
                 for (int i = town.outgoing.Count; i > 0; i--) {
-                    gm.RemoveActionFromTown(town.position, town.outgoing[i - 1].position, DateTime.Now);
+                    RetreatFromTown(town.position, town.outgoing[i - 1].position, DateTime.Now);
                 }
             }
             lock (gm.treeLock) {
                 foreach (Town t in town.outgoing) {
                     gm.CalculateTownLife(t, DateTime.Now);
                     if (t.life <= 0) {
-                        ConquerTown(town, t);
+                        t.life = 0;
+                        ConquerTown(player, t.position, DateTime.Now);
+                        i.score += 20;
                         return;
                     }
                     else if (t.life > i.gene.properties["supportMaxCap"]) {
-                        gm.RemoveActionFromTown(town.position, t.position, DateTime.Now);
+                        RetreatFromTown(town.position, t.position, DateTime.Now);
                     }
                 }
             }
         }
 
-        private void ConquerTown(Town town, Town t) {
-            town.life = 0;
-            gm.ConquerTown(player, t.position, DateTime.Now);
-            i.score += 20;
-            if (Constants.TRAININGS_MODE == false) {
-                foreach (Client client in Server.clients.Values) {
-                    if (client.player != null) {
-                        ServerSend.GrantedConquer(client.id, player, t.position);
-                    }
-                }
-            }
+        public override void Disconnect() {
+            throw new NotImplementedException();
         }
     }
 }

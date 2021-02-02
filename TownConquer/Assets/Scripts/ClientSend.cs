@@ -38,8 +38,8 @@ public class ClientSend : MonoBehaviour
         }
     }
 
-    public static void AttackRequest(Vector3 atkTown, Vector3 deffTown) {
-        using (Packet packet = new Packet((int)ClientPackets.attackRequest)) {
+    public static void InteractionRequest(Vector3 atkTown, Vector3 deffTown) {
+        using (Packet packet = new Packet((int)ClientPackets.interactionRequest)) {
             packet.Write(Client.instance.myId);
             packet.Write(ConversionManager.ToNumericVector(atkTown));
             packet.Write(ConversionManager.ToNumericVector(deffTown));

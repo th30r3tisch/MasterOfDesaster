@@ -129,7 +129,7 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public void AttackTown(Vector3 lineStart, Vector3 lineEnd) {
+    public void AddInteractionToTown(Vector3 lineStart, Vector3 lineEnd) {
         UTown deffT = (UTown)_world.SearchTown(_world, ConversionManager.ToNumericVector(lineEnd));
         UTown atkT = (UTown)_world.SearchTown(_world, ConversionManager.ToNumericVector(lineStart));
         GameObject line;

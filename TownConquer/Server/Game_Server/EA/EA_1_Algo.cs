@@ -52,13 +52,13 @@ namespace Game_Server.EA {
                 CancellationTokenSource c = new CancellationTokenSource();
                 CancellationToken token = c.Token;
 
-                KI_base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
-                KI_base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
+                KI.KI_Base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
+                KI.KI_Base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
                 Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000, 100, 10, 500, 600, 50, 85);
 
                 
-                var t1 = referenceKI.Start(token, referenceIndividual);
-                var t2 = eaKI.Start(token, individual);
+                var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
+                var t2 = eaKI.SendIntoGame(token, individual);
 
                 await Task.WhenAny(t1, t2);
                 c.Cancel();

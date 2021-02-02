@@ -240,21 +240,25 @@ namespace Game_Server {
             var c = new CancellationTokenSource();
             var token = c.Token;
 
-            KI_base ki1 = new KI_1(this, 999, "KI999", Color.FromArgb(255, 255, 255));
-            KI_base ki2 = new KI_1(this, 998, "KI998", Color.FromArgb(0, 0, 0));
+            KI_Base ki1 = new KI_1(this, 999, "KI999", Color.FromArgb(255, 255, 255));
+            //KI_Base ki2 = new KI_1(this, 998, "KI998", Color.FromArgb(0, 0, 0));
 
             Individual referenceIndividual = new Individual(new Genotype {
                 properties = new Dictionary<string, int>() {
                     { "initialConquerRadius", 400 },
                     { "maxConquerRadius", 2000 },
                     { "radiusExpansionStep", 100 },
-                    { "attackMinLife", 10 }
+                    { "attackMinLife", 10 },
+                    { "supportRadius", 1000 },
+                    { "supportMaxCap", 100 },
+                    { "supportMinCap", 20 },
+                    { "supportTownRatio", 85 }
                 }
             }, 999);
-            var t1 = ki1.Start(token, referenceIndividual);
-            var t2 = ki2.Start(token, referenceIndividual);
+            var t1 = ki1.SendIntoGame(token, referenceIndividual);
+            //var t2 = ki2.SendIntoGame(token, referenceIndividual);
 
-            Task.WhenAny(t1, t2).ContinueWith(taskInfo => { 
+            Task.WhenAny(t1).ContinueWith(taskInfo => { 
                 c.Cancel();
                 Console.WriteLine($"{taskInfo.Result.Result.name} has won the game!");
             });

@@ -248,7 +248,7 @@ public class Client : MonoBehaviour
             { (int)ServerPackets.welcome, ClientHandle.Welcome },
             { (int)ServerPackets.createWorld, ClientHandle.CreateWorld },
             { (int)ServerPackets.updateWorld, ClientHandle.UpdateWorld },
-            { (int)ServerPackets.grantedAttack, ClientHandle.GrantedAttack },
+            { (int)ServerPackets.grantedInteraction, ClientHandle.GrantedInteraction },
             { (int)ServerPackets.grantedRetreat, ClientHandle.GrantedRetreat },
             { (int)ServerPackets.grantedConquer, ClientHandle.GrantedConquer },
             { (int)ServerPackets.playerDisconnected, ClientHandle.PlayerDisconnected },

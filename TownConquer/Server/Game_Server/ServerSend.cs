@@ -43,7 +43,7 @@ namespace Game_Server {
         }
 
         public static void GrantedAction(int toClient, Vector3 atkTown, Vector3 deffTown) {
-            using (Packet packet = new Packet((int)ServerPackets.grantedAttack)) {
+            using (Packet packet = new Packet((int)ServerPackets.grantedInteraction)) {
                 packet.Write(atkTown);
                 packet.Write(deffTown);
                 SendTCPData(toClient, packet);

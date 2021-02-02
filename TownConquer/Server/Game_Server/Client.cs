@@ -1,18 +1,13 @@
 ﻿using Game_Server.KI;
 using SharedLibrary;
-using SharedLibrary.Models;
 using System;
-using System.Drawing;
 using System.Net;
 using System.Net.Sockets;
-using System.Numerics;
 
 namespace Game_Server {
-    class Client {
+    class Client: User {
         private static int _dataBufferSize = 4096;
 
-        public Player player;
-        public int id;
         public TCP tcp;
         public UDP udp;
 
@@ -168,60 +163,22 @@ namespace Game_Server {
             }
         }
 
-        public void SendIntoGame(string playerName, Color color) {
+        public void SendIntoGame() {
+            Server.gm.CreateKis();
+            ServerSend.CreateWorld(id, Server.clients[id].player, Constants.RANDOM_SEED, Server.clients[id].player.towns[0]); // create the world for new player
 
-            if (Server.gm.game.kis.Count == 0) Server.gm.CreateKis();
-
-            player = new Player(id, playerName, color, DateTime.Now);
-            Town t = Server.gm.CreateTown(player);
-
-            ServerSend.CreateWorld(id, Server.clients[id].player, Constants.RANDOM_SEED, t); // create the world for new player
-
-            foreach (KI_base ki in Server.gm.game.kis) {
+            foreach (Client client in Server.clients.Values) {
+                if (client.player != null && client.id != id) {
+                    ServerSend.UpdateWorld(id, client.player, client.player.towns.Count, client.player.towns);// send every already connected player to the new player
+                    ServerSend.UpdateWorld(client.id, player, player.towns.Count, player.towns);// send the new players info to all connected players
+                }
+            }
+            foreach (KI_Base ki in Server.kis.Values) {
                 ServerSend.UpdateWorld(id, ki.player, ki.player.towns.Count, ki.player.towns);// send every KI player to the new player
             }
-
-            foreach (Client client in Server.clients.Values) {
-                if (client.player != null) {
-                    if (client.id != id) {
-                        ServerSend.UpdateWorld(id, client.player, client.player.towns.Count, client.player.towns);// send every already connected player to the new player
-                        ServerSend.UpdateWorld(client.id, player, player.towns.Count, player.towns);// send the new players info to all connected players
-                    }
-                }
-            }
         }
 
-        public void AttackTown(Vector3 atkTown, Vector3 deffTown, DateTime timeStamp) {
-            if (!Server.gm.IsIntersecting(atkTown, deffTown)) {
-                Server.gm.AddActionToTown(atkTown, deffTown, timeStamp);
-                foreach (Client client in Server.clients.Values) {
-                    if (client.player != null) {
-                        ServerSend.GrantedAction(client.id, atkTown, deffTown);
-                    }
-                }
-            }
-        }
-
-        public void RetreatTown(Vector3 atkTown, Vector3 deffTown, DateTime timeStamp) {
-            Server.gm.RemoveActionFromTown(atkTown, deffTown, timeStamp);
-            foreach (Client client in Server.clients.Values) {
-                if (client.player != null) {
-                    ServerSend.GrantedRetreat(client.id, atkTown, deffTown);
-                }
-            }
-        }
-
-        public void ConquerTown(int attackerId, Vector3 deffTown, DateTime timeStamp) {
-            Player conquerer = Server.clients[attackerId].player;
-            Server.gm.ConquerTown(conquerer, deffTown, timeStamp);
-            foreach (Client client in Server.clients.Values) {
-                if (client.player != null) {
-                    ServerSend.GrantedConquer(client.id, conquerer, deffTown);
-                }
-            }
-        }
-
-        public void Disconnect() {
+        override public void Disconnect() {
             Console.WriteLine($"{tcp.socket.Client.RemoteEndPoint} has disconnected.");
             player = null;
             tcp.Disconnect();

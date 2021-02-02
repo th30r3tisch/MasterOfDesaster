@@ -10,7 +10,7 @@ namespace SharedLibrary {
         welcome = 1,
         createWorld,
         updateWorld,
-        grantedAttack,
+        grantedInteraction,
         grantedRetreat,
         grantedConquer,
         playerDisconnected,
@@ -19,7 +19,7 @@ namespace SharedLibrary {
     /// <summary>Sent from client to server.</summary>
     public enum ClientPackets {
         welcomeReceived = 1,
-        attackRequest,
+        interactionRequest,
         retreatRequest,
         conquerRequest,
     }
