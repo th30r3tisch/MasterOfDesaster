@@ -42,7 +42,7 @@ namespace Game_Server.KI {
         protected abstract Task<Individual> PlayAsync(CancellationToken ct);
 
         protected void CheckKITownLifes(Town town) {
-            gm.CalculateTownLife(town, DateTime.Now);
+            town.CalculateLife(DateTime.Now);
             if (town.life <= 0) {
                 town.life = 0;
                 for (int i = town.outgoing.Count; i > 0; i--) {
@@ -51,7 +51,7 @@ namespace Game_Server.KI {
             }
             lock (gm.treeLock) {
                 foreach (Town t in town.outgoing) {
-                    gm.CalculateTownLife(t, DateTime.Now);
+                    t.CalculateLife(DateTime.Now);
                     if (t.life <= 0) {
                         t.life = 0;
                         ConquerTown(player, t.position, DateTime.Now);

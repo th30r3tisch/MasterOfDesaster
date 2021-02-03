@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
 
-namespace Game_Server.writer {
+namespace Game_Server.writer.EA_1 {
     class EA_1_Stat : StatEntry {
 
         public bool won { get; set; }

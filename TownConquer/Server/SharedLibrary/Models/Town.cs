@@ -36,5 +36,23 @@ namespace SharedLibrary.Models {
                 outgoing.Remove(town);
             }
         }
+
+        public void CalculateLife(DateTime currentTime) {
+            TimeSpan span = currentTime.Subtract(creationTime);
+            float timePassed = (float)span.TotalSeconds;
+            int firstLifeCalc = life;
+
+            if (player.id != -1) {
+                int rawTownLife = (int)(timePassed / Constants.TOWN_GROTH_SECONDS);
+                int lostLifeByOutgoing = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * outgoing.Count);
+                int gotLifeByIncoming = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * supporterTowns.Count);
+                firstLifeCalc += rawTownLife - lostLifeByOutgoing + gotLifeByIncoming;
+            }
+            int lostLifeByIncoming = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * attackerTowns.Count);
+
+            int finalNewLife = firstLifeCalc - lostLifeByIncoming;
+            life = finalNewLife;
+            creationTime = currentTime;
+        }
     }
 }

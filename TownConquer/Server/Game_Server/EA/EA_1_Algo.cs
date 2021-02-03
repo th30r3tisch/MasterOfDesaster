@@ -1,6 +1,7 @@
 ﻿using Game_Server.EA.Models;
 using Game_Server.KI;
 using Game_Server.writer;
+using Game_Server.writer.EA_1;
 using MathNet.Numerics.Distributions;
 using SharedLibrary;
 using System;
@@ -20,11 +21,11 @@ namespace Game_Server.EA {
         private const double _recombinationProbability = 0.7;
 
         private readonly Random _r;
-        private readonly StatsWriter _writer;
+        private readonly EA_1_Writer _writer;
 
         public EA_1_Algo() {
             _r = new Random();
-            _writer = new StatsWriter("EA");
+            _writer = new EA_1_Writer("EA");
             Evolve(CreatePopulation(), 0);
         }
 
@@ -52,8 +53,8 @@ namespace Game_Server.EA {
                 CancellationTokenSource c = new CancellationTokenSource();
                 CancellationToken token = c.Token;
 
-                KI.KI_Base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
-                KI.KI_Base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
+                KI_Base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
+                KI_Base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
                 Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000, 100, 10, 500, 600, 50, 85);
 
                 

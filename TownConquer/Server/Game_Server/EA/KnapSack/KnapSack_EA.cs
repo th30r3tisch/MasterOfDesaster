@@ -1,4 +1,4 @@
-﻿using Game_Server.writer;
+﻿using Game_Server.writer.knapsack;
 using System;
 using System.Collections.Generic;
 
@@ -22,7 +22,7 @@ namespace Game_Server.EA.KnapSack {
 
             GenerateItems();
             Evolve(GenerateInitPopulation(), 0, 0);
-            StatsWriter writer = new StatsWriter("KnapSack");
+            KnapsackWriter writer = new KnapsackWriter("KnapSack");
             writer.WriteStats(new[] { _average, _standardDeviation, _maxValues, _simpsonDivIndex });
         }
 

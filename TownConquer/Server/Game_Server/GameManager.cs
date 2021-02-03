@@ -167,8 +167,8 @@ namespace Game_Server {
                 QuadTree tree = game.tree;
                 Town atkTown = tree.SearchTown(tree, atk);
                 Town deffTown = tree.SearchTown(tree, deff);
-                CalculateTownLife(atkTown, timeStamp);
-                CalculateTownLife(deffTown, timeStamp);
+                atkTown.CalculateLife(timeStamp);
+                deffTown.CalculateLife(timeStamp);
                 tree.AddTownActionReference(atkTown, deffTown);
             }
         }
@@ -178,8 +178,8 @@ namespace Game_Server {
                 QuadTree tree = game.tree;
                 Town atkTown = tree.SearchTown(tree, atk);
                 Town deffTown = tree.SearchTown(tree, deff);
-                CalculateTownLife(atkTown, timeStamp);
-                CalculateTownLife(deffTown, timeStamp);
+                atkTown.CalculateLife(timeStamp);
+                deffTown.CalculateLife(timeStamp);
                 tree.RmTownActionReference(atkTown, deffTown);
             }
         }
@@ -188,7 +188,7 @@ namespace Game_Server {
             lock (treeLock) {
                 QuadTree tree = game.tree;
                 Town deffTown = tree.SearchTown(tree, town);
-                CalculateTownLife(deffTown, timeStamp);
+                deffTown.CalculateLife(timeStamp);
                 UpdateTown(deffTown, timeStamp);
 
                 tree.UpdateOwner(player, deffTown);
@@ -200,40 +200,22 @@ namespace Game_Server {
                 QuadTree tree = game.tree;
                 // removes all incoming atk troops and deletes references in both towns
                 for (int i = town.attackerTowns.Count; i > 0; i--) {
-                    CalculateTownLife(town.attackerTowns[i - 1], timeStamp);
+                    town.attackerTowns[i - 1].CalculateLife(timeStamp);
                     tree.RmTownActionReference(town.attackerTowns[i - 1], town);
                 }
 
                 // removes all incoming support troops and deletes references in both towns
                 for (int i = town.supporterTowns.Count; i > 0; i--) {
-                    CalculateTownLife(town.supporterTowns[i - 1], timeStamp);
+                    town.supporterTowns[i - 1].CalculateLife(timeStamp);
                     tree.RmTownActionReference(town.supporterTowns[i - 1], town);
                 }
 
                 // removes all outgoing troops and deletes references in both towns
                 for (int i = town.outgoing.Count; i > 0; i--) {
-                    CalculateTownLife(town.outgoing[i - 1], timeStamp);
+                    town.outgoing[i - 1].CalculateLife(timeStamp);
                     tree.RmTownActionReference(town, town.outgoing[i - 1]);
                 }
             }
-        }
-
-        public void CalculateTownLife(Town town, DateTime creationTime) {
-            TimeSpan span = creationTime.Subtract(town.creationTime);
-            float timePassed = (float)span.TotalSeconds;
-            int firstLifeCalc = town.life;
-
-            if (town.player.id != -1) {
-                int rawTownLife = (int)(timePassed / Constants.TOWN_GROTH_SECONDS);
-                int lostLifeByOutgoing = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * town.outgoing.Count);
-                int gotLifeByIncoming = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * town.supporterTowns.Count);
-                firstLifeCalc += rawTownLife - lostLifeByOutgoing + gotLifeByIncoming;
-            }
-            int lostLifeByIncoming = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * town.attackerTowns.Count);
-
-            int finalNewLife = firstLifeCalc - lostLifeByIncoming;
-            town.life = finalNewLife;
-            town.creationTime = creationTime;
         }
 
         public void CreateKis() {
