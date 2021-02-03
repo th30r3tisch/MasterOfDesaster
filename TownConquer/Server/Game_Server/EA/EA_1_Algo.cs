@@ -1,6 +1,5 @@
 ﻿using Game_Server.EA.Models;
 using Game_Server.KI;
-using Game_Server.writer;
 using Game_Server.writer.EA_1;
 using MathNet.Numerics.Distributions;
 using SharedLibrary;
@@ -13,71 +12,15 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Game_Server.EA {
-    class EA_1_Algo {
+    class EA_1_Algo: EA_Base<EA_1_Writer> {
         public delegate double GaussDelegate(double deviation);
 
-        private const int _populationNumber = 200;
-        private const int _noImprovementLimit = 100;
-        private const double _recombinationProbability = 0.7;
-
-        private readonly Random _r;
-        private readonly EA_1_Writer _writer;
-
-        public EA_1_Algo() {
-            _r = new Random();
+        public EA_1_Algo() : base() {
             _writer = new EA_1_Writer("EA");
             Evolve(CreatePopulation(), 0);
         }
 
-        private void Evolve(List<Individual> population, int counter) {
-            if (counter < _noImprovementLimit) {
-                Console.WriteLine($"_________Evo {counter}________");
-
-                population = Evaluate(TrainKis(population));
-                WriteProtocoll(population);
-                counter++;
-                Evolve(CreateOffspring(population), counter);
-            }
-            else {
-                Console.WriteLine("FINISHED");
-            }
-        }
-
-        private ConcurrentBag<Individual> TrainKis(List<Individual> population) {
-            ConcurrentBag<Individual> resultCollection = new ConcurrentBag<Individual>();
-            ConcurrentBag<Individual> referenceCollection = new ConcurrentBag<Individual>();
-
-            Task[] tasks = population.Select(async individual => {
-                GameManager gm = new GameManager();
-
-                CancellationTokenSource c = new CancellationTokenSource();
-                CancellationToken token = c.Token;
-
-                KI_Base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
-                KI_Base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
-                Individual referenceIndividual = CreateIndividual(individual.number, 400, 2000, 100, 10, 500, 600, 50, 85);
-
-                
-                var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
-                var t2 = eaKI.SendIntoGame(token, individual);
-
-                await Task.WhenAny(t1, t2);
-                c.Cancel();
-                await Task.WhenAll(t1, t2);
-                var result1 = await t1;
-                var result2 = await t2;
-                referenceCollection.Add(result1);
-                resultCollection.Add(result2);
-            }).ToArray();
-
-            Task.WaitAll(tasks);
-
-            //WriteProtocoll(referenceCollection, "REF");
-
-            return resultCollection;
-        }
-
-        private List<Individual> CreateOffspring(List<Individual> population) {
+        protected override List<Individual> CreateOffspring(List<Individual> population) {
             List<Individual> newPopulation = new List<Individual>();
             GaussDelegate gauss = new GaussDelegate(Gauss);
             Individual child;
@@ -94,8 +37,54 @@ namespace Game_Server.EA {
             return newPopulation;
         }
 
+        protected override List<Individual> Evaluate(ConcurrentBag<Individual> results) {
+            List<Individual> individualList = new List<Individual>();
+            foreach (Individual individual in results) {
+                individual.CalcFitness();
+                individualList.Add(individual);
+            }
+            return individualList;
+        }
+
+        protected override void WriteProtocoll(List<Individual> results) {
+            EA_1_Stat[] stats = new EA_1_Stat[results.Count];
+            foreach (var individual in results) {
+                EA_1_Stat stat = new EA_1_Stat(individual.name) {
+                    //townDevelopment = individual.townNumberDevelopment,
+                    //timeStamps = individual.timestamp,
+                    gameTime = individual.timestamp.Last(),
+                    startPos = individual.startPos,
+                    won = individual.won,
+                    fitness = individual.fitness,
+                    score = individual.score,
+                    townLifeSum = individual.townLifeSum,
+                    number = individual.number,
+                    properties = individual.gene.properties
+                };
+                stats[individual.number] = stat;
+            }
+            _writer.WriteStats(stats);
+        }
+
+
+        private Individual CreateIndividual(int number, int initialConquerRadius, int maxConquerRadius, int radiusExpansionStep, int attackMinLife, int supportRadius, int supportMaxCap, int supportMinCap, int supportTownRatio) {
+            Genotype g = new Genotype {
+                properties = new Dictionary<string, int>() {
+                    { "initialConquerRadius", initialConquerRadius },
+                    { "maxConquerRadius", maxConquerRadius },
+                    { "radiusExpansionStep", radiusExpansionStep },
+                    { "attackMinLife", attackMinLife },
+                    { "supportRadius", supportRadius },
+                    { "supportMaxCap", supportMaxCap },
+                    { "supportMinCap", supportMinCap },
+                    { "supportTownRatio", supportTownRatio }
+                }
+            };
+            return new Individual(g, number);
+        }
+
         private void ResetNewPopulation(List<Individual> newPopulation) {
-            for(int i = 0; i < newPopulation.Count; i++) {
+            for (int i = 0; i < newPopulation.Count; i++) {
                 Individual individual = newPopulation[i];
                 individual.number = i;
                 individual.townNumberDevelopment.Clear();
@@ -124,15 +113,6 @@ namespace Game_Server.EA {
             else {
                 return parents[0].Recombinate(parents[1], _r);
             }
-        }
-
-        private List<Individual> Evaluate(ConcurrentBag<Individual> results) {
-            List<Individual> individualList = new List<Individual>();
-            foreach (Individual individual in results) {
-                individual.CalcFitness();
-                individualList.Add(individual);
-            }
-            return individualList;
         }
 
         private Individual GetElite(List<Individual> individualList) {
@@ -166,42 +146,6 @@ namespace Game_Server.EA {
                 populationCount++;
             }
             return population;
-        }
-
-        private Individual CreateIndividual(int number, int initialConquerRadius, int maxConquerRadius, int radiusExpansionStep, int attackMinLife, int supportRadius, int supportMaxCap, int supportMinCap, int supportTownRatio) {
-            Genotype g = new Genotype {
-                properties = new Dictionary<string, int>() {
-                    { "initialConquerRadius", initialConquerRadius },
-                    { "maxConquerRadius", maxConquerRadius },
-                    { "radiusExpansionStep", radiusExpansionStep },
-                    { "attackMinLife", attackMinLife },
-                    { "supportRadius", supportRadius },
-                    { "supportMaxCap", supportMaxCap },
-                    { "supportMinCap", supportMinCap },
-                    { "supportTownRatio", supportTownRatio }
-                }
-            };
-            return new Individual(g, number);
-        }
-
-        private void WriteProtocoll(List<Individual> results) {
-            EA_1_Stat[] stats = new EA_1_Stat[results.Count];
-            foreach (var individual in results) {
-                EA_1_Stat stat = new EA_1_Stat(individual.name) {
-                    //townDevelopment = individual.townNumberDevelopment,
-                    //timeStamps = individual.timestamp,
-                    gameTime = individual.timestamp.Last(),
-                    startPos = individual.startPos,
-                    won = individual.won,
-                    fitness = individual.fitness,
-                    score = individual.score,
-                    townLifeSum = individual.townLifeSum,
-                    number = individual.number,
-                    properties = individual.gene.properties
-                };
-                stats[individual.number] = stat;
-            }
-            _writer.WriteStats(stats);
         }
 
         /// <summary>
