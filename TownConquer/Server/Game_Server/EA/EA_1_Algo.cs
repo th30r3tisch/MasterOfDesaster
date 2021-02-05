@@ -32,7 +32,9 @@ namespace Game_Server.EA {
 
                 KI_Base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
                 KI_Base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
-                Individual_Simple referenceIndividual = CreateIndividual(individual.number, 400, 2000, 100, 10, 500, 600, 50, 85);
+
+                Genotype_Simple gene = new Genotype_Simple(400, 2000, 100, 10, 1000, 100, 20, 85);
+                Individual_Simple referenceIndividual = new Individual_Simple(gene, individual.number);
 
                 var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
                 var t2 = eaKI.SendIntoGame(token, individual);
@@ -59,7 +61,7 @@ namespace Game_Server.EA {
             newPopulation.Add(GetElite(population));
 
             for (int i = 0; i < population.Count - 1; i++) {
-                child = TournamentSelection(population).DeepCopy();
+                child = (Individual_Simple)TournamentSelection(population).DeepCopy();
                 child.Mutate(_r, gauss);
                 newPopulation.Add(child);
             }
@@ -95,23 +97,6 @@ namespace Game_Server.EA {
                 stats[individual.number] = stat;
             }
             _writer.WriteStats(stats);
-        }
-
-
-        private Individual_Simple CreateIndividual(int number, int initialConquerRadius, int maxConquerRadius, int radiusExpansionStep, int attackMinLife, int supportRadius, int supportMaxCap, int supportMinCap, int supportTownRatio) {
-            Genotype_Simple g = new Genotype_Simple {
-                properties = new Dictionary<string, int>() {
-                    { "initialConquerRadius", initialConquerRadius },
-                    { "maxConquerRadius", maxConquerRadius },
-                    { "radiusExpansionStep", radiusExpansionStep },
-                    { "attackMinLife", attackMinLife },
-                    { "supportRadius", supportRadius },
-                    { "supportMaxCap", supportMaxCap },
-                    { "supportMinCap", supportMinCap },
-                    { "supportTownRatio", supportTownRatio }
-                }
-            };
-            return new Individual_Simple(g, number);
         }
 
         private void ResetNewPopulation(List<Individual_Simple> newPopulation) {
@@ -164,16 +149,16 @@ namespace Game_Server.EA {
             List<Individual_Simple> population = new List<Individual_Simple>();
             int populationCount = 0;
             while (populationCount < _populationNumber) {
-                population.Add(CreateIndividual(
-                    populationCount, 
-                    _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT), 
-                    _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT), 
-                    _r.Next(- Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5), 
+                Genotype_Simple gene = new Genotype_Simple(
+                    _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
+                    _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
+                    _r.Next(-Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5),
                     _r.Next(5, 100),
                     _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
                     _r.Next(5, 1000),
                     _r.Next(5, 1000),
-                    _r.Next(0, 100)));
+                    _r.Next(0, 100));
+                population.Add(new Individual_Simple(gene, populationCount));
                 populationCount++;
             }
             return population;

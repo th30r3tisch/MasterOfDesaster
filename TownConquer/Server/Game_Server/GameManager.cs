@@ -225,18 +225,9 @@ namespace Game_Server {
             KI_Base ki1 = new KI_1(this, 999, "KI999", Color.FromArgb(255, 255, 255));
             //KI_Base ki2 = new KI_1(this, 998, "KI998", Color.FromArgb(0, 0, 0));
 
-            Individual_Simple referenceIndividual = new Individual_Simple(new Genotype_Simple {
-                properties = new Dictionary<string, int>() {
-                    { "initialConquerRadius", 400 },
-                    { "maxConquerRadius", 2000 },
-                    { "radiusExpansionStep", 100 },
-                    { "attackMinLife", 10 },
-                    { "supportRadius", 1000 },
-                    { "supportMaxCap", 100 },
-                    { "supportMinCap", 20 },
-                    { "supportTownRatio", 85 }
-                }
-            }, 999);
+            Genotype_Simple gene = new Genotype_Simple(400, 2000, 100, 10, 1000, 100, 20, 85);
+            Individual_Simple referenceIndividual = new Individual_Simple(gene, 999);
+
             var t1 = ki1.SendIntoGame(token, referenceIndividual);
             //var t2 = ki2.SendIntoGame(token, referenceIndividual);
 

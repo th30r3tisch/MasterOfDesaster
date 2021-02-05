@@ -2,28 +2,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using static Game_Server.EA.EA_1_Algo;
 
 namespace Game_Server.EA.Models {
     class Individual_Simple: Individual<Genotype_Simple> {
         
-        public Vector3 startPos;
-        public bool won;
-        public double fitness;
-        public bool isElite;
-
         public List<int> townNumberDevelopment;
-        public List<int> timestamp;
         public int score = 0;
         public int townLifeSum = 0;
 
         public Individual_Simple(Genotype_Simple gene, int number) : base(gene, number) {
             townNumberDevelopment = new List<int>();
-            timestamp = new List<int>();
         }
 
-        public void CalcFitness() {
+        public override void CalcFitness() {
             fitness = score - (timestamp.Last() / 1000);
         }
 
