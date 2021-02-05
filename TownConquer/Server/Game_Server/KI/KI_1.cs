@@ -17,7 +17,7 @@ namespace Game_Server.KI {
         /// </summary>
         /// <param name="ct">CancellationToken</param>
         /// <returns>task with individual</returns>
-        protected override async Task<Individual> PlayAsync(CancellationToken ct) {
+        protected override async Task<Individual_Simple> PlayAsync(CancellationToken ct) {
             i.startPos = player.towns[0].position;
             var startTickCount = Environment.TickCount;
             int timePassed = 0;

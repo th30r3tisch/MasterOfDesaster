@@ -20,10 +20,41 @@ namespace Game_Server.EA {
             Evolve(CreatePopulation(), 0);
         }
 
-        protected override List<Individual> CreateOffspring(List<Individual> population) {
-            List<Individual> newPopulation = new List<Individual>();
+        protected override ConcurrentBag<Individual_Simple> TrainKis(List<Individual_Simple> population) {
+            ConcurrentBag<Individual_Simple> resultCollection = new ConcurrentBag<Individual_Simple>();
+            ConcurrentBag<Individual_Simple> referenceCollection = new ConcurrentBag<Individual_Simple>();
+
+            Task[] tasks = population.Select(async individual => {
+                GameManager gm = new GameManager();
+
+                CancellationTokenSource c = new CancellationTokenSource();
+                CancellationToken token = c.Token;
+
+                KI_Base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
+                KI_Base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
+                Individual_Simple referenceIndividual = CreateIndividual(individual.number, 400, 2000, 100, 10, 500, 600, 50, 85);
+
+                var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
+                var t2 = eaKI.SendIntoGame(token, individual);
+
+                await Task.WhenAny(t1, t2);
+                c.Cancel();
+                await Task.WhenAll(t1, t2);
+                var result1 = await t1;
+                var result2 = await t2;
+                referenceCollection.Add(result1);
+                resultCollection.Add(result2);
+            }).ToArray();
+
+            Task.WaitAll(tasks);
+
+            return resultCollection;
+        }
+
+        protected override List<Individual_Simple> CreateOffspring(List<Individual_Simple> population) {
+            List<Individual_Simple> newPopulation = new List<Individual_Simple>();
             GaussDelegate gauss = new GaussDelegate(Gauss);
-            Individual child;
+            Individual_Simple child;
 
             newPopulation.Add(GetElite(population));
 
@@ -37,16 +68,16 @@ namespace Game_Server.EA {
             return newPopulation;
         }
 
-        protected override List<Individual> Evaluate(ConcurrentBag<Individual> results) {
-            List<Individual> individualList = new List<Individual>();
-            foreach (Individual individual in results) {
+        protected override List<Individual_Simple> Evaluate(ConcurrentBag<Individual_Simple> results) {
+            List<Individual_Simple> individualList = new List<Individual_Simple>();
+            foreach (Individual_Simple individual in results) {
                 individual.CalcFitness();
                 individualList.Add(individual);
             }
             return individualList;
         }
 
-        protected override void WriteProtocoll(List<Individual> results) {
+        protected override void WriteProtocoll(List<Individual_Simple> results) {
             EA_1_Stat[] stats = new EA_1_Stat[results.Count];
             foreach (var individual in results) {
                 EA_1_Stat stat = new EA_1_Stat(individual.name) {
@@ -67,8 +98,8 @@ namespace Game_Server.EA {
         }
 
 
-        private Individual CreateIndividual(int number, int initialConquerRadius, int maxConquerRadius, int radiusExpansionStep, int attackMinLife, int supportRadius, int supportMaxCap, int supportMinCap, int supportTownRatio) {
-            Genotype g = new Genotype {
+        private Individual_Simple CreateIndividual(int number, int initialConquerRadius, int maxConquerRadius, int radiusExpansionStep, int attackMinLife, int supportRadius, int supportMaxCap, int supportMinCap, int supportTownRatio) {
+            Genotype_Simple g = new Genotype_Simple {
                 properties = new Dictionary<string, int>() {
                     { "initialConquerRadius", initialConquerRadius },
                     { "maxConquerRadius", maxConquerRadius },
@@ -80,12 +111,12 @@ namespace Game_Server.EA {
                     { "supportTownRatio", supportTownRatio }
                 }
             };
-            return new Individual(g, number);
+            return new Individual_Simple(g, number);
         }
 
-        private void ResetNewPopulation(List<Individual> newPopulation) {
+        private void ResetNewPopulation(List<Individual_Simple> newPopulation) {
             for (int i = 0; i < newPopulation.Count; i++) {
-                Individual individual = newPopulation[i];
+                Individual_Simple individual = newPopulation[i];
                 individual.number = i;
                 individual.townNumberDevelopment.Clear();
                 individual.timestamp.Clear();
@@ -94,12 +125,12 @@ namespace Game_Server.EA {
             }
         }
 
-        private Individual TournamentSelection(List<Individual> population) {
-            List<Individual> parents = new List<Individual>();
+        private Individual_Simple TournamentSelection(List<Individual_Simple> population) {
+            List<Individual_Simple> parents = new List<Individual_Simple>();
             int populationSize = population.Count;
             while (parents.Count < 2) {
-                Individual contestantOne = population[_r.Next(0, populationSize)];
-                Individual contestantTwo = population[_r.Next(0, populationSize)];
+                Individual_Simple contestantOne = population[_r.Next(0, populationSize)];
+                Individual_Simple contestantTwo = population[_r.Next(0, populationSize)];
                 if (contestantOne.fitness > contestantTwo.fitness) {
                     parents.Add(contestantOne);
                 }
@@ -115,10 +146,10 @@ namespace Game_Server.EA {
             }
         }
 
-        private Individual GetElite(List<Individual> individualList) {
+        private Individual_Simple GetElite(List<Individual_Simple> individualList) {
             double bestFitness = -9999;
-            Individual eliteIndividual = null;
-            foreach (Individual individual in individualList) {
+            Individual_Simple eliteIndividual = null;
+            foreach (Individual_Simple individual in individualList) {
                 if (individual.fitness > bestFitness) {
                     eliteIndividual = individual;
                     bestFitness = individual.fitness;
@@ -129,8 +160,8 @@ namespace Game_Server.EA {
             return eliteIndividual;
         }
 
-        private List<Individual> CreatePopulation() {
-            List<Individual> population = new List<Individual>();
+        private List<Individual_Simple> CreatePopulation() {
+            List<Individual_Simple> population = new List<Individual_Simple>();
             int populationCount = 0;
             while (populationCount < _populationNumber) {
                 population.Add(CreateIndividual(

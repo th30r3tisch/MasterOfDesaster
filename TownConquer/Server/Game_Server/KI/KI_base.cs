@@ -12,7 +12,7 @@ namespace Game_Server.KI {
         protected GameManager gm { get; set; }
         protected int tickLength;
         protected int protocollTime;
-        protected Individual i;
+        protected Individual_Simple i;
 
         public KI_Base(GameManager gm, int kiId, string name, Color color) {
             id = kiId;
@@ -28,7 +28,7 @@ namespace Game_Server.KI {
         /// <param name="ct">CancellationToken</param>
         /// <param name="i">individual</param>
         /// <returns>task with individual</returns>
-        public Task<Individual> SendIntoGame(CancellationToken ct, Individual i) {
+        public Task<Individual_Simple> SendIntoGame(CancellationToken ct, Individual_Simple i) {
             this.i = i;
             Server.kis.Add(Server.kis.Count, this);
             return Task.Run(() => PlayAsync(ct));
@@ -39,7 +39,7 @@ namespace Game_Server.KI {
         /// </summary>
         /// <param name="ct">CancellationToken</param>
         /// <returns>task with individual</returns>
-        protected abstract Task<Individual> PlayAsync(CancellationToken ct);
+        protected abstract Task<Individual_Simple> PlayAsync(CancellationToken ct);
 
         protected void CheckKITownLifes(Town town) {
             town.CalculateLife(DateTime.Now);

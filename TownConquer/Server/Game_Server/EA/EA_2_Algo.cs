@@ -10,19 +10,19 @@ namespace Game_Server.EA {
             _writer = new EA_2_Writer("EA");
         }
 
-        protected override List<Individual> CreateOffspring(List<Individual> population) {
+        protected override List<Individual_Simple> CreateOffspring(List<Individual_Simple> population) {
             throw new System.NotImplementedException();
         }
 
-        protected override List<Individual> Evaluate(ConcurrentBag<Individual> results) {
+        protected override List<Individual_Simple> Evaluate(ConcurrentBag<Individual_Simple> results) {
             throw new System.NotImplementedException();
         }
 
-        protected override ConcurrentBag<Individual> TrainKis(List<Individual> population) {
+        protected override ConcurrentBag<Individual_Simple> TrainKis(List<Individual_Simple> population) {
             throw new System.NotImplementedException();
         }
 
-        protected override void WriteProtocoll(List<Individual> results) {
+        protected override void WriteProtocoll(List<Individual_Simple> results) {
             throw new System.NotImplementedException();
         }
     }
