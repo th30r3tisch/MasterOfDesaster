@@ -1,4 +1,4 @@
-﻿using Game_Server.EA.Models;
+﻿using Game_Server.EA.Models.Advanced;
 using SharedLibrary.Models;
 using System;
 using System.Drawing;

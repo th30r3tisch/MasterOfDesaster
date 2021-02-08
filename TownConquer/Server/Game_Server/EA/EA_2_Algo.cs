@@ -1,4 +1,4 @@
-﻿using Game_Server.EA.Models;
+﻿using Game_Server.EA.Models.Advanced;
 using Game_Server.KI;
 using Game_Server.writer.EA_2;
 using SharedLibrary;
@@ -34,10 +34,13 @@ namespace Game_Server.EA {
                 CancellationTokenSource c = new CancellationTokenSource();
                 CancellationToken token = c.Token;
 
-                KI_Base referenceKI = new KI_2(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
-                KI_Base eaKI = new KI_2(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
+                KI_Base<Individual_Advanced> referenceKI = new KI_2(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
+                KI_Base<Individual_Advanced> eaKI = new KI_2(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
 
-                Genotype_Advanced gene = new Genotype_Advanced(400, 2000, 100, 10, 1000, 100, 20, 85);
+                Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties(new List<int> { 400, 2000, 100, 10, 1000, 100, 20, 85 });
+                Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties(new List<int> { 400, 2000, 100, 10, 1000, 100, 20, 85 });
+                Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties(new List<int> { 400, 2000, 100, 10, 1000, 100, 20, 85 });
+                Genotype_Advanced gene = new Genotype_Advanced(supProps, offProps, deffProps);
                 Individual_Advanced referenceIndividual = new Individual_Advanced(gene, individual.number);
 
                 var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
@@ -61,7 +64,15 @@ namespace Game_Server.EA {
             List<Individual_Advanced> population = new List<Individual_Advanced>();
             int populationCount = 0;
             while (populationCount < _populationNumber) {
-                Dictionary<string, int> properties = new Genotype_Advanced(
+                Genotype_Advanced gene = new Genotype_Advanced(GenerateRndProps(), GenerateRndProps(), GenerateRndProps());
+                population.Add(new Individual_Advanced(gene, populationCount));
+                populationCount++;
+            }
+            return population;
+        }
+
+        private Dictionary<string, int> GenerateRndProps() {
+            return Genotype_Advanced.CreateProperties( new List<int> {
                     _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
                     _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
                     _r.Next(-Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5),
@@ -69,11 +80,8 @@ namespace Game_Server.EA {
                     _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
                     _r.Next(5, 1000),
                     _r.Next(5, 1000),
-                    _r.Next(0, 100));
-                population.Add(new Individual_Advanced(gene, populationCount));
-                populationCount++;
-            }
-            return population;
+                    _r.Next(0, 100)
+                });
         }
 
         protected override void WriteProtocoll(List<Individual_Advanced> results) {

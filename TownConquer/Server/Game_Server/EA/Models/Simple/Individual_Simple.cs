@@ -4,25 +4,22 @@ using System.Collections.Generic;
 using System.Linq;
 using static Game_Server.EA.EA_1_Algo;
 
-namespace Game_Server.EA.Models {
-    class Individual_Advanced : Individual<Genotype_Advanced> {
+namespace Game_Server.EA.Models.Simple {
+    class Individual_Simple: Individual<Genotype_Simple> {
+        
+        public List<int> townNumberDevelopment;
+        public int townLifeSum = 0;
 
-        public Individual_Advanced(Genotype_Advanced gene, int number) : base(gene, number) {
-
+        public Individual_Simple(Genotype_Simple gene, int number) : base(gene, number) {
+            townNumberDevelopment = new List<int>();
         }
 
         public override void CalcFitness() {
-            throw new NotImplementedException();
+            fitness = score - (timestamp.Last() / 1000);
         }
 
-        public Individual_Advanced PrepareMutate(Random r, GaussDelegate gauss) {
-            Mutate(r, gauss, gene.attackProperties);
-            Mutate(r, gauss, gene.defensiveProperties);
-            Mutate(r, gauss, gene.supportProperties);
-            return this;
-        }
-
-        private void Mutate(Random r, GaussDelegate gauss, Dictionary<string, int> props) {
+        public Individual_Simple Mutate(Random r, GaussDelegate gauss) {
+            Dictionary<string, int> props = gene.properties;
             double mutationProbability = 1 / props.Count();
             foreach (string key in props.Keys.ToList()) {
                 if (r.NextDouble() < mutationProbability) {
@@ -31,22 +28,20 @@ namespace Game_Server.EA.Models {
                     props[key] = ClampValue(value, key);
                 }
             }
-        }
-
-        public Individual_Advanced PrepareRecombination(Individual_Advanced partner, Random r) {
-            Recombinate(gene.attackProperties, partner.gene.attackProperties, r);
-            Recombinate(gene.defensiveProperties, partner.gene.defensiveProperties, r);
-            Recombinate(gene.supportProperties, partner.gene.supportProperties, r);
             return this;
         }
 
-        private void Recombinate(Dictionary<string, int> prop1, Dictionary<string, int> prop2, Random r) {
+        public Individual_Simple Recombinate(Individual_Simple partner, Random r) {
             double u = r.NextDouble() + r.NextDouble(); // random number between 0 and 2
-            foreach (string key in prop1.Keys.ToList()) {
+            var ownProps = gene.properties;
+            var partnerProps = partner.gene.properties;
+
+            foreach (string key in ownProps.Keys.ToList()) {
                 // Kind.Ai = u · Elter1.Ai + (1 - u) · Elter2.Ai
-                int value = (int)(u * prop1[key] + (1 - u) * prop2[key]);
-                prop1[key] = ClampValue(value, key);
+                int value = (int)(u * ownProps[key] + (1 - u) * partnerProps[key]);
+                ownProps[key] = ClampValue(value, key);
             }
+            return this;
         }
 
         /// <summary>
@@ -65,14 +60,6 @@ namespace Game_Server.EA.Models {
                     return Math.Min(Constants.MAP_HEIGHT, Math.Max(-Constants.MAP_HEIGHT, value));
                 case "attackMinLife":
                     return Math.Min(150, Math.Max(5, value));
-                case "supportRadius":
-                    return Math.Min(Constants.MAP_HEIGHT, Math.Max(Constants.TOWN_MIN_DISTANCE, value));
-                case "supportMaxCap":
-                    return Math.Min(1000, Math.Max(5, value));
-                case "supportMinCap":
-                    return Math.Min(500, Math.Max(5, value));
-                case "supportTownRatio":
-                    return Math.Min(99, Math.Max(0, value));
                 default:
                     return value;
             }

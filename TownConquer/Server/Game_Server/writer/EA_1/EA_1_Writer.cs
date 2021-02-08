@@ -1,5 +1,6 @@
 ﻿using CsvHelper;
-using Game_Server.EA.Models;
+using Game_Server.EA.Models.Simple;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,10 +27,9 @@ namespace Game_Server.writer.EA_1 {
                     csv.WriteField(record.townLifeSum);
                     csv.WriteField(record.score);
                     csv.WriteField(record.timestamp.Last());
-                    csv.WriteField(record.gene.properties["initialConquerRadius"]);
-                    csv.WriteField(record.gene.properties["maxConquerRadius"]);
-                    csv.WriteField(record.gene.properties["radiusExpansionStep"]);
-                    csv.WriteField(record.gene.properties["attackMinLife"]);
+                    foreach (string key in record.gene.properties.Keys.ToList()) {
+                        csv.WriteField(key);
+                    }
                     //_csv.WriteField(record.townDevelopment);
                 }
                 writer.Flush();
@@ -72,10 +72,9 @@ namespace Game_Server.writer.EA_1 {
                 csv.WriteField("TownLifeSum");
                 csv.WriteField("Score");
                 csv.WriteField("GameTime");
-                csv.WriteField("InitialConquerRadius");
-                csv.WriteField("MaxConquerRadius");
-                csv.WriteField("RadiusExpansionStep");
-                csv.WriteField("AttackMinLife");
+                foreach (string property in Enum.GetNames(typeof(PropertyNames_Simple))) {
+                    csv.WriteField(property);
+                }
                 writer.Flush();
             }
         }
