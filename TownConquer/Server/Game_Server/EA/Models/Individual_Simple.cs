@@ -8,7 +8,6 @@ namespace Game_Server.EA.Models {
     class Individual_Simple: Individual<Genotype_Simple> {
         
         public List<int> townNumberDevelopment;
-        public int score = 0;
         public int townLifeSum = 0;
 
         public Individual_Simple(Genotype_Simple gene, int number) : base(gene, number) {

@@ -15,8 +15,14 @@ namespace Game_Server.EA.Models {
             throw new NotImplementedException();
         }
 
-        public Individual_Advanced Mutate(Random r, GaussDelegate gauss) {
-            Dictionary<string, int> props = gene.properties;
+        public Individual_Advanced PrepareMutate(Random r, GaussDelegate gauss) {
+            Mutate(r, gauss, gene.attackProperties);
+            Mutate(r, gauss, gene.defensiveProperties);
+            Mutate(r, gauss, gene.supportProperties);
+            return this;
+        }
+
+        private void Mutate(Random r, GaussDelegate gauss, Dictionary<string, int> props) {
             double mutationProbability = 1 / props.Count();
             foreach (string key in props.Keys.ToList()) {
                 if (r.NextDouble() < mutationProbability) {
@@ -25,7 +31,6 @@ namespace Game_Server.EA.Models {
                     props[key] = ClampValue(value, key);
                 }
             }
-            return this;
         }
 
         public Individual_Advanced PrepareRecombination(Individual_Advanced partner, Random r) {

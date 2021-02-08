@@ -1,15 +1,18 @@
 ﻿using CsvHelper;
+using Game_Server.EA.Models;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Game_Server.writer.EA_1 {
-    class EA_1_Writer: StatsWriter<EA_1_Stat> {
+    class EA_1_Writer: StatsWriter<Individual_Simple> {
 
         public EA_1_Writer(string filename) : base(filename) {
             PrepareFile();
         }
 
-        public override void WriteStats(EA_1_Stat[] records) {
-            EA_1_Stat longestRecord = PrepareStats(records);
+        public override void WriteStats(List<Individual_Simple> records) {
+            Individual_Simple longestRecord = PrepareStats(records);
             using (var stream = File.Open(_path, FileMode.Append))
             using (var writer = new StreamWriter(stream))
             using (var csv = new CsvWriter(writer, _config)) {
@@ -22,19 +25,19 @@ namespace Game_Server.writer.EA_1 {
                     csv.WriteField(record.fitness);
                     csv.WriteField(record.townLifeSum);
                     csv.WriteField(record.score);
-                    csv.WriteField(record.gameTime);
-                    csv.WriteField(record.properties["initialConquerRadius"]);
-                    csv.WriteField(record.properties["maxConquerRadius"]);
-                    csv.WriteField(record.properties["radiusExpansionStep"]);
-                    csv.WriteField(record.properties["attackMinLife"]);
+                    csv.WriteField(record.timestamp.Last());
+                    csv.WriteField(record.gene.properties["initialConquerRadius"]);
+                    csv.WriteField(record.gene.properties["maxConquerRadius"]);
+                    csv.WriteField(record.gene.properties["radiusExpansionStep"]);
+                    csv.WriteField(record.gene.properties["attackMinLife"]);
                     //_csv.WriteField(record.townDevelopment);
                 }
                 writer.Flush();
             }
         }
 
-        private EA_1_Stat PrepareStats(EA_1_Stat[] records) {
-            EA_1_Stat longestRecord;
+        private Individual_Simple PrepareStats(List<Individual_Simple> records) {
+            Individual_Simple longestRecord;
             longestRecord = GetLongestRecord(records, 0);
             return longestRecord;
         }
@@ -45,11 +48,11 @@ namespace Game_Server.writer.EA_1 {
         /// <param name="records">All records</param>
         /// <param name="length">Min length of the records</param>
         /// <returns>The longest record</returns>
-        private EA_1_Stat GetLongestRecord(EA_1_Stat[] records, int length) {
-            EA_1_Stat rec = null;
+        private Individual_Simple GetLongestRecord(List<Individual_Simple> records, int length) {
+            Individual_Simple rec = null;
             foreach (var record in records) {
-                if (record.timeStamps.Count > length) {
-                    length = record.timeStamps.Count;
+                if (record.timestamp.Count > length) {
+                    length = record.timestamp.Count;
                     rec = record;
                 }
             }

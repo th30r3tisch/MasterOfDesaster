@@ -1,5 +1,4 @@
 ﻿using Game_Server.EA;
-using Game_Server.KI;
 using SharedLibrary;
 using System;
 using System.Collections.Generic;
@@ -15,7 +14,7 @@ namespace Game_Server {
         public static int maxPlayers { get; private set; }
         public static int port { get; private set; }
         public static Dictionary<int, Client> clients = new Dictionary<int, Client>();
-        public static Dictionary<int, KI_Base> kis = new Dictionary<int, KI_Base>();
+        public static Dictionary<int, User> kis = new Dictionary<int, User>();
         public static Dictionary<int, PacketHandler> packetHandlers;
 
         private static TcpListener _tcpListener;

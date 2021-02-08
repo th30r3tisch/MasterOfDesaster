@@ -12,7 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Game_Server.EA {
-    class EA_1_Algo: EA_Base<EA_1_Writer> {
+    class EA_1_Algo: EA_Base<Individual_Simple> {
         public delegate double GaussDelegate(double deviation);
 
         public EA_1_Algo() : base() {
@@ -30,10 +30,10 @@ namespace Game_Server.EA {
                 CancellationTokenSource c = new CancellationTokenSource();
                 CancellationToken token = c.Token;
 
-                KI_Base referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
-                KI_Base eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
+                KI_Base<Individual_Simple> referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
+                KI_Base<Individual_Simple> eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
 
-                Genotype_Simple gene = new Genotype_Simple(400, 2000, 100, 10, 1000, 100, 20, 85);
+                Genotype_Simple gene = new Genotype_Simple(400, 2000, 100, 10);
                 Individual_Simple referenceIndividual = new Individual_Simple(gene, individual.number);
 
                 var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
@@ -80,23 +80,7 @@ namespace Game_Server.EA {
         }
 
         protected override void WriteProtocoll(List<Individual_Simple> results) {
-            EA_1_Stat[] stats = new EA_1_Stat[results.Count];
-            foreach (var individual in results) {
-                EA_1_Stat stat = new EA_1_Stat(individual.name) {
-                    //townDevelopment = individual.townNumberDevelopment,
-                    //timeStamps = individual.timestamp,
-                    gameTime = individual.timestamp.Last(),
-                    startPos = individual.startPos,
-                    won = individual.won,
-                    fitness = individual.fitness,
-                    score = individual.score,
-                    townLifeSum = individual.townLifeSum,
-                    number = individual.number,
-                    properties = individual.gene.properties
-                };
-                stats[individual.number] = stat;
-            }
-            _writer.WriteStats(stats);
+            _writer.WriteStats(results);
         }
 
         private void ResetNewPopulation(List<Individual_Simple> newPopulation) {
@@ -153,11 +137,7 @@ namespace Game_Server.EA {
                     _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
                     _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
                     _r.Next(-Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5),
-                    _r.Next(5, 100),
-                    _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
-                    _r.Next(5, 1000),
-                    _r.Next(5, 1000),
-                    _r.Next(0, 100));
+                    _r.Next(5, 100));
                 population.Add(new Individual_Simple(gene, populationCount));
                 populationCount++;
             }

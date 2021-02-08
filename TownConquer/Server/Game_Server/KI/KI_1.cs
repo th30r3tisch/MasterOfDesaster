@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Game_Server.KI {
-    class KI_1 : KI_Base {
+    class KI_1 : KI_Base<Individual_Simple> {
 
         public KI_1(GameManager gm, int id, string name, Color color) : base(gm, id, name, color) { }
 
@@ -68,6 +68,30 @@ namespace Game_Server.KI {
             return i;
         }
 
+        protected override void CheckKITownLifes(Town town) {
+            town.CalculateLife(DateTime.Now);
+            if (town.life <= 0) {
+                town.life = 0;
+                for (int i = town.outgoing.Count; i > 0; i--) {
+                    RetreatFromTown(town.position, town.outgoing[i - 1].position, DateTime.Now);
+                }
+            }
+            lock (gm.treeLock) {
+                foreach (Town t in town.outgoing) {
+                    t.CalculateLife(DateTime.Now);
+                    if (t.life <= 0) {
+                        t.life = 0;
+                        ConquerTown(player, t.position, DateTime.Now);
+                        i.score += 20;
+                        return;
+                    }
+                    else if (t.life > i.gene.properties["supportMaxCap"]) {
+                        RetreatFromTown(town.position, t.position, DateTime.Now);
+                    }
+                }
+            }
+        }
+
         private void TrySupportTown(Town atkTown) {
             List<Town> ownTowns = player.towns;
             foreach (Town supptown in ownTowns) {
@@ -97,8 +121,7 @@ namespace Game_Server.KI {
                 (int)atkTown.position.X + supportRadius,
                 (int)atkTown.position.Z + supportRadius);
             foreach (TreeNode node in objects) {
-                if (node is Town) {
-                    Town t = (Town)node;
+                if (node is Town t) {
                     if (t.player == player) {
                         friendlyTownNumber++;
                     }

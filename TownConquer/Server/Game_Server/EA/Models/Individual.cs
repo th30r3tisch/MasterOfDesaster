@@ -2,8 +2,8 @@
 using System.Numerics;
 
 namespace Game_Server.EA.Models {
-    abstract class Individual<T> where T: Gene{
-        public T gene;
+    abstract class Individual<T>: IIndividual where T: Gene{
+        public T gene { get; set; }
         public int number;
         public string name;
 
@@ -11,6 +11,7 @@ namespace Game_Server.EA.Models {
         public double fitness;
         public Vector3 startPos;
         public bool isElite;
+        public int score = 0;
         public List<int> timestamp;
 
         public Individual(T gene, int number) {

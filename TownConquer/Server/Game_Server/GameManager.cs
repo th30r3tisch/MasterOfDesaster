@@ -222,10 +222,10 @@ namespace Game_Server {
             var c = new CancellationTokenSource();
             var token = c.Token;
 
-            KI_Base ki1 = new KI_1(this, 999, "KI999", Color.FromArgb(255, 255, 255));
+            KI_Base<Individual_Simple> ki1 = new KI_1(this, 999, "KI999", Color.FromArgb(255, 255, 255));
             //KI_Base ki2 = new KI_1(this, 998, "KI998", Color.FromArgb(0, 0, 0));
 
-            Genotype_Simple gene = new Genotype_Simple(400, 2000, 100, 10, 1000, 100, 20, 85);
+            Genotype_Simple gene = new Genotype_Simple(400, 2000, 100, 10);
             Individual_Simple referenceIndividual = new Individual_Simple(gene, 999);
 
             var t1 = ki1.SendIntoGame(token, referenceIndividual);

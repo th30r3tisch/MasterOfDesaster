@@ -1,9 +1,11 @@
 ﻿using CsvHelper.Configuration;
+using Game_Server.EA.Models;
 using Game_Server.writer;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Game_Server {
-    abstract class StatsWriter<T> where T : StatEntry {
+    abstract class StatsWriter<T> where T : IIndividual {
         protected CsvConfiguration _config;
         protected string _path;
 
@@ -14,6 +16,6 @@ namespace Game_Server {
             };
         }
 
-        public abstract void WriteStats(T[] records);
+        public abstract void WriteStats(List<T> records);
     }
 }
