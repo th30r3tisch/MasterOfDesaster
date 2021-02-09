@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Game_Server.EA.EA_1_Algo;
+using static Game_Server.EA.EA_2_Algo;
 
 namespace Game_Server.EA.Models.Advanced {
     class Individual_Advanced : Individual<Genotype_Advanced> {
@@ -15,8 +15,11 @@ namespace Game_Server.EA.Models.Advanced {
             CreateGene(r);
         }
 
+        /// <summary>
+        /// Calculates the Fitness of the individual
+        /// </summary>
         public override void CalcFitness() {
-            throw new NotImplementedException();
+            fitness = score - (timestamp.Last() / 1000);
         }
 
         public Individual_Advanced PrepareMutate(Random r, GaussDelegate gauss) {

@@ -5,13 +5,13 @@ using System.Numerics;
 namespace Game_Server.EA.Models {
     abstract class Individual<T> : IIndividual where T : Gene {
         public T gene { get; set; }
-        public int number;
+        public int number { get; set; }
         public string name;
 
         public bool won;
-        public double fitness;
+        public double fitness { get; set; }
         public Vector3 startPos;
-        public bool isElite;
+        public bool isElite { get; set; }
         public int score = 0;
         public List<int> timestamp;
 

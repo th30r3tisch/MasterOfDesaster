@@ -1,6 +1,5 @@
 ﻿using Game_Server.EA.Models;
 using Game_Server.KI;
-using Game_Server.writer;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Game_Server.EA {
-    abstract class EA_Base<T> where T: IIndividual {
+    abstract class EA_Base<T,K> where T: IIndividual where K: KI_Base<T> {
 
         protected const int _populationNumber = 200;
         protected const int _noImprovementLimit = 100;
@@ -23,6 +22,11 @@ namespace Game_Server.EA {
             _r = new Random();
         }
 
+        /// <summary>
+        /// includes the evolutionary cycle to improve the individuals
+        /// </summary>
+        /// <param name="population">list of individuals</param>
+        /// <param name="counter">number counting the generations</param>
         protected void Evolve(List<T> population, int counter) {
             if (counter < _noImprovementLimit) {
                 Console.WriteLine($"_________Evo {counter}________");
@@ -36,6 +40,10 @@ namespace Game_Server.EA {
             }
         }
 
+        /// <summary>
+        /// creates the first random population
+        /// </summary>
+        /// <returns>random population</returns>
         protected List<T> CreatePopulation() {
             List<T> population = new List<T>();
             int populationCount = 0;
@@ -46,9 +54,75 @@ namespace Game_Server.EA {
             return population;
         }
 
-        protected abstract ConcurrentBag<T> TrainKis(List<T> population);
+        /// <summary>
+        /// starts the games to evaluate the population of individuals
+        /// </summary>
+        /// <param name="population">list of individuals</param>
+        /// <returns>ConcurrentBag with results of each game and individual</returns>
+        protected ConcurrentBag<T> TrainKis(List<T> population) {
+            ConcurrentBag<T> resultCollection = new ConcurrentBag<T>();
+            ConcurrentBag<T> referenceCollection = new ConcurrentBag<T>();
 
-        protected abstract List<T> Evaluate(ConcurrentBag<T> results);
+            Task[] tasks = population.Select(async individual => {
+                GameManager gm = new GameManager();
+
+                CancellationTokenSource c = new CancellationTokenSource();
+                CancellationToken token = c.Token;
+
+                K referenceKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0) });
+                K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255) });
+
+                T referenceIndividual = (T)Activator.CreateInstance(typeof(T), new object[] { individual.number });
+
+                var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
+                var t2 = eaKI.SendIntoGame(token, individual);
+
+                await Task.WhenAny(t1, t2);
+                c.Cancel();
+                await Task.WhenAll(t1, t2);
+                var result1 = await t1;
+                var result2 = await t2;
+                referenceCollection.Add(result1);
+                resultCollection.Add(result2);
+            }).ToArray();
+
+            Task.WaitAll(tasks);
+
+            return resultCollection;
+        }
+
+        /// <summary>
+        /// Searchs the best individual of the population based on fitness
+        /// </summary>
+        /// <param name="individualList">population</param>
+        /// <returns>the best individual</returns>
+        protected T GetElite(List<T> individualList) {
+            double bestFitness = -9999;
+            T eliteIndividual = default(T);
+            foreach (T individual in individualList) {
+                if (individual.fitness > bestFitness) {
+                    eliteIndividual = individual;
+                    bestFitness = individual.fitness;
+                }
+            }
+            eliteIndividual.isElite = true;
+
+            return eliteIndividual;
+        }
+
+        /// <summary>
+        /// calculating the fitness of each individual
+        /// </summary>
+        /// <param name="results">all individuals</param>
+        /// <returns>list of evaluated individuals</returns>
+        protected List<T> Evaluate(ConcurrentBag<T> results) {
+            List<T> individualList = new List<T>();
+            foreach (T individual in results) {
+                individual.CalcFitness();
+                individualList.Add(individual);
+            }
+            return individualList;
+        }
 
         protected abstract List<T> CreateOffspring(List<T> population);
     }

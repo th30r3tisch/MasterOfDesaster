@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Game_Server.EA.Models {
-    interface IIndividual { }
+    interface IIndividual {
+        int number { get; set; }
+        double fitness { get; set; }
+        bool isElite { get; set; }
+
+        void CalcFitness();
+    }
 }

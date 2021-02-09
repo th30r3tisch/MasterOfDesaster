@@ -1,59 +1,81 @@
 ﻿using Game_Server.EA.Models.Advanced;
 using Game_Server.KI;
 using Game_Server.writer.EA_2;
-using System.Collections.Concurrent;
+using MathNet.Numerics.Distributions;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Game_Server.EA {
-    class EA_2_Algo: EA_Base<Individual_Advanced> {
+    class EA_2_Algo: EA_Base<Individual_Advanced, KI_2> {
+
+        public delegate double GaussDelegate(double deviation);
 
         public EA_2_Algo() : base() {
             _writer = new EA_2_Writer("EA2");
             Evolve(CreatePopulation(), 0);
         }
 
-        protected override ConcurrentBag<Individual_Advanced> TrainKis(List<Individual_Advanced> population) {
-            ConcurrentBag<Individual_Advanced> resultCollection = new ConcurrentBag<Individual_Advanced>();
-            ConcurrentBag<Individual_Advanced> referenceCollection = new ConcurrentBag<Individual_Advanced>();
-
-            Task[] tasks = population.Select(async individual => {
-                GameManager gm = new GameManager();
-
-                CancellationTokenSource c = new CancellationTokenSource();
-                CancellationToken token = c.Token;
-
-                KI_Base<Individual_Advanced> referenceKI = new KI_2(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
-                KI_Base<Individual_Advanced> eaKI = new KI_2(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
-
-                Individual_Advanced referenceIndividual = new Individual_Advanced(individual.number);
-
-                var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
-                var t2 = eaKI.SendIntoGame(token, individual);
-
-                await Task.WhenAny(t1, t2);
-                c.Cancel();
-                await Task.WhenAll(t1, t2);
-                var result1 = await t1;
-                var result2 = await t2;
-                referenceCollection.Add(result1);
-                resultCollection.Add(result2);
-            }).ToArray();
-
-            Task.WaitAll(tasks);
-
-            return resultCollection;
+        private Individual_Advanced TournamentSelection(List<Individual_Advanced> population) {
+            List<Individual_Advanced> parents = new List<Individual_Advanced>();
+            int populationSize = population.Count;
+            while (parents.Count < 2) {
+                Individual_Advanced contestantOne = population[_r.Next(0, populationSize)];
+                Individual_Advanced contestantTwo = population[_r.Next(0, populationSize)];
+                if (contestantOne.fitness > contestantTwo.fitness) {
+                    parents.Add(contestantOne);
+                }
+                else {
+                    parents.Add(contestantTwo);
+                }
+            }
+            if (_r.NextDouble() > _recombinationProbability) {
+                return parents[0];
+            }
+            else {
+                return parents[0].PrepareRecombination(parents[1], _r);
+            }
         }
 
         protected override List<Individual_Advanced> CreateOffspring(List<Individual_Advanced> population) {
-            throw new System.NotImplementedException();
+            List<Individual_Advanced> newPopulation = new List<Individual_Advanced>();
+            GaussDelegate gauss = new GaussDelegate(Gauss);
+            Individual_Advanced child;
+
+            newPopulation.Add(GetElite(population));
+
+            for (int i = 0; i < population.Count - 1; i++) {
+                child = (Individual_Advanced)TournamentSelection(population).DeepCopy();
+                child.PrepareMutate(_r, gauss);
+                newPopulation.Add(child);
+            }
+
+            ResetNewPopulation(newPopulation);
+            return newPopulation;
         }
 
-        protected override List<Individual_Advanced> Evaluate(ConcurrentBag<Individual_Advanced> results) {
-            throw new System.NotImplementedException();
+        /// <summary>
+        /// resets all important values preparing the start of the new generation
+        /// </summary>
+        /// <param name="newPopulation">new generation</param>
+        private void ResetNewPopulation(List<Individual_Advanced> newPopulation) {
+            for (int i = 0; i < newPopulation.Count; i++) {
+                Individual_Advanced individual = newPopulation[i];
+                individual.number = i;
+                individual.timestamp.Clear();
+                individual.score = 0;
+            }
+        }
+
+        /// <summary>
+        /// calculates a random number based on gauss
+        /// </summary>
+        /// <param name="deviation">standard deviation</param>
+        /// <returns>random number based on gauss distribution</returns>
+        public static double Gauss(double deviation) {
+            double mean = 0;
+            Normal normalDist = new Normal(mean, deviation);
+            double gaussNum = Math.Round(normalDist.Sample(), 1);
+            return gaussNum;
         }
     }
 }
