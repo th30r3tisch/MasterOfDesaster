@@ -8,6 +8,8 @@ using Game_Server.KI;
 using System.Threading;
 using System.Threading.Tasks;
 using Game_Server.EA.Models;
+using Game_Server.EA.Models.Simple;
+using Game_Server.EA.Models.Advanced;
 
 namespace Game_Server {
     class GameManager {
@@ -223,10 +225,10 @@ namespace Game_Server {
             var token = c.Token;
 
             KI_Base<Individual_Simple> ki1 = new KI_1(this, 999, "KI999", Color.FromArgb(255, 255, 255));
-            //KI_Base ki2 = new KI_1(this, 998, "KI998", Color.FromArgb(0, 0, 0));
+            //KI_Base<Individual_Advanced> ki2 = new KI_2(this, 998, "KI998", Color.FromArgb(0, 0, 0));
 
-            Genotype_Simple gene = new Genotype_Simple(400, 2000, 100, 10);
-            Individual_Simple referenceIndividual = new Individual_Simple(gene, 999);
+            Individual_Simple referenceIndividual = new Individual_Simple(999);
+            //Individual_Advanced referenceIndividual2 = new Individual_Advanced(999);
 
             var t1 = ki1.SendIntoGame(token, referenceIndividual);
             //var t2 = ki2.SendIntoGame(token, referenceIndividual);

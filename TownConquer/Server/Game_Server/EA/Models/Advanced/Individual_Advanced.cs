@@ -7,8 +7,12 @@ using static Game_Server.EA.EA_1_Algo;
 namespace Game_Server.EA.Models.Advanced {
     class Individual_Advanced : Individual<Genotype_Advanced> {
 
-        public Individual_Advanced(Genotype_Advanced gene, int number) : base(gene, number) {
+        public Individual_Advanced(int number) : base( number) {
+            CreateGene();
+        }
 
+        public Individual_Advanced(Random r, int number) : base(number) {
+            CreateGene(r);
         }
 
         public override void CalcFitness() {
@@ -55,7 +59,7 @@ namespace Game_Server.EA.Models.Advanced {
         /// <param name="value">the value to be clamped</param>
         /// <param name="key">the belonging name of the value to clamp</param>
         /// <returns>a valid value</returns>
-        private int ClampValue(int value, string key) {
+        protected override int ClampValue(int value, string key) {
             switch (key) {
                 case nameof(PropertyNames_Advanced.InitialConquerRadius):
                     return Math.Min(Constants.MAP_HEIGHT, Math.Max(Constants.TOWN_MIN_DISTANCE, value));
@@ -76,6 +80,41 @@ namespace Game_Server.EA.Models.Advanced {
                 default:
                     return value;
             }
+        }
+
+        /// <summary>
+        /// Creates static genes
+        /// </summary>
+        protected override void CreateGene() {
+            Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties(new List<int> { 400, 2000, 100, 10, 1000, 100, 20, 85 });
+            Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties(new List<int> { 400, 2000, 100, 10, 1000, 100, 20, 85 });
+            Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties(new List<int> { 400, 2000, 100, 10, 1000, 100, 20, 85 });
+            gene = new Genotype_Advanced(supProps, offProps, deffProps);
+        }
+
+        /// <summary>
+        /// Creates random genes
+        /// </summary>
+        /// <param name="r">Pseudo-random number generator</param>
+        protected override void CreateGene(Random r) {
+            gene = new Genotype_Advanced(CreateProps(r), CreateProps(r), CreateProps(r));
+        }
+
+        /// <summary>
+        /// Creates random properties
+        /// </summary>
+        /// <param name="r">Pseudo-random number generator</param>
+        private Dictionary<string, int> CreateProps(Random r) {
+            return Genotype_Advanced.CreateProperties(new List<int> {
+                r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
+                r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
+                r.Next(-Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5),
+                r.Next(5, 100),
+                r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
+                r.Next(5, 1000),
+                r.Next(5, 1000),
+                r.Next(0, 100)
+            });
         }
     }
 }

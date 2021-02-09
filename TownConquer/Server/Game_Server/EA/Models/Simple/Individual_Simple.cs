@@ -10,14 +10,49 @@ namespace Game_Server.EA.Models.Simple {
         public List<int> townNumberDevelopment;
         public int townLifeSum = 0;
 
-        public Individual_Simple(Genotype_Simple gene, int number) : base(gene, number) {
+        public Individual_Simple(int number) : base(number) {
             townNumberDevelopment = new List<int>();
+            CreateGene();
         }
 
+        public Individual_Simple(Random r, int number) : base(number) {
+            townNumberDevelopment = new List<int>();
+            CreateGene(r);
+        }
+
+        /// <summary>
+        /// Creates static genes
+        /// </summary>
+        protected override void CreateGene() {
+            gene = new Genotype_Simple(new List<int> { 400, 2000, 100, 10 });
+        }
+
+        /// <summary>
+        /// Creates random genes
+        /// </summary>
+        /// <param name="r">Pseudo-random number generator</param>
+        protected override void CreateGene(Random r) {
+            gene = new Genotype_Simple(new List<int> {
+                r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
+                r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
+                r.Next(-Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5),
+                r.Next(5, 100)
+            });
+        }
+
+        /// <summary>
+        /// Calculates the Fitness of the individual
+        /// </summary>
         public override void CalcFitness() {
             fitness = score - (timestamp.Last() / 1000);
         }
 
+        /// <summary>
+        /// Mutates the individual
+        /// </summary>
+        /// <param name="r">Pseudo-random number generator</param>
+        /// <param name="gauss">random number based on gauss distribution</param>
+        /// <returns>The mutatet individual</returns>
         public Individual_Simple Mutate(Random r, GaussDelegate gauss) {
             Dictionary<string, int> props = gene.properties;
             double mutationProbability = 1 / props.Count();
@@ -31,6 +66,12 @@ namespace Game_Server.EA.Models.Simple {
             return this;
         }
 
+        /// <summary>
+        /// Recombinates the individual with a partner
+        /// </summary>
+        /// <param name="partner">individual to recombine with</param>
+        /// <param name="r">Pseudo-random number generator</param>
+        /// <returns>The recombinated individual</returns>
         public Individual_Simple Recombinate(Individual_Simple partner, Random r) {
             double u = r.NextDouble() + r.NextDouble(); // random number between 0 and 2
             var ownProps = gene.properties;
@@ -50,15 +91,15 @@ namespace Game_Server.EA.Models.Simple {
         /// <param name="value">the value to be clamped</param>
         /// <param name="key">the belonging name of the value to clamp</param>
         /// <returns>a valid value</returns>
-        private int ClampValue(int value, string key) {
+        protected override int ClampValue(int value, string key) {
             switch (key) {
-                case "initialConquerRadius":
+                case nameof(PropertyNames_Simple.InitialConquerRadius):
                     return Math.Min(Constants.MAP_HEIGHT, Math.Max(Constants.TOWN_MIN_DISTANCE, value));
-                case "maxConquerRadius":
+                case nameof(PropertyNames_Simple.MaxConquerRadius):
                     return Math.Min(Constants.MAP_HEIGHT, Math.Max(Constants.TOWN_MIN_DISTANCE, value));
-                case "radiusExpansionStep":
+                case nameof(PropertyNames_Simple.RadiusExpansionStep):
                     return Math.Min(Constants.MAP_HEIGHT, Math.Max(-Constants.MAP_HEIGHT, value));
-                case "attackMinLife":
+                case nameof(PropertyNames_Simple.AttackMinLife):
                     return Math.Min(150, Math.Max(5, value));
                 default:
                     return value;

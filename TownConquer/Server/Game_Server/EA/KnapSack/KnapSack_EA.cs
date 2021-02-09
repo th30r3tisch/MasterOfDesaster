@@ -1,5 +1,4 @@
-﻿using Game_Server.writer.knapsack;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Game_Server.EA.KnapSack {
@@ -12,10 +11,11 @@ namespace Game_Server.EA.KnapSack {
 
         private readonly Random _r;
         private List<Item> _items = new List<Item>();
-        private KnapsackStat _average = new KnapsackStat("average");
-        private KnapsackStat _standardDeviation = new KnapsackStat("standardDeviation");
-        private KnapsackStat _maxValues = new KnapsackStat("maxValues");
-        private KnapsackStat _simpsonDivIndex = new KnapsackStat("SimpsonDivIndex");
+
+        private List<double> _average = new List<double>();
+        private List<double> _standardDeviation = new List<double>();
+        private List<double> _maxValues = new List<double>();
+        private List<double> _simpsonDivIndex = new List<double>();
 
         public KnapSack_EA() {
             _r = new Random(1);
@@ -45,10 +45,10 @@ namespace Game_Server.EA.KnapSack {
                     noImprovmentCount = 0;
                 }
 
-                _average.entries.Add(avg);
-                _standardDeviation.entries.Add(StandardDeviationInPopulation(population, avg));
-                _maxValues.entries.Add(MaxValueInPopulation(population).first.value);
-                _simpsonDivIndex.entries.Add(SimpsonsDiversityIndexOfPopulation(population));
+                _average.Add(avg);
+                _standardDeviation.Add(StandardDeviationInPopulation(population, avg));
+                _maxValues.Add(MaxValueInPopulation(population).first.value);
+                _simpsonDivIndex.Add(SimpsonsDiversityIndexOfPopulation(population));
 
                 Evolve(CreateOffspring(population), oldavg, noImprovmentCount);
             }

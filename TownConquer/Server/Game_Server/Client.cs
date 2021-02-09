@@ -173,7 +173,7 @@ namespace Game_Server {
                     ServerSend.UpdateWorld(client.id, player, player.towns.Count, player.towns);// send the new players info to all connected players
                 }
             }
-            foreach (KI_Base ki in Server.kis.Values) {
+            foreach (User ki in Server.kis.Values) {
                 ServerSend.UpdateWorld(id, ki.player, ki.player.towns.Count, ki.player.towns);// send every KI player to the new player
             }
         }

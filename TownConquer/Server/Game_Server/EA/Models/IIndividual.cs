@@ -5,7 +5,5 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Game_Server.EA.Models {
-    interface IIndividual {
-
-    }
+    interface IIndividual { }
 }

@@ -2,7 +2,6 @@
 using Game_Server.KI;
 using Game_Server.writer.EA_1;
 using MathNet.Numerics.Distributions;
-using SharedLibrary;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -16,7 +15,7 @@ namespace Game_Server.EA {
         public delegate double GaussDelegate(double deviation);
 
         public EA_1_Algo() : base() {
-            _writer = new EA_1_Writer("EA");
+            _writer = new EA_1_Writer("EA1");
             Evolve(CreatePopulation(), 0);
         }
 
@@ -33,8 +32,7 @@ namespace Game_Server.EA {
                 KI_Base<Individual_Simple> referenceKI = new KI_1(gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0));
                 KI_Base<Individual_Simple> eaKI = new KI_1(gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255));
 
-                Genotype_Simple gene = new Genotype_Simple(new List<int> { 400, 2000, 100, 10 });
-                Individual_Simple referenceIndividual = new Individual_Simple(gene, individual.number);
+                Individual_Simple referenceIndividual = new Individual_Simple(individual.number);
 
                 var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
                 var t2 = eaKI.SendIntoGame(token, individual);
@@ -77,10 +75,6 @@ namespace Game_Server.EA {
                 individualList.Add(individual);
             }
             return individualList;
-        }
-
-        protected override void WriteProtocoll(List<Individual_Simple> results) {
-            _writer.WriteStats(results);
         }
 
         private void ResetNewPopulation(List<Individual_Simple> newPopulation) {
@@ -129,21 +123,6 @@ namespace Game_Server.EA {
             return eliteIndividual;
         }
 
-        private List<Individual_Simple> CreatePopulation() {
-            List<Individual_Simple> population = new List<Individual_Simple>();
-            int populationCount = 0;
-            while (populationCount < _populationNumber) {
-                Genotype_Simple gene = new Genotype_Simple(new List<int> {
-                    _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
-                    _r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
-                    _r.Next(-Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5),
-                    _r.Next(5, 100)
-                });
-                population.Add(new Individual_Simple(gene, populationCount));
-                populationCount++;
-            }
-            return population;
-        }
 
         /// <summary>
         /// calculates a random number based on gauss

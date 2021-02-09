@@ -1,8 +1,9 @@
-﻿using CsvHelper.Configuration;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
 using Game_Server.EA.Models;
-using Game_Server.writer;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 
 namespace Game_Server {
     abstract class StatsWriter<T> where T : IIndividual {
@@ -17,5 +18,25 @@ namespace Game_Server {
         }
 
         public abstract void WriteStats(List<T> records);
+
+        /// <summary>
+        /// Writes the headlines to the file. Needs the same sequence than the WriteStats method
+        /// </summary>
+        protected void PrepareFile(string[] propertynames) {
+            using (var writer = new StreamWriter(_path))
+            using (var csv = new CsvWriter(writer, _config)) {
+                csv.WriteField("Name");
+                csv.WriteField("Coord");
+                csv.WriteField("Winner");
+                csv.WriteField("Fitness");
+                csv.WriteField("TownLifeSum");
+                csv.WriteField("Score");
+                csv.WriteField("GameTime");
+                foreach (string property in propertynames) {
+                    csv.WriteField(property);
+                }
+                writer.Flush();
+            }
+        }
     }
 }

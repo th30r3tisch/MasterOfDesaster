@@ -102,6 +102,7 @@ namespace Game_Server {
             if (Constants.TRAININGS_MODE == true) {
                 //new KnapSack_EA();
                 EA_1_Algo ea = new EA_1_Algo();
+                //EA_2_Algo ea2 = new EA_2_Algo();
             }
 
             for (int i = 1; i <= maxPlayers; i++) {

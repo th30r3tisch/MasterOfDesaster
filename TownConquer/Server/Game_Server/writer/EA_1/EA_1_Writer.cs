@@ -9,7 +9,7 @@ namespace Game_Server.writer.EA_1 {
     class EA_1_Writer: StatsWriter<Individual_Simple> {
 
         public EA_1_Writer(string filename) : base(filename) {
-            PrepareFile();
+            PrepareFile(Enum.GetNames(typeof(PropertyNames_Simple)));
         }
 
         public override void WriteStats(List<Individual_Simple> records) {
@@ -59,24 +59,6 @@ namespace Game_Server.writer.EA_1 {
             return rec;
         }
 
-        /// <summary>
-        /// Writes the headlines to the file. Needs the same sequence than the WriteStats method
-        /// </summary>
-        private void PrepareFile() {
-            using (var writer = new StreamWriter(_path))
-            using (var csv = new CsvWriter(writer, _config)) {
-                csv.WriteField("Name");
-                csv.WriteField("Coord");
-                csv.WriteField("Winner");
-                csv.WriteField("Fitness");
-                csv.WriteField("TownLifeSum");
-                csv.WriteField("Score");
-                csv.WriteField("GameTime");
-                foreach (string property in Enum.GetNames(typeof(PropertyNames_Simple))) {
-                    csv.WriteField(property);
-                }
-                writer.Flush();
-            }
-        }
+
     }
 }
