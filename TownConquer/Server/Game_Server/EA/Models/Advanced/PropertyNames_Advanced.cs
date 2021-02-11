@@ -8,6 +8,5 @@ namespace Game_Server.EA.Models.Advanced {
         SupportRadius,
         SupportMaxCap,
         SupportMinCap,
-        SupportTownRatio
     }
 }

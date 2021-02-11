@@ -8,6 +8,7 @@ namespace SharedLibrary.Models {
         public Player player;
         public int life;
         public DateTime creationTime;
+        public TownCategory townCategory;
 
         public List<Town> attackerTowns = new List<Town>();
         public List<Town> supporterTowns = new List<Town>();

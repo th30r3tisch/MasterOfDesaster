@@ -225,13 +225,15 @@ namespace Game_Server {
             var token = c.Token;
 
             KI_Base<Individual_Simple> ki1 = new KI_1(this, 999, "KI999", Color.FromArgb(255, 255, 255));
+            KI_Base<Individual_Simple> ki2 = new KI_1(this, 998, "KI998", Color.FromArgb(0, 0, 0));
             //KI_Base<Individual_Advanced> ki2 = new KI_2(this, 998, "KI998", Color.FromArgb(0, 0, 0));
 
             Individual_Simple referenceIndividual = new Individual_Simple(999);
+            Individual_Simple referenceIndividual2 = new Individual_Simple(998);
             //Individual_Advanced referenceIndividual2 = new Individual_Advanced(999);
 
             var t1 = ki1.SendIntoGame(token, referenceIndividual);
-            //var t2 = ki2.SendIntoGame(token, referenceIndividual);
+            var t2 = ki2.SendIntoGame(token, referenceIndividual2);
 
             Task.WhenAny(t1).ContinueWith(taskInfo => { 
                 c.Cancel();

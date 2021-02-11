@@ -22,35 +22,35 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Game_Server.Program" Collapsed="true">
-    <Position X="15.5" Y="1.5" Width="1.5" />
+    <Position X="13.75" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>gAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
       <FileName>Program.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Game_Server.Server" Collapsed="true">
-    <Position X="10.25" Y="2.5" Width="1.5" />
+    <Position X="15.5" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAgACAgBEAAAAEAAAAgAABgEAgAAAAIABAAAAA=</HashCode>
       <FileName>Server.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Game_Server.ServerHandle" Collapsed="true">
-    <Position X="12" Y="2.5" Width="1.5" />
+    <Position X="10.25" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AEAAAAIAAAAABAAAAAAAAAAAAAAAAAAACAAAAAAAAAA=</HashCode>
       <FileName>ServerHandle.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Game_Server.ServerSend" Collapsed="true">
-    <Position X="13.75" Y="2.5" Width="1.5" />
+    <Position X="12" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAABkAAAAAAACAAAEAAAAAAAQABAQIAAAAAAACACAAA=</HashCode>
       <FileName>ServerSend.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Game_Server.ThreadManager" Collapsed="true">
-    <Position X="15.5" Y="2.5" Width="1.5" />
+    <Position X="13.75" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAABAAAQAEAAIAAAAAAAAAAAAAAAAAABAAAA=</HashCode>
       <FileName>ThreadManager.cs</FileName>
@@ -66,28 +66,28 @@
   <Class Name="Game_Server.StatsWriter&lt;T&gt;" Collapsed="true">
     <Position X="6.75" Y="7.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAIAAEAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAIAAEAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAA=</HashCode>
       <FileName>writer\StatsWriter.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Game_Server.EA.EA_1_Algo" Collapsed="true">
     <Position X="0.5" Y="8.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AQAAAAAAAAAAAAAAAEAAAqgAAAAAAAAABAAAAAAAAhA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAEAAAIAAAAAAAAAABAAAAAAAABA=</HashCode>
       <FileName>EA\EA_1_Algo.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Game_Server.EA.EA_2_Algo" Collapsed="true">
     <Position X="2.75" Y="8.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAqgAAAAAAAAAAAAAAAAAAgA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAEAAAIAAAAAAAAAABAAAAAAAABA=</HashCode>
       <FileName>EA\EA_2_Algo.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Game_Server.EA.EA_Base&lt;T&gt;" Collapsed="true">
+  <Class Name="Game_Server.EA.EA_Base&lt;T, K&gt;" Collapsed="true">
     <Position X="1.75" Y="7.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAIAAAAAAAAAAAAAAAAQ4gAAAAAAAAAICAAAAAAAoA=</HashCode>
+      <HashCode>AQAIAAAAAAAAAAAAAAAAQ6gAAAAAAAAAICAAAAAAAIA=</HashCode>
       <FileName>EA\EA_Base.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -112,6 +112,27 @@
       <FileName>EA\KnapSack\KnapSack_EA.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="Game_Server.EA.KnapSack.KnapsackWriter" Collapsed="true">
+    <Position X="12" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAEAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>EA\KnapSack\KnapsackWriter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Game_Server.EA.Models.Advanced.Genotype_Advanced" Collapsed="true">
+    <Position X="7.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAABAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAhA=</HashCode>
+      <FileName>EA\Models\Advanced\Genotype_Advanced.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Game_Server.EA.Models.Advanced.Individual_Advanced" Collapsed="true">
+    <Position X="0.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAIAAAAAAACAAAAAAAAAAAACAAAAAAACAM=</HashCode>
+      <FileName>EA\Models\Advanced\Individual_Advanced.cs</FileName>
+    </TypeIdentifier>
+  </Class>
   <Class Name="Game_Server.EA.Models.Gene" Collapsed="true">
     <Position X="6.75" Y="4.5" Width="1.5" />
     <TypeIdentifier>
@@ -119,53 +140,39 @@
       <FileName>EA\Models\Gene.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Game_Server.EA.Models.Genotype_Advanced" Collapsed="true">
-    <Position X="7.75" Y="5.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAQAABAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAgA=</HashCode>
-      <FileName>EA\Models\Genotype_Advanced.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Game_Server.EA.Models.Genotype_Simple" Collapsed="true">
-    <Position X="5.5" Y="5.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>EA\Models\Genotype_Simple.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="Game_Server.EA.Models.Individual&lt;T&gt;" Collapsed="true">
     <Position X="1.75" Y="4.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAIAAAQAAAAAAIABAAAgAMAAAACAAAAgEAAAI=</HashCode>
+      <HashCode>AAAAAAgAIAAAQAAAAAAIABAAAgAMAAAACAAAAgEAAAM=</HashCode>
       <FileName>EA\Models\Individual.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Game_Server.EA.Models.Individual_Advanced" Collapsed="true">
-    <Position X="0.5" Y="5.75" Width="1.5" />
+  <Class Name="Game_Server.EA.Models.Simple.Genotype_Simple" Collapsed="true">
+    <Position X="5.5" Y="5.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAACAAAAAAACAM=</HashCode>
-      <FileName>EA\Models\Individual_Advanced.cs</FileName>
+      <HashCode>AAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>EA\Models\Simple\Genotype_Simple.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Game_Server.EA.Models.Individual_Simple" Collapsed="true">
+  <Class Name="Game_Server.EA.Models.Simple.Individual_Simple" Collapsed="true">
     <Position X="2.75" Y="5.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AEAAAIAAAAAIAAAAAAAAAAAAAAAAAAAACAAAAAAAAAE=</HashCode>
-      <FileName>EA\Models\Individual_Simple.cs</FileName>
+      <HashCode>AEAAAIgAAAAIAAAAAAAAAAAAAAAAAAAACAAAAAAAAAE=</HashCode>
+      <FileName>EA\Models\Simple\Individual_Simple.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Game_Server.KI.KI_1" Collapsed="true">
-    <Position X="5.25" Y="3.25" Width="1.5" />
+    <Position X="3" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAACAABAAAAAACAEQAAACAABAAAAAAAAAAAAAA=</HashCode>
       <FileName>KI\KI_1.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Game_Server.KI.KI_2" Collapsed="true">
-    <Position X="3" Y="3.25" Width="1.5" />
+    <Position X="5.25" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAACAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAACAABAAAAAAAIEQAAACAABAAAAAAAAAAAAAA=</HashCode>
       <FileName>KI\KI_2.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -179,7 +186,7 @@
   <Class Name="Game_Server.writer.EA_1.EA_1_Writer" Collapsed="true">
     <Position X="5.5" Y="8.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAKAA=</HashCode>
+      <HashCode>AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAACAA=</HashCode>
       <FileName>writer\EA_1\EA_1_Writer.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -190,26 +197,33 @@
       <FileName>writer\EA_2\EA_2_Writer.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Game_Server.writer.knapsack.KnapsackStat" Collapsed="true">
-    <Position X="12" Y="1.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>writer\knapsack\KnapsackStat.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Game_Server.writer.knapsack.KnapsackWriter" Collapsed="true">
-    <Position X="13.75" Y="1.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>writer\knapsack\KnapsackWriter.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Interface Name="Game_Server.EA.Models.IIndividual" Collapsed="true">
     <Position X="10.25" Y="3.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAIAAAQAAAAAAAAAAAAAAAAAAACAAAAAEAAAA=</HashCode>
       <FileName>EA\Models\IIndividual.cs</FileName>
     </TypeIdentifier>
   </Interface>
+  <Enum Name="Game_Server.EA.Models.Advanced.PropertyNames_Advanced" Collapsed="true">
+    <Position X="10.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAgAAACAAAAAAAAAABAAAQAAAAAAAAAAEAI=</HashCode>
+      <FileName>EA\Models\Advanced\PropertyNames_Advanced.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Game_Server.EA.Models.Advanced.PropertyNames_General" Collapsed="true">
+    <Position X="12" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAABABQAAACAAAAAAAAAA=</HashCode>
+      <FileName>EA\Models\Advanced\PropertyNames_General.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Game_Server.EA.Models.Simple.PropertyNames_Simple" Collapsed="true">
+    <Position X="13.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAgAAACAAAAAAAAAABABAQAAAAAAAAAAEAI=</HashCode>
+      <FileName>EA\Models\Simple\PropertyNames_Simple.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

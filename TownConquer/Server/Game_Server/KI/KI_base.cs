@@ -2,6 +2,7 @@
 using SharedLibrary;
 using SharedLibrary.Models;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,7 +42,7 @@ namespace Game_Server.KI {
         /// <returns>task with individual</returns>
         protected abstract Task<T> PlayAsync(CancellationToken ct);
 
-        protected abstract void CheckKITownLifes(Town town);
+        protected abstract void CheckKITownLifes(Town town, Dictionary<string, int> props);
 
         public override void Disconnect() {
             throw new NotImplementedException();

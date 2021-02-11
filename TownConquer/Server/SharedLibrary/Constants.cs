@@ -20,6 +20,6 @@ namespace SharedLibrary {
         public const int RANDOM_SEED = 1;
         public const float TOWN_GROTH_SECONDS = 1.1f;
 
-        public const bool TRAININGS_MODE = true;
+        public const bool TRAININGS_MODE = false;
     }
 }

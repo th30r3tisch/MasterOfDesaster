@@ -24,7 +24,7 @@ namespace Game_Server.EA.Models.Simple {
         /// Creates static genes
         /// </summary>
         protected override void CreateGene() {
-            gene = new Genotype_Simple(new List<int> { 400, 2000, 100, 10 });
+            gene = new Genotype_Simple(new List<int> { 400, 2000, 100, 10, 1000, 100, 20, 85 });
         }
 
         /// <summary>
@@ -36,7 +36,11 @@ namespace Game_Server.EA.Models.Simple {
                 r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
                 r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
                 r.Next(-Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5),
-                r.Next(5, 100)
+                r.Next(5, 100),
+                r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
+                r.Next(5, 1000),
+                r.Next(5, 1000),
+                r.Next(0, 100)
             });
         }
 
@@ -101,6 +105,14 @@ namespace Game_Server.EA.Models.Simple {
                     return Math.Min(Constants.MAP_HEIGHT, Math.Max(-Constants.MAP_HEIGHT, value));
                 case nameof(PropertyNames_Simple.AttackMinLife):
                     return Math.Min(150, Math.Max(5, value));
+                case nameof(PropertyNames_Simple.SupportRadius):
+                    return Math.Min(Constants.MAP_HEIGHT, Math.Max(Constants.TOWN_MIN_DISTANCE, value));
+                case nameof(PropertyNames_Simple.SupportMaxCap):
+                    return Math.Min(1000, Math.Max(5, value));
+                case nameof(PropertyNames_Simple.SupportMinCap):
+                    return Math.Min(500, Math.Max(5, value));
+                case nameof(PropertyNames_Simple.SupportTownRatio):
+                    return Math.Min(99, Math.Max(0, value));
                 default:
                     return value;
             }

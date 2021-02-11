@@ -1,4 +1,5 @@
 ﻿using Game_Server.EA.Models;
+using Game_Server.EA.Models.Simple;
 using Game_Server.KI;
 using System;
 using System.Collections.Concurrent;
@@ -69,10 +70,12 @@ namespace Game_Server.EA {
                 CancellationTokenSource c = new CancellationTokenSource();
                 CancellationToken token = c.Token;
 
-                K referenceKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0) });
+                KI_Base<Individual_Simple> referenceKI = new KI_1(gm, 999, "KI999", Color.FromArgb(255, 255, 255));
+                // K referenceKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0) });
                 K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255) });
-
-                T referenceIndividual = (T)Activator.CreateInstance(typeof(T), new object[] { individual.number });
+                
+                Individual_Simple referenceIndividual = new Individual_Simple(999);
+                //T referenceIndividual = (T)Activator.CreateInstance(typeof(T), new object[] { individual.number });
 
                 var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
                 var t2 = eaKI.SendIntoGame(token, individual);
@@ -82,7 +85,7 @@ namespace Game_Server.EA {
                 await Task.WhenAll(t1, t2);
                 var result1 = await t1;
                 var result2 = await t2;
-                referenceCollection.Add(result1);
+                //referenceCollection.Add(result1);
                 resultCollection.Add(result2);
             }).ToArray();
 

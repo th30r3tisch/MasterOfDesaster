@@ -26,6 +26,7 @@ namespace Game_Server.EA.Models.Advanced {
             Mutate(r, gauss, gene.attackProperties);
             Mutate(r, gauss, gene.defensiveProperties);
             Mutate(r, gauss, gene.supportProperties);
+            Mutate(r, gauss, gene.generalProperties);
             return this;
         }
 
@@ -44,6 +45,7 @@ namespace Game_Server.EA.Models.Advanced {
             Recombinate(gene.attackProperties, partner.gene.attackProperties, r);
             Recombinate(gene.defensiveProperties, partner.gene.defensiveProperties, r);
             Recombinate(gene.supportProperties, partner.gene.supportProperties, r);
+            Recombinate(gene.generalProperties, partner.gene.generalProperties, r);
             return this;
         }
 
@@ -78,8 +80,14 @@ namespace Game_Server.EA.Models.Advanced {
                     return Math.Min(1000, Math.Max(5, value));
                 case nameof(PropertyNames_Advanced.SupportMinCap):
                     return Math.Min(500, Math.Max(5, value));
-                case nameof(PropertyNames_Advanced.SupportTownRatio):
+                case nameof(PropertyNames_General.SupportTownRatio):
                     return Math.Min(99, Math.Max(0, value));
+                case nameof(PropertyNames_General.DeffTownRatio):
+                    return Math.Min(99, Math.Max(0, value));
+                case nameof(PropertyNames_General.AtkTownRatio):
+                    return Math.Min(99, Math.Max(0, value));
+                case nameof(PropertyNames_General.CategorisationRadius):
+                    return Math.Min(Constants.MAP_HEIGHT, Math.Max(Constants.TOWN_MIN_DISTANCE, value));
                 default:
                     return value;
             }
@@ -89,10 +97,11 @@ namespace Game_Server.EA.Models.Advanced {
         /// Creates static genes
         /// </summary>
         protected override void CreateGene() {
-            Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties(new List<int> { 400, 2000, 100, 10, 1000, 100, 20, 85 });
-            Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties(new List<int> { 400, 2000, 100, 10, 1000, 100, 20, 85 });
-            Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties(new List<int> { 400, 2000, 100, 10, 1000, 100, 20, 85 });
-            gene = new Genotype_Advanced(supProps, offProps, deffProps);
+            Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 400, 2000, 100, 10, 1000, 100, 20 });
+            Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 400, 2000, 100, 10, 1000, 100, 20 });
+            Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 400, 2000, 100, 10, 1000, 100, 20 });
+            Dictionary<string, int> genProps = Genotype_Advanced.CreateProperties<PropertyNames_General>(new List<int> { 85, 10, 50, 1500 });
+            gene = new Genotype_Advanced(supProps, offProps, deffProps, genProps);
         }
 
         /// <summary>
@@ -100,15 +109,19 @@ namespace Game_Server.EA.Models.Advanced {
         /// </summary>
         /// <param name="r">Pseudo-random number generator</param>
         protected override void CreateGene(Random r) {
-            gene = new Genotype_Advanced(CreateProps(r), CreateProps(r), CreateProps(r));
+            gene = new Genotype_Advanced(
+                CreateProps<PropertyNames_Advanced>(r), 
+                CreateProps<PropertyNames_Advanced>(r), 
+                CreateProps<PropertyNames_Advanced>(r), 
+                CreateProps<PropertyNames_General>(r));
         }
 
         /// <summary>
         /// Creates random properties
         /// </summary>
         /// <param name="r">Pseudo-random number generator</param>
-        private Dictionary<string, int> CreateProps(Random r) {
-            return Genotype_Advanced.CreateProperties(new List<int> {
+        private Dictionary<string, int> CreateProps<T>(Random r) {
+            return Genotype_Advanced.CreateProperties<T>(new List<int> {
                 r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
                 r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
                 r.Next(-Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5),
