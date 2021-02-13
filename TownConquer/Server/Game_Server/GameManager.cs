@@ -14,6 +14,7 @@ using Game_Server.EA.Models.Advanced;
 namespace Game_Server {
     class GameManager {
         public Game game;
+        public int id;
 
         public readonly object treeLock = new object();
 
@@ -21,7 +22,8 @@ namespace Game_Server {
             ThreadManager.UpdateMain();
         }
 
-        public GameManager() {
+        public GameManager(int gmId) {
+            id = gmId;
             GenereateInitialMap();
         }
 

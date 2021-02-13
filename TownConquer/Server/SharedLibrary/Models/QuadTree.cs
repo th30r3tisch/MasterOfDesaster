@@ -120,6 +120,7 @@ namespace SharedLibrary.Models {
         /// <param name="atkTown">the origin of the action</param>
         /// <param name="deffTown">the target of the action</param>
         public void AddTownActionReference(Town atkTown, Town deffTown) {
+            if (atkTown.position == deffTown.position) return;
             if (atkTown.player == deffTown.player) {
                 if (!deffTown.supporterTowns.Contains(atkTown)) {
                     deffTown.supporterTowns.Add(atkTown);

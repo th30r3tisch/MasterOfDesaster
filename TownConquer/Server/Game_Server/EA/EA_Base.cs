@@ -1,4 +1,5 @@
 ﻿using Game_Server.EA.Models;
+using Game_Server.EA.Models.Advanced;
 using Game_Server.EA.Models.Simple;
 using Game_Server.KI;
 using System;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 namespace Game_Server.EA {
     abstract class EA_Base<T,K> where T: IIndividual where K: KI_Base<T> {
 
-        protected const int _populationNumber = 200;
+        protected const int _populationNumber = 1;
         protected const int _noImprovementLimit = 100;
         protected const double _recombinationProbability = 0.7;
 
@@ -65,16 +66,18 @@ namespace Game_Server.EA {
             ConcurrentBag<T> referenceCollection = new ConcurrentBag<T>();
 
             Task[] tasks = population.Select(async individual => {
-                GameManager gm = new GameManager();
+                GameManager gm = new GameManager(individual.number);
 
                 CancellationTokenSource c = new CancellationTokenSource();
                 CancellationToken token = c.Token;
 
                 KI_Base<Individual_Simple> referenceKI = new KI_1(gm, 999, "KI999", Color.FromArgb(255, 255, 255));
+                //KI_Base<Individual_Advanced> referenceKI = new KI_2(gm, 999, "KI999", Color.FromArgb(255, 255, 255));
                 // K referenceKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0) });
                 K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255) });
                 
                 Individual_Simple referenceIndividual = new Individual_Simple(999);
+                //Individual_Advanced referenceIndividual = new Individual_Advanced(999);
                 //T referenceIndividual = (T)Activator.CreateInstance(typeof(T), new object[] { individual.number });
 
                 var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
@@ -101,7 +104,7 @@ namespace Game_Server.EA {
         /// <returns>the best individual</returns>
         protected T GetElite(List<T> individualList) {
             double bestFitness = -9999;
-            T eliteIndividual = default(T);
+            T eliteIndividual = default;
             foreach (T individual in individualList) {
                 if (individual.fitness > bestFitness) {
                     eliteIndividual = individual;

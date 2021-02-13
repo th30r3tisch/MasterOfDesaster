@@ -4,6 +4,7 @@ using Game_Server.writer.EA_1;
 using MathNet.Numerics.Distributions;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace Game_Server.EA {
     class EA_1_Algo: EA_Base<Individual_Simple, KI_1> {

@@ -112,7 +112,8 @@ namespace Game_Server.KI {
                 }
             }
             lock (gm.treeLock) {
-                foreach (Town t in town.outgoing) {
+                for (int x = town.outgoing.Count - 1; x == 0; x--) {
+                    Town t = town.outgoing[x];
                     t.CalculateLife(DateTime.Now);
                     if (t.life <= 0) {
                         t.life = 0;

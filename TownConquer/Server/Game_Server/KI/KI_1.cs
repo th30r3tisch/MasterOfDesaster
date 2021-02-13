@@ -23,8 +23,7 @@ namespace Game_Server.KI {
             int timePassed = 0;
             int townCount = 0;
 
-            while (Constants.TOWN_NUMBER * 0.8 > player.towns.Count ) { //  && player.towns.Count != 0
-                Console.WriteLine($"{player.towns.Count}");
+            while (Constants.TOWN_NUMBER * 0.8 > player.towns.Count) { //  && player.towns.Count != 0
                 try {
                     await Task.Delay(tickLength);
                 }
@@ -78,7 +77,8 @@ namespace Game_Server.KI {
                 }
             }
             lock (gm.treeLock) {
-                foreach (Town t in town.outgoing) {
+                for (int x = town.outgoing.Count -1; x == 0; x--) {
+                    Town t = town.outgoing[x];
                     t.CalculateLife(DateTime.Now);
                     if (t.life <= 0) {
                         t.life = 0;
@@ -157,7 +157,7 @@ namespace Game_Server.KI {
         private void TryAttackTown(Town atkTown) {
             if (atkTown.life > i.gene.properties["AttackMinLife"] && atkTown.outgoing.Count < 2) {
                 Town deffTown = GetPossibleAttackTarget(atkTown);
-                if (deffTown != null) {
+                if (deffTown != null && atkTown != deffTown) {
                     InteractWithTown(atkTown.position, deffTown.position, DateTime.Now);
                 }
             }
@@ -167,7 +167,7 @@ namespace Game_Server.KI {
             int conquerRadius = i.gene.properties["InitialConquerRadius"];
             Town target = null;
             QuadTree tree = gm.game.tree;
-
+            
             while (target == null && conquerRadius < i.gene.properties["MaxConquerRadius"] && conquerRadius > 0) {
                 List <TreeNode> townsInRange;
                 List<Town> enemyTowns = new List<Town>();

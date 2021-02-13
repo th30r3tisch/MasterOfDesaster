@@ -97,7 +97,7 @@ namespace Game_Server {
 
         private static void InitializeServerData() {
 
-            gm = new GameManager();
+            gm = new GameManager(-1);
 
             if (Constants.TRAININGS_MODE == true) {
                 //new KnapSack_EA();
