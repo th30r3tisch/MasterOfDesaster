@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviour {
             else {
                 TownManager tm = town.go.GetComponent<TownManager>();
                 enemy.towns.Add(town);
-                town.player = enemy;
+                town.owner = enemy;
                 tm.ownerid = enemy.id;
                 tm.ownerName = enemy.username;
                 town.go.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(enemy.color);
@@ -90,25 +90,25 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private void CreateTown(int i, Vector3 position, Player owner) {
+    private void CreateTown(int i, Vector3 position, Player player) {
         GameObject town;
         UTown t;
 
         t = new UTown(ConversionManager.ToNumericVector(position)) {
-            player = owner
+            owner = player
         };
 
         town = Instantiate(townPrefab, position, _horizontalOrientation);
         town.GetComponent<TownManager>().id = i;
-        town.GetComponent<TownManager>().ownerName = owner.username;
-        town.GetComponent<TownManager>().ownerid = owner.id;
+        town.GetComponent<TownManager>().ownerName = player.username;
+        town.GetComponent<TownManager>().ownerid = player.id;
         town.GetComponent<TownManager>().life = t.life;
         town.GetComponent<TownManager>().town = t;
-        town.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(owner.color);
+        town.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(player.color);
 
         t.go = town;
-        t.creationTime = owner.creationTime;
-        owner.towns.Add(t);
+        t.creationTime = player.creationTime;
+        player.towns.Add(t);
         _world.Insert(t);
     }
 
@@ -134,14 +134,14 @@ public class GameManager : MonoBehaviour {
         UTown atkT = (UTown)_world.SearchTown(_world, ConversionManager.ToNumericVector(lineStart));
         GameObject line;
 
-        if (deffT.player.id == atkT.player.id) {
-            line = CreateLineMesh(atkT.player.id, atkT, deffT, "sup");
+        if (deffT.owner.id == atkT.owner.id) {
+            line = CreateLineMesh(atkT.owner.id, atkT, deffT, "sup");
         }
         else {
-            line = CreateLineMesh(atkT.player.id, atkT, deffT, "atk");
+            line = CreateLineMesh(atkT.owner.id, atkT, deffT, "atk");
         }
         atkT.outgoingActions.Add(line);
-        _world.AddTownActionReference(atkT, deffT);
+        deffT.AddTownActionReference(atkT);
     }
 
     public void RetreatTroops(Vector3 lineStart, Vector3 lineEnd) {
@@ -150,7 +150,7 @@ public class GameManager : MonoBehaviour {
         TownManager atkTm = atkT.go.GetComponent<TownManager>();
         atkTm.RetreatTroopsFromTown(deffT);
 
-        _world.RmTownActionReference(atkT, deffT);
+        deffT.RmTownActionReference(atkT);
     }
 
     public void ConquerTown(int conquererId, Vector3 conqueredTownCoord) {
@@ -181,29 +181,29 @@ public class GameManager : MonoBehaviour {
         TownManager conqueredTm = conqueredT.go.GetComponent<TownManager>();
 
         // removes all attacking troops and deletes references in both towns
-        for (int i = conqueredT.attackerTowns.Count; i > 0; i--) {
-            UTown atkT = (UTown)conqueredT.attackerTowns[i - 1];
+        for (int i = conqueredT.incomingAttackerTowns.Count; i > 0; i--) {
+            UTown atkT = (UTown)conqueredT.incomingAttackerTowns[i - 1];
             atkT.go.GetComponent<TownManager>().RetreatTroopsFromTown(conqueredT);
-            _world.RmTownActionReference(atkT, conqueredT);
+            conqueredT.RmTownActionReference(atkT);
         }
 
         // removes all attacking troops and deletes references in both towns
-        for (int i = conqueredT.supporterTowns.Count; i > 0; i--) {
-            UTown supT = (UTown)conqueredT.supporterTowns[i - 1];
+        for (int i = conqueredT.incomingSupporterTowns.Count; i > 0; i--) {
+            UTown supT = (UTown)conqueredT.incomingSupporterTowns[i - 1];
             supT.go.GetComponent<TownManager>().RetreatTroopsFromTown(conqueredT);
-            _world.RmTownActionReference(supT, conqueredT);
+            conqueredT.RmTownActionReference(supT);
         }
 
         // removes all outgoing troops and deletes references in both towns
-        for (int i = conqueredT.outgoing.Count; i > 0; i--) {
-            UTown targetT = (UTown)conqueredT.outgoing[i - 1];
+        for (int i = conqueredT.outgoingActionsToTowns.Count; i > 0; i--) {
+            UTown targetT = (UTown)conqueredT.outgoingActionsToTowns[i - 1];
             conqueredTm.RetreatTroopsFromTown(targetT);
-            _world.RmTownActionReference(conqueredT, targetT);
+            targetT.RmTownActionReference(conqueredT);
         }
 
         conqueredTm.ownerid = conquerer.id;
         conqueredTm.ownerName = conquerer.username;
-        _world.UpdateOwner(conquerer, conqueredT);
+        conqueredT.UpdateOwner(conquerer);
         conqueredT.go.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(conquerer.color);
     }
 

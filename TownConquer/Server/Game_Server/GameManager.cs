@@ -7,9 +7,7 @@ using System.Drawing;
 using Game_Server.KI;
 using System.Threading;
 using System.Threading.Tasks;
-using Game_Server.EA.Models;
 using Game_Server.EA.Models.Simple;
-using Game_Server.EA.Models.Advanced;
 
 namespace Game_Server {
     class GameManager {
@@ -65,7 +63,7 @@ namespace Game_Server {
                     }
                 }
             }
-            t.player = owner;
+            t.owner = owner;
             t.creationTime = owner.creationTime;
             owner.towns.Add(t);
             tree.Insert(t);
@@ -171,9 +169,11 @@ namespace Game_Server {
                 QuadTree tree = game.tree;
                 Town atkTown = tree.SearchTown(tree, atk);
                 Town deffTown = tree.SearchTown(tree, deff);
-                atkTown.CalculateLife(timeStamp);
-                deffTown.CalculateLife(timeStamp);
-                tree.AddTownActionReference(atkTown, deffTown);
+                if (CanTownsInteract(atkTown, deffTown)) {
+                    atkTown.CalculateLife(timeStamp);
+                    deffTown.CalculateLife(timeStamp);
+                    deffTown.AddTownActionReference(atkTown);
+                }
             }
         }
 
@@ -184,7 +184,7 @@ namespace Game_Server {
                 Town deffTown = tree.SearchTown(tree, deff);
                 atkTown.CalculateLife(timeStamp);
                 deffTown.CalculateLife(timeStamp);
-                tree.RmTownActionReference(atkTown, deffTown);
+                deffTown.RmTownActionReference(atkTown);
             }
         }
 
@@ -195,31 +195,45 @@ namespace Game_Server {
                 deffTown.CalculateLife(timeStamp);
                 UpdateTown(deffTown, timeStamp);
 
-                tree.UpdateOwner(player, deffTown);
+                deffTown.UpdateOwner(player);
             }
         }
 
+        /// <summary>
+        /// updates one town and all its references
+        /// </summary>
+        /// <param name="town">town to update</param>
+        /// <param name="timeStamp">time when update happened</param>
         public void UpdateTown(Town town, DateTime timeStamp) {
             lock (treeLock) {
-                QuadTree tree = game.tree;
                 // removes all incoming atk troops and deletes references in both towns
-                for (int i = town.attackerTowns.Count; i > 0; i--) {
-                    town.attackerTowns[i - 1].CalculateLife(timeStamp);
-                    tree.RmTownActionReference(town.attackerTowns[i - 1], town);
-                }
-
+                UpdateInteractingTowns(town.incomingAttackerTowns, town, timeStamp);
                 // removes all incoming support troops and deletes references in both towns
-                for (int i = town.supporterTowns.Count; i > 0; i--) {
-                    town.supporterTowns[i - 1].CalculateLife(timeStamp);
-                    tree.RmTownActionReference(town.supporterTowns[i - 1], town);
-                }
+                UpdateInteractingTowns(town.incomingSupporterTowns, town, timeStamp);
 
                 // removes all outgoing troops and deletes references in both towns
-                for (int i = town.outgoing.Count; i > 0; i--) {
-                    town.outgoing[i - 1].CalculateLife(timeStamp);
-                    tree.RmTownActionReference(town, town.outgoing[i - 1]);
+                for (int i = town.outgoingActionsToTowns.Count; i > 0; i--) {
+                    town.outgoingActionsToTowns[i - 1].CalculateLife(timeStamp);
+                    town.outgoingActionsToTowns[i - 1].RmTownActionReference(town);
                 }
             }
+        }
+
+        private void UpdateInteractingTowns(List<Town> interactingTowns, Town town, DateTime timeStamp) {
+            for (int i = interactingTowns.Count; i > 0; i--) {
+                interactingTowns[i - 1].CalculateLife(timeStamp);
+                town.RmTownActionReference(interactingTowns[i - 1]);
+            }
+        }
+
+        public bool CanTownsInteract(Town townOne, Town townTwo) {
+            if (!townOne.outgoingActionsToTowns.Contains(townTwo) &&
+                !townTwo.outgoingActionsToTowns.Contains(townOne) &&
+                townTwo != townOne &&
+                !IsIntersecting(townOne.position, townTwo.position)) {
+                return true;
+            }
+            return false;
         }
 
         public void CreateKis() {

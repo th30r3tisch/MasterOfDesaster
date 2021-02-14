@@ -27,10 +27,10 @@ public class TownManager : MonoBehaviour {
             if (ownerid >= 0) {
                 life += 1;
             }
-            life += town.supporterTowns.Count - town.attackerTowns.Count - town.outgoing.Count;
+            life += town.incomingSupporterTowns.Count - town.incomingAttackerTowns.Count - town.outgoingActionsToTowns.Count;
             if (life < 0) {
                 life = 0;
-                if (town.attackerTowns.Count > 0) {
+                if (town.incomingAttackerTowns.Count > 0) {
                     ConquerTownRequest();
                 }
                 else {
@@ -63,7 +63,7 @@ public class TownManager : MonoBehaviour {
 
 
     private void ConquerTownRequest() {
-        if (town.attackerTowns.First().player.id == Client.instance.myId) {
+        if (town.incomingAttackerTowns.First().owner.id == Client.instance.myId) {
             ClientSend.ConquerRequest(gameObject.transform.position);
         }
     }

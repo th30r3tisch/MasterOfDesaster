@@ -40,13 +40,13 @@ namespace Game_Server.KI {
                 }
                 lock (gm.treeLock) {
                     for (int x = player.towns.Count; x > 0; x--) {
-                        Town atkTown = player.towns[x - 1];
-                        CheckKITownLifes(atkTown, i.gene.properties);
-                        if (IsSupportTown(atkTown)) {
-                            TrySupportTown(atkTown);
+                        Town town = player.towns[x - 1];
+                        CheckKITownLifes(town, i.gene.properties);
+                        if (HasSupportPermission(town)) {
+                            TrySupportTown(town);
                         }
                         else {
-                            TryAttackTown(atkTown);
+                            TryAttackTown(town);
                         }
                     }
                 }
@@ -72,13 +72,13 @@ namespace Game_Server.KI {
             town.CalculateLife(DateTime.Now);
             if (town.life <= 0) {
                 town.life = 0;
-                for (int i = town.outgoing.Count; i > 0; i--) {
-                    RetreatFromTown(town.position, town.outgoing[i - 1].position, DateTime.Now);
+                for (int i = town.outgoingActionsToTowns.Count; i > 0; i--) {
+                    RetreatFromTown(town.position, town.outgoingActionsToTowns[i - 1].position, DateTime.Now);
                 }
             }
             lock (gm.treeLock) {
-                for (int x = town.outgoing.Count -1; x == 0; x--) {
-                    Town t = town.outgoing[x];
+                for (int x = town.outgoingActionsToTowns.Count -1; x == 0; x--) {
+                    Town t = town.outgoingActionsToTowns[x];
                     t.CalculateLife(DateTime.Now);
                     if (t.life <= 0) {
                         t.life = 0;
@@ -96,34 +96,46 @@ namespace Game_Server.KI {
         private void TrySupportTown(Town atkTown) {
             List<Town> ownTowns = player.towns;
             foreach (Town supptown in ownTowns) {
-                if (supptown.life < i.gene.properties["SupportMinCap"] && 
-                    atkTown.outgoing.Count < 2 && 
-                    !supptown.outgoing.Contains(atkTown) &&
-                    !atkTown.outgoing.Contains(supptown) && 
-                    atkTown != supptown) {
-                        InteractWithTown(atkTown.position, supptown.position, DateTime.Now);
+                if (gm.CanTownsInteract(supptown, atkTown) && supptown.NeedSupport(i.gene.properties["SupportMinCap"])) {
+                    InteractWithTown(atkTown.position, supptown.position, DateTime.Now);
+                }
+                if (!atkTown.CanSupport(i.gene.properties["SupportMinCap"])) {
+                    return;
                 }
             }   
         }
 
-        private bool IsSupportTown(Town atkTown) {
+        private void TryAttackTown(Town atkTown) {
+            if (atkTown.CanAttack(i.gene.properties["AttackMinLife"])) {
+                Town deffTown = GetPossibleAttackTarget(atkTown);
+                if (deffTown != null) {
+                    InteractWithTown(atkTown.position, deffTown.position, DateTime.Now);
+                }
+            }
+        }
+
+        /// <summary>
+        /// checks if a town has support permissions
+        /// </summary>
+        /// <param name="town">the town to check</param>
+        /// <returns>if the town has permissions</returns>
+        private bool HasSupportPermission(Town town) {
             int supportRadius = i.gene.properties["SupportRadius"];
             int friendlyTownNumber = 0;
             int hostileTownNumber = 0;
-            bool isSupTown = false;
 
-            if (atkTown.life < i.gene.properties["SupportMinCap"]) {
+            if (!town.CanSupport(i.gene.properties["SupportMinCap"])) {
                 return false;
             }
 
             List<TreeNode> objects = gm.game.tree.GetAllContentBetween(
-                (int)atkTown.position.X - supportRadius,
-                (int)atkTown.position.Z - supportRadius,
-                (int)atkTown.position.X + supportRadius,
-                (int)atkTown.position.Z + supportRadius);
+                (int)town.position.X - supportRadius,
+                (int)town.position.Z - supportRadius,
+                (int)town.position.X + supportRadius,
+                (int)town.position.Z + supportRadius);
             foreach (TreeNode node in objects) {
                 if (node is Town t) {
-                    if (t.player == player) {
+                    if (t.owner == player) {
                         friendlyTownNumber++;
                     }
                     else {
@@ -135,40 +147,21 @@ namespace Game_Server.KI {
             float friendlyPercent = friendlyTownNumber / allTowns;
             float test = i.gene.properties["SupportTownRatio"] / 100f;
             if (friendlyPercent >= test && allTowns > 1) {
-                isSupTown = true;
+                return true;
             }
-            return isSupTown;
+            return false;
         }
 
-        private void CalcTownLifeSum() {
-            int life = 0;
-            foreach (Town town in player.towns) {
-                life += town.life;
-            }
-            i.townLifeSum = life;
-        }
-
-        private void ProtocollStats(int timePassed) {
-            i.name = player.username;
-            i.timestamp.Add(timePassed);
-            i.townNumberDevelopment.Add(player.towns.Count);
-        }
-
-        private void TryAttackTown(Town atkTown) {
-            if (atkTown.life > i.gene.properties["AttackMinLife"] && atkTown.outgoing.Count < 2) {
-                Town deffTown = GetPossibleAttackTarget(atkTown);
-                if (deffTown != null && atkTown != deffTown) {
-                    InteractWithTown(atkTown.position, deffTown.position, DateTime.Now);
-                }
-            }
-        }
-
+        /// <summary>
+        /// searches an attack target for a town
+        /// </summary>
+        /// <param name="atkTown">town who has permission to attack</param>
+        /// <returns>one random town to attack or null</returns>
         private Town GetPossibleAttackTarget(Town atkTown) {
             int conquerRadius = i.gene.properties["InitialConquerRadius"];
-            Town target = null;
             QuadTree tree = gm.game.tree;
             
-            while (target == null && conquerRadius < i.gene.properties["MaxConquerRadius"] && conquerRadius > 0) {
+            while (conquerRadius < i.gene.properties["MaxConquerRadius"] && conquerRadius > 0) {
                 List <TreeNode> townsInRange;
                 List<Town> enemyTowns = new List<Town>();
                 Random r = new Random();
@@ -180,9 +173,7 @@ namespace Game_Server.KI {
 
                 for (int i = 0; i < townsInRange.Count; i++) {
                     if (townsInRange[i] is Town deffTown) {
-                        if (!deffTown.player.username.Equals(atkTown.player.username) &&
-                        !gm.IsIntersecting(atkTown.position, deffTown.position) &&
-                        !atkTown.outgoing.Contains(deffTown)) {
+                        if (gm.CanTownsInteract(deffTown, atkTown) && deffTown.owner != atkTown.owner) {
                             enemyTowns.Add(deffTown);
                         }
                     }
@@ -193,6 +184,20 @@ namespace Game_Server.KI {
                 else conquerRadius += i.gene.properties["RadiusExpansionStep"];
             }
             return null;
+        }
+
+        private void ProtocollStats(int timePassed) {
+            i.name = player.username;
+            i.timestamp.Add(timePassed);
+            i.townNumberDevelopment.Add(player.towns.Count);
+        }
+
+        private void CalcTownLifeSum() {
+            int life = 0;
+            foreach (Town town in player.towns) {
+                life += town.life;
+            }
+            i.townLifeSum = life;
         }
     }
 }

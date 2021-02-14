@@ -115,55 +115,6 @@ namespace SharedLibrary.Models {
         }
 
         /// <summary>
-        /// Adds the attack or support reference between two towns
-        /// </summary>
-        /// <param name="atkTown">the origin of the action</param>
-        /// <param name="deffTown">the target of the action</param>
-        public void AddTownActionReference(Town atkTown, Town deffTown) {
-            if (atkTown.position == deffTown.position) return;
-            if (atkTown.player == deffTown.player) {
-                if (!deffTown.supporterTowns.Contains(atkTown)) {
-                    deffTown.supporterTowns.Add(atkTown);
-                }
-            }
-            else {
-                if (!deffTown.attackerTowns.Contains(atkTown)) {
-                    deffTown.attackerTowns.Add(atkTown);
-                }
-            }
-            atkTown.outgoing.Add(deffTown);
-        }
-
-        /// <summary>
-        /// Removes the attack or support reference between two towns
-        /// </summary>
-        /// <param name="atkTown">the origin of the action</param>
-        /// <param name="deffTown">the target of the action</param>
-        public void RmTownActionReference(Town atkTown, Town deffTown) {
-            if (atkTown.player == deffTown.player) {
-                deffTown.RemoveSupporterTown(atkTown);
-            }
-            else {
-                deffTown.RemoveAttackTown(atkTown);
-            }
-            atkTown.RemoveOutgoingTown(deffTown);
-        }
-
-        /// <summary>
-        /// Updates the owner of a town when conquered
-        /// </summary>
-        /// <param name="player">The player who conquered the town</param>
-        /// <param name="town">The town which is conquered</param>
-        public void UpdateOwner(Player player, Town town) {
-            Player oldOwner = town.player;
-            oldOwner.towns.Remove(town);
-
-            town.creationTime = DateTime.Now;
-            town.player = player;
-            player.towns.Add(town);
-        }
-
-        /// <summary>
         /// Searches a town within the quadtree and returns it
         /// </summary>
         /// <param name="tree">The quadtree</param>

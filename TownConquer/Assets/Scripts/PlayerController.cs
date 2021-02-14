@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour {
                 GameObject go = hitInfo.collider.gameObject;
                 if (go.name.StartsWith("Town") &&
                     go.GetInstanceID() != _startTown.GetInstanceID() &&
-                    !go.GetComponent<TownManager>().town.outgoing.Contains(_startTown.GetComponent<TownManager>().town)) {
+                    !go.GetComponent<TownManager>().town.outgoingActionsToTowns.Contains(_startTown.GetComponent<TownManager>().town)) {
                     _lineEnd = go.transform.position;
                     ClientSend.InteractionRequest(_lineStart, _lineEnd);
                 }
