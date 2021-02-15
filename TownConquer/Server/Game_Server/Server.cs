@@ -10,11 +10,11 @@ namespace Game_Server {
 
         public delegate void PacketHandler(int fromClient, Packet packet);
 
-        public static GameManager gm { get; private set; }
         public static int maxPlayers { get; private set; }
+        public static int maxGames { get; private set; }
         public static int port { get; private set; }
-        public static Dictionary<int, Client> clients = new Dictionary<int, Client>();
-        public static Dictionary<int, User> kis = new Dictionary<int, User>();
+
+        public static Dictionary<int, Game> games = new Dictionary<int, Game>();
         public static Dictionary<int, PacketHandler> packetHandlers;
 
         private static TcpListener _tcpListener;
@@ -47,6 +47,7 @@ namespace Game_Server {
                 }
 
                 using (Packet packet = new Packet(data)) {
+                    int gameId = packet.ReadInt();
                     int clientId = packet.ReadInt();
 
                     if (clientId == 0) {
@@ -54,13 +55,13 @@ namespace Game_Server {
                     }
 
                     // new connection with empty packet to open clients port
-                    if (clients[clientId].udp.endPoint == null) {
-                        clients[clientId].udp.Connect(clientEndPoint);
+                    if (games[gameId].clients[clientId].udp.endPoint == null) {
+                        games[gameId].clients[clientId].udp.Connect(clientEndPoint);
                         return;
                     }
 
-                    if (clients[clientId].udp.endPoint.ToString() == clientEndPoint.ToString()) {
-                        clients[clientId].udp.HandleData(packet);
+                    if (games[gameId].clients[clientId].udp.endPoint.ToString() == clientEndPoint.ToString()) {
+                        games[gameId].clients[clientId].udp.HandleData(packet);
                     }
                 }
             }
@@ -86,8 +87,8 @@ namespace Game_Server {
             Console.WriteLine($"Incoming connection from {client.Client.RemoteEndPoint}.");
 
             for (int i = 1; i <= maxPlayers; i++) {
-                if (clients[i] != null && clients[i].tcp.socket == null) {
-                    clients[i].tcp.Connect(client);
+                if (games[-1].clients[i] != null && games[-1].clients[i].tcp.socket == null) {
+                    games[-1].clients[i].tcp.Connect(client);
                     return;
                 }
             }
@@ -97,7 +98,7 @@ namespace Game_Server {
 
         private static void InitializeServerData() {
 
-            gm = new GameManager(-1);
+            games.Add(-1, new Game(-1));
 
             if (Constants.TRAININGS_MODE == true) {
                 //new KnapSack_EA();
@@ -106,7 +107,7 @@ namespace Game_Server {
             }
 
             for (int i = 1; i <= maxPlayers; i++) {
-                clients.Add(i, new Client(i));
+                games[-1].clients.Add(i, new Client(i, games[-1]));
             }
 
             packetHandlers = new Dictionary<int, PacketHandler>() {

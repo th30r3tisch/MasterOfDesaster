@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Game_Server.KI {
     class KI_1 : KI_Base<Individual_Simple> {
 
-        public KI_1(GameManager gm, int id, string name, Color color) : base(gm, id, name, color) { }
+        public KI_1(Game gm, int id, string name, Color color) : base(gm, id, name, color) { }
 
         /// <summary>
         /// includes the play routine of the ki
@@ -38,7 +38,7 @@ namespace Game_Server.KI {
                     townCount = player.towns.Count;
                     i.score -= 5;
                 }
-                lock (gm.treeLock) {
+                lock (game.gm.treeLock) {
                     for (int x = player.towns.Count; x > 0; x--) {
                         Town town = player.towns[x - 1];
                         CheckKITownLifes(town, i.gene.properties);
@@ -76,7 +76,7 @@ namespace Game_Server.KI {
                     RetreatFromTown(town.position, town.outgoingActionsToTowns[i - 1].position, DateTime.Now);
                 }
             }
-            lock (gm.treeLock) {
+            lock (game.gm.treeLock) {
                 for (int x = town.outgoingActionsToTowns.Count -1; x == 0; x--) {
                     Town t = town.outgoingActionsToTowns[x];
                     t.CalculateLife(DateTime.Now);
@@ -96,7 +96,7 @@ namespace Game_Server.KI {
         private void TrySupportTown(Town atkTown) {
             List<Town> ownTowns = player.towns;
             foreach (Town supptown in ownTowns) {
-                if (gm.CanTownsInteract(supptown, atkTown) && supptown.NeedSupport(i.gene.properties["SupportMinCap"])) {
+                if (game.gm.CanTownsInteract(supptown, atkTown) && supptown.NeedSupport(i.gene.properties["SupportMinCap"])) {
                     InteractWithTown(atkTown.position, supptown.position, DateTime.Now);
                 }
                 if (!atkTown.CanSupport(i.gene.properties["SupportMinCap"])) {
@@ -128,7 +128,7 @@ namespace Game_Server.KI {
                 return false;
             }
 
-            List<TreeNode> objects = gm.game.tree.GetAllContentBetween(
+            List<TreeNode> objects = game.tree.GetAllContentBetween(
                 (int)town.position.X - supportRadius,
                 (int)town.position.Z - supportRadius,
                 (int)town.position.X + supportRadius,
@@ -159,7 +159,7 @@ namespace Game_Server.KI {
         /// <returns>one random town to attack or null</returns>
         private Town GetPossibleAttackTarget(Town atkTown) {
             int conquerRadius = i.gene.properties["InitialConquerRadius"];
-            QuadTree tree = gm.game.tree;
+            QuadTree tree = game.tree;
             
             while (conquerRadius < i.gene.properties["MaxConquerRadius"] && conquerRadius > 0) {
                 List <TreeNode> townsInRange;
@@ -173,13 +173,13 @@ namespace Game_Server.KI {
 
                 for (int i = 0; i < townsInRange.Count; i++) {
                     if (townsInRange[i] is Town deffTown) {
-                        if (gm.CanTownsInteract(deffTown, atkTown) && deffTown.owner != atkTown.owner) {
+                        if (game.gm.CanTownsInteract(deffTown, atkTown) && deffTown.owner != atkTown.owner) {
                             enemyTowns.Add(deffTown);
                         }
                     }
                 }
                 if (enemyTowns.Count > 0) {
-                    return enemyTowns[r.Next(0, enemyTowns.Count - 1)];
+                    return enemyTowns[r.Next(0, enemyTowns.Count)];
                 }
                 else conquerRadius += i.gene.properties["RadiusExpansionStep"];
             }

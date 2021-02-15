@@ -10,16 +10,15 @@ using System.Threading.Tasks;
 namespace Game_Server.KI {
     abstract class KI_Base<T>: User where T: IIndividual  {
 
-        protected GameManager gm { get; set; }
         protected int tickLength;
         protected int protocollTime;
         protected T i;
 
-        public KI_Base(GameManager gm, int kiId, string name, Color color) {
+        public KI_Base(Game game, int kiId, string name, Color color) {
             id = kiId;
             tickLength = (int)(Constants.TOWN_GROTH_SECONDS * 1000 + 10);
             protocollTime = tickLength * 5;
-            this.gm = gm;
+            this.game = game;
             SetupUser(name, color);
         }
 
@@ -31,7 +30,7 @@ namespace Game_Server.KI {
         /// <returns>task with individual</returns>
         public Task<T> SendIntoGame(CancellationToken ct, T i) {
             this.i = i;
-            Server.kis.Add(Server.kis.Count, this);
+            game.kis.Add(game.kis.Count, this);
             return Task.Run(() => PlayAsync(ct));
         }
 

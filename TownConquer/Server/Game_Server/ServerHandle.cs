@@ -10,7 +10,7 @@ namespace Game_Server {
             string username = packet.ReadString();
             Color color = packet.ReadColor();
 
-            Client client = Server.clients[fromClient];
+            Client client = Server.games[-1].clients[fromClient];
             Console.WriteLine($"{client.tcp.socket.Client.RemoteEndPoint} connected successfully and is now player {fromClient} - {username}.");
             if (fromClient != clientId) {
                 Console.WriteLine($"Player \" {username}\" (ID:{fromClient}) has assumed the wrong client ID ({clientId})!");
@@ -26,7 +26,7 @@ namespace Game_Server {
             Vector3 deffTown = packet.ReadVector3();
             DateTime timeStamp = DateTime.FromBinary(packet.ReadLong());
 
-            Client client = Server.clients[fromClient];
+            Client client = Server.games[-1].clients[fromClient];
             Console.WriteLine($"{client.tcp.socket.Client.RemoteEndPoint} requested an attack at town {deffTown}.");
 
             client.InteractWithTown(atkTown, deffTown, timeStamp);
@@ -38,7 +38,7 @@ namespace Game_Server {
             Vector3 deffTown = packet.ReadVector3();
             DateTime timeStamp = DateTime.FromBinary(packet.ReadLong());
 
-            Client client = Server.clients[fromClient];
+            Client client = Server.games[-1].clients[fromClient];
             Console.WriteLine($"{client.tcp.socket.Client.RemoteEndPoint} requested an retreat of troops from town {deffTown}.");
 
             client.RetreatFromTown(atkTown, deffTown, timeStamp);
@@ -49,7 +49,7 @@ namespace Game_Server {
             Vector3 deffTown = packet.ReadVector3();
             DateTime timeStamp = DateTime.FromBinary(packet.ReadLong());
 
-            Client client = Server.clients[fromClient];
+            Client client = Server.games[-1].clients[fromClient];
             Console.WriteLine($"{client.tcp.socket.Client.RemoteEndPoint} requested to conquer {deffTown}.");
 
             client.ConquerTown(client.player, deffTown, timeStamp);

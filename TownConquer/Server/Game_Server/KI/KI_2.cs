@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Game_Server.KI {
     class KI_2 : KI_Base<Individual_Advanced> {
 
-        public KI_2(GameManager gm, int id, string name, Color color) : base(gm, id, name, color) { }
+        public KI_2(Game game, int id, string name, Color color) : base(game, id, name, color) { }
 
         protected override async Task<Individual_Advanced> PlayAsync(CancellationToken ct) {
             i.startPos = player.towns[0].position;
@@ -33,9 +33,10 @@ namespace Game_Server.KI {
                     townCount = player.towns.Count;
                     i.score -= 5;
                 }
-                lock (gm.treeLock) {
-                    for (int i = player.towns.Count; i > 0; i--) {
-                        Town atkTown = player.towns[i - 1];
+                
+                for (int i = player.towns.Count; i > 0; i--) {
+                    Town atkTown = player.towns[i - 1];
+                    lock (game.gm.treeLock) {
                         CategorizeTown(atkTown);
                     }
                 }
@@ -65,7 +66,7 @@ namespace Game_Server.KI {
             int friendlyTownNumber = 0;
             int hostileTownNumber = 0;
 
-            List<TreeNode> objects = gm.game.tree.GetAllContentBetween(
+            List<TreeNode> objects = game.tree.GetAllContentBetween(
                 (int)town.position.X - categorizationRadius,
                 (int)town.position.Z - categorizationRadius,
                 (int)town.position.X + categorizationRadius,
@@ -111,7 +112,7 @@ namespace Game_Server.KI {
                     RetreatFromTown(town.position, town.outgoingActionsToTowns[i - 1].position, DateTime.Now);
                 }
             }
-            lock (gm.treeLock) {
+            lock (game.gm.treeLock) {
                 for (int x = town.outgoingActionsToTowns.Count - 1; x == 0; x--) {
                     Town t = town.outgoingActionsToTowns[x];
                     t.CalculateLife(DateTime.Now);
@@ -131,7 +132,7 @@ namespace Game_Server.KI {
         private void TrySupportTown(Town atkTown, Dictionary<string, int> props) {
             List<Town> ownTowns = player.towns;
             foreach (Town supptown in ownTowns) {
-                if (gm.CanTownsInteract(supptown, atkTown) && supptown.NeedSupport(props["SupportMinCap"])) {
+                if (game.gm.CanTownsInteract(supptown, atkTown) && supptown.NeedSupport(props["SupportMinCap"])) {
                     InteractWithTown(atkTown.position, supptown.position, DateTime.Now);
                 }
                 if (!atkTown.CanSupport(props["SupportMinCap"])) {
@@ -151,7 +152,7 @@ namespace Game_Server.KI {
 
         private Town GetPossibleAttackTarget(Town atkTown, Dictionary<string, int> props) {
             int conquerRadius = props["InitialConquerRadius"];
-            QuadTree tree = gm.game.tree;
+            QuadTree tree = game.tree;
 
             while (conquerRadius < props["MaxConquerRadius"] && conquerRadius > 0) {
                 List<TreeNode> townsInRange;
@@ -165,7 +166,7 @@ namespace Game_Server.KI {
 
                 for (int i = 0; i < townsInRange.Count; i++) {
                     if (townsInRange[i] is Town deffTown) {
-                        if (gm.CanTownsInteract(deffTown, atkTown) && deffTown.owner != atkTown.owner) {
+                        if (game.gm.CanTownsInteract(deffTown, atkTown) && deffTown.owner != atkTown.owner) {
                             enemyTowns.Add(deffTown);
                         }
                     }

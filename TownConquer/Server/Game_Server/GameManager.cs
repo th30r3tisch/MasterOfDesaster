@@ -12,21 +12,20 @@ using Game_Server.EA.Models.Simple;
 namespace Game_Server {
     class GameManager {
         public Game game;
-        public int id;
-
+        
         public readonly object treeLock = new object();
 
         public static void Update() {
             ThreadManager.UpdateMain();
         }
 
-        public GameManager(int gmId) {
-            id = gmId;
+        public GameManager(Game associatedGame) {
+            game = associatedGame;
             GenereateInitialMap();
         }
 
         public void GenereateInitialMap() {
-            game = new Game(
+            game.InitData(
                 new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT)),
                 new Player(-1, "game", Color.FromArgb(150, 150, 150), DateTime.Now),
                 new Random(Constants.RANDOM_SEED)
@@ -78,8 +77,8 @@ namespace Game_Server {
                             RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_WIDTH - Constants.DISTANCE_TO_EDGES),
                             2,
                             RandomNumber(Constants.DISTANCE_TO_EDGES, Constants.MAP_HEIGHT - Constants.DISTANCE_TO_EDGES)),
-                        RandomNumber(0, 1),
-                        RandomNumber(Constants.OBSTACLE_MIN_LENGTH, Constants.OBSTACLE_MAX_LENGTH)));
+                            RandomNumber(0, 1),
+                            RandomNumber(Constants.OBSTACLE_MIN_LENGTH, Constants.OBSTACLE_MAX_LENGTH)));
             }
         }
 
@@ -165,11 +164,12 @@ namespace Game_Server {
         }
 
         public void AddActionToTown(Vector3 atk, Vector3 deff, DateTime timeStamp) {
-            lock (treeLock) {
-                QuadTree tree = game.tree;
-                Town atkTown = tree.SearchTown(tree, atk);
-                Town deffTown = tree.SearchTown(tree, deff);
-                if (CanTownsInteract(atkTown, deffTown)) {
+            
+            QuadTree tree = game.tree;
+            Town atkTown = tree.SearchTown(tree, atk);
+            Town deffTown = tree.SearchTown(tree, deff);
+            if (CanTownsInteract(atkTown, deffTown)) {
+                lock (treeLock) {
                     atkTown.CalculateLife(timeStamp);
                     deffTown.CalculateLife(timeStamp);
                     deffTown.AddTownActionReference(atkTown);
@@ -178,10 +178,10 @@ namespace Game_Server {
         }
 
         public void RemoveActionFromTown(Vector3 atk, Vector3 deff, DateTime timeStamp) {
+            QuadTree tree = game.tree;
+            Town atkTown = tree.SearchTown(tree, atk);
+            Town deffTown = tree.SearchTown(tree, deff);
             lock (treeLock) {
-                QuadTree tree = game.tree;
-                Town atkTown = tree.SearchTown(tree, atk);
-                Town deffTown = tree.SearchTown(tree, deff);
                 atkTown.CalculateLife(timeStamp);
                 deffTown.CalculateLife(timeStamp);
                 deffTown.RmTownActionReference(atkTown);
@@ -189,9 +189,9 @@ namespace Game_Server {
         }
 
         public void ConquerTown(Player player, Vector3 town, DateTime timeStamp) {
+            QuadTree tree = game.tree;
+            Town deffTown = tree.SearchTown(tree, town);
             lock (treeLock) {
-                QuadTree tree = game.tree;
-                Town deffTown = tree.SearchTown(tree, town);
                 deffTown.CalculateLife(timeStamp);
                 UpdateTown(deffTown, timeStamp);
 
@@ -240,8 +240,8 @@ namespace Game_Server {
             var c = new CancellationTokenSource();
             var token = c.Token;
 
-            KI_Base<Individual_Simple> ki1 = new KI_1(this, 999, "KI999", Color.FromArgb(255, 255, 255));
-            KI_Base<Individual_Simple> ki2 = new KI_1(this, 998, "KI998", Color.FromArgb(0, 0, 0));
+            KI_Base<Individual_Simple> ki1 = new KI_1(game, 999, "KI999", Color.FromArgb(255, 255, 255));
+            KI_Base<Individual_Simple> ki2 = new KI_1(game, 998, "KI998", Color.FromArgb(0, 0, 0));
             //KI_Base<Individual_Advanced> ki2 = new KI_2(this, 998, "KI998", Color.FromArgb(0, 0, 0));
 
             Individual_Simple referenceIndividual = new Individual_Simple(999);

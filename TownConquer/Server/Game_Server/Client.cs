@@ -1,6 +1,4 @@
-﻿using Game_Server.EA;
-using Game_Server.KI;
-using SharedLibrary;
+﻿using SharedLibrary;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -12,7 +10,8 @@ namespace Game_Server {
         public TCP tcp;
         public UDP udp;
 
-        public Client(int clientId) {
+        public Client(int clientId, Game game) {
+            this.game = game;
             id = clientId;
             tcp = new TCP(id);
             udp = new UDP(id);
@@ -60,7 +59,7 @@ namespace Game_Server {
                 try {
                     int byteLength = stream.EndRead(result);
                     if (byteLength <= 0) {
-                        Server.clients[id].Disconnect();
+                        Server.games[-1].clients[id].Disconnect();
                         return;
                     }
 
@@ -72,7 +71,7 @@ namespace Game_Server {
                 }
                 catch (Exception e) {
                     Console.WriteLine($"Error receiving TCP data: {e}");
-                    Server.clients[id].Disconnect();
+                    Server.games[-1].clients[id].Disconnect();
                 }
             }
 
@@ -165,16 +164,16 @@ namespace Game_Server {
         }
 
         public void SendIntoGame() {
-            Server.gm.CreateKis();
-            ServerSend.CreateWorld(id, Server.clients[id].player, Constants.RANDOM_SEED, Server.clients[id].player.towns[0]); // create the world for new player
+            Server.games[-1].gm.CreateKis();
+            ServerSend.CreateWorld(id, Server.games[-1].clients[id].player, Constants.RANDOM_SEED, Server.games[-1].clients[id].player.towns[0]); // create the world for new player
 
-            foreach (Client client in Server.clients.Values) {
+            foreach (Client client in Server.games[-1].clients.Values) {
                 if (client.player != null && client.id != id) {
                     ServerSend.UpdateWorld(id, client.player, client.player.towns.Count, client.player.towns);// send every already connected player to the new player
                     ServerSend.UpdateWorld(client.id, player, player.towns.Count, player.towns);// send the new players info to all connected players
                 }
             }
-            foreach (User ki in Server.kis.Values) {
+            foreach (User ki in Server.games[-1].kis.Values) {
                 ServerSend.UpdateWorld(id, ki.player, ki.player.towns.Count, ki.player.towns);// send every KI player to the new player
             }
         }

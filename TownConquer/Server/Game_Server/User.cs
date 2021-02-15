@@ -6,19 +6,20 @@ using System.Numerics;
 
 namespace Game_Server {
     abstract class User {
+        protected Game game { get; set; }
         public Player player;
         public int id;
 
         public void SetupUser(string playerName, Color color) {
             player = new Player(id, playerName, color, DateTime.Now);
-            Server.gm.CreateTown(player);
+            game.gm.CreateTown(player);
         }
 
         public void InteractWithTown(Vector3 atkTown, Vector3 deffTown, DateTime timeStamp) {
-            if (!Server.gm.IsIntersecting(atkTown, deffTown)) {
-                Server.gm.AddActionToTown(atkTown, deffTown, timeStamp);
+            if (!game.gm.IsIntersecting(atkTown, deffTown)) {
+                game.gm.AddActionToTown(atkTown, deffTown, timeStamp);
                 if (Constants.TRAININGS_MODE == false) {
-                    foreach (Client client in Server.clients.Values) {
+                    foreach (Client client in game.clients.Values) {
                         if (client.player != null) {
                             ServerSend.GrantedAction(client.id, atkTown, deffTown);
                         }
@@ -28,9 +29,9 @@ namespace Game_Server {
         }
 
         public void RetreatFromTown(Vector3 atkTown, Vector3 deffTown, DateTime timeStamp) {
-            Server.gm.RemoveActionFromTown(atkTown, deffTown, timeStamp);
+            game.gm.RemoveActionFromTown(atkTown, deffTown, timeStamp);
             if (Constants.TRAININGS_MODE == false) {
-                foreach (Client client in Server.clients.Values) {
+                foreach (Client client in game.clients.Values) {
                     if (client.player != null) {
                         ServerSend.GrantedRetreat(client.id, atkTown, deffTown);
                     }
@@ -39,9 +40,9 @@ namespace Game_Server {
         }
 
         public void ConquerTown(Player conquerer, Vector3 deffTown, DateTime timeStamp) {
-            Server.gm.ConquerTown(conquerer, deffTown, timeStamp);
+            game.gm.ConquerTown(conquerer, deffTown, timeStamp);
             if (Constants.TRAININGS_MODE == false) {
-                foreach (Client client in Server.clients.Values) {
+                foreach (Client client in game.clients.Values) {
                     if (client.player != null) {
                         ServerSend.GrantedConquer(client.id, conquerer, deffTown);
                     }

@@ -66,15 +66,15 @@ namespace Game_Server.EA {
             ConcurrentBag<T> referenceCollection = new ConcurrentBag<T>();
 
             Task[] tasks = population.Select(async individual => {
-                GameManager gm = new GameManager(individual.number);
+                Game game = new Game(individual.number);
 
                 CancellationTokenSource c = new CancellationTokenSource();
                 CancellationToken token = c.Token;
 
-                KI_Base<Individual_Simple> referenceKI = new KI_1(gm, 999, "KI999", Color.FromArgb(255, 255, 255));
+                KI_Base<Individual_Simple> referenceKI = new KI_1(game, 999, "KI999", Color.FromArgb(255, 255, 255));
                 //KI_Base<Individual_Advanced> referenceKI = new KI_2(gm, 999, "KI999", Color.FromArgb(255, 255, 255));
                 // K referenceKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0) });
-                K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255) });
+                K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { game, individual.number, "EA" + individual.number, Color.FromArgb(255, 255, 255) });
                 
                 Individual_Simple referenceIndividual = new Individual_Simple(999);
                 //Individual_Advanced referenceIndividual = new Individual_Advanced(999);
@@ -86,7 +86,7 @@ namespace Game_Server.EA {
                 await Task.WhenAny(t1, t2);
                 c.Cancel();
                 await Task.WhenAll(t1, t2);
-                var result1 = await t1;
+                //var result1 = await t1;
                 var result2 = await t2;
                 //referenceCollection.Add(result1);
                 resultCollection.Add(result2);

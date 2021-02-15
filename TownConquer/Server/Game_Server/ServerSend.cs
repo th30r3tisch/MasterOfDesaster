@@ -79,20 +79,20 @@ namespace Game_Server {
 
         private static void SendTCPData(int toClient, Packet packet) {
             packet.WriteLength();
-            Server.clients[toClient].tcp.SendData(packet);
+            Server.games[-1].clients[toClient].tcp.SendData(packet);
         }
 
         private static void SendTCPDataToAll(Packet packet) {
             packet.WriteLength();
             for (int i = 1; i <= Server.maxPlayers; i++) {
-                Server.clients[i].tcp.SendData(packet);
+                Server.games[-1].clients[i].tcp.SendData(packet);
             }
         }
         private static void SendTCPDataToAll(int exceptClient, Packet packet) {
             packet.WriteLength();
             for (int i = 1; i <= Server.maxPlayers; i++) {
                 if (i != exceptClient) {
-                    Server.clients[i].tcp.SendData(packet);
+                    Server.games[-1].clients[i].tcp.SendData(packet);
                 }
             }
         }
@@ -102,20 +102,20 @@ namespace Game_Server {
 
         private static void SendUDPData(int toClient, Packet packet) {
             packet.WriteLength();
-            Server.clients[toClient].udp.SendData(packet);
+            Server.games[-1].clients[toClient].udp.SendData(packet);
         }
 
         private static void SendUDPDataToAll(Packet packet) {
             packet.WriteLength();
             for (int i = 1; i <= Server.maxPlayers; i++) {
-                Server.clients[i].udp.SendData(packet);
+                Server.games[-1].clients[i].udp.SendData(packet);
             }
         }
         private static void SendUDPDataToAll(int exceptClient, Packet packet) {
             packet.WriteLength();
             for (int i = 1; i <= Server.maxPlayers; i++) {
                 if (i != exceptClient) {
-                    Server.clients[i].udp.SendData(packet);
+                    Server.games[-1].clients[i].udp.SendData(packet);
                 }
             }
         }
