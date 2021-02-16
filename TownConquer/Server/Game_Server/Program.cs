@@ -21,19 +21,23 @@ namespace Game_Server {
 
         private static void MainThread(object data) {
             Console.WriteLine($"{data} thread started. Running at {Constants.TICKS_PER_SEC} ticks per second.");
-            DateTime nextLoop = DateTime.Now;
-            GameManager.Update();
-            //while (_isRunning) {
-            //    while (nextLoop < DateTime.Now) {
-            //        GameManager.Update();
-            //        nextLoop = nextLoop.AddMilliseconds(Constants.MS_PER_TICK);
+            if (Constants.TRAININGS_MODE == true) {
+                GameManager.Update();
+            }
+            else {
+                DateTime nextLoop = DateTime.Now;
 
-            //        if (nextLoop > DateTime.Now) {
-            //            Console.WriteLine(nextLoop - DateTime.Now);
-            //            Thread.Sleep(nextLoop - DateTime.Now);
-            //        }
-            //    }
-            //}
+                while (_isRunning) {
+                    while (nextLoop < DateTime.Now) {
+                        GameManager.Update();
+                        nextLoop = nextLoop.AddMilliseconds(Constants.MS_PER_TICK);
+
+                        if (nextLoop > DateTime.Now) {
+                            Thread.Sleep(nextLoop - DateTime.Now);
+                        }
+                    }
+                }
+            }
         }
     }
 }

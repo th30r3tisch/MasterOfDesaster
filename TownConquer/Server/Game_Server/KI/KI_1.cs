@@ -77,16 +77,15 @@ namespace Game_Server.KI {
                 }
             }
             lock (game.gm.treeLock) {
-                for (int x = town.outgoingActionsToTowns.Count -1; x == 0; x--) {
-                    Town t = town.outgoingActionsToTowns[x];
+                for (int x = town.outgoingActionsToTowns.Count; x > 0; x--) {
+                    Town t = town.outgoingActionsToTowns[x - 1];
                     t.CalculateLife(DateTime.Now);
                     if (t.life <= 0) {
                         t.life = 0;
                         ConquerTown(player, t.position, DateTime.Now);
                         indi.score += 20;
-                        return;
                     }
-                    //else if (t.life > props["SupportMaxCap"]) {
+                    //else if (t.life > props["SupportMaxCap"] && t.incomingSupporterTowns.Contains(town)) {
                     //    RetreatFromTown(town.position, t.position, DateTime.Now);
                     //}
                 }
@@ -99,7 +98,7 @@ namespace Game_Server.KI {
                 if (game.gm.CanTownsInteract(supptown, atkTown) && supptown.NeedSupport(indi.gene.properties["SupportMinCap"])) {
                     InteractWithTown(atkTown.position, supptown.position, DateTime.Now);
                 }
-                if (!atkTown.CanSupport(indi.gene.properties["SupportMinCap"])) {
+                if (!atkTown.CanSupport(indi.gene.properties["SupportMaxCap"])) {
                     return;
                 }
             }   
@@ -125,7 +124,7 @@ namespace Game_Server.KI {
             int friendlyTownNumber = 0;
             int hostileTownNumber = 0;
 
-            if (!town.CanSupport(indi.gene.properties["SupportMinCap"])) {
+            if (!town.CanSupport(indi.gene.properties["SupportMaxCap"])) {
                 return false;
             }
 
@@ -146,8 +145,7 @@ namespace Game_Server.KI {
             }
             float allTowns = friendlyTownNumber + hostileTownNumber;
             float friendlyPercent = friendlyTownNumber / allTowns;
-            float test = indi.gene.properties["SupportTownRatio"] / 100f;
-            if (friendlyPercent >= test && allTowns > 1) {
+            if (friendlyPercent >= (indi.gene.properties["SupportTownRatio"] / 100f) && allTowns > 1) {
                 return true;
             }
             return false;

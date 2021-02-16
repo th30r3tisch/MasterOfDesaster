@@ -47,7 +47,6 @@ namespace Game_Server {
                 }
 
                 using (Packet packet = new Packet(data)) {
-                    int gameId = packet.ReadInt();
                     int clientId = packet.ReadInt();
 
                     if (clientId == 0) {
@@ -55,13 +54,13 @@ namespace Game_Server {
                     }
 
                     // new connection with empty packet to open clients port
-                    if (games[gameId].clients[clientId].udp.endPoint == null) {
-                        games[gameId].clients[clientId].udp.Connect(clientEndPoint);
+                    if (games[-1].clients[clientId].udp.endPoint == null) {
+                        games[-1].clients[clientId].udp.Connect(clientEndPoint);
                         return;
                     }
 
-                    if (games[gameId].clients[clientId].udp.endPoint.ToString() == clientEndPoint.ToString()) {
-                        games[gameId].clients[clientId].udp.HandleData(packet);
+                    if (games[-1].clients[clientId].udp.endPoint.ToString() == clientEndPoint.ToString()) {
+                        games[-1].clients[clientId].udp.HandleData(packet);
                     }
                 }
             }

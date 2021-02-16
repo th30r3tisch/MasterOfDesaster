@@ -113,8 +113,8 @@ namespace Game_Server.KI {
                 }
             }
             lock (game.gm.treeLock) {
-                for (int x = town.outgoingActionsToTowns.Count - 1; x == 0; x--) {
-                    Town t = town.outgoingActionsToTowns[x];
+                for (int x = town.outgoingActionsToTowns.Count; x > 0; x--) {
+                    Town t = town.outgoingActionsToTowns[x - 1];
                     t.CalculateLife(DateTime.Now);
                     if (t.life <= 0) {
                         t.life = 0;
@@ -122,7 +122,7 @@ namespace Game_Server.KI {
                         indi.score += 20;
                         return;
                     }
-                    else if (t.life > props["SupportMaxCap"]) {
+                    else if (t.life > props["SupportMaxCap"] && t.incomingSupporterTowns.Contains(town)) {
                         RetreatFromTown(town.position, t.position, DateTime.Now);
                     }
                 }
@@ -135,7 +135,7 @@ namespace Game_Server.KI {
                 if (game.gm.CanTownsInteract(supptown, atkTown) && supptown.NeedSupport(props["SupportMinCap"])) {
                     InteractWithTown(atkTown.position, supptown.position, DateTime.Now);
                 }
-                if (!atkTown.CanSupport(props["SupportMinCap"])) {
+                if (!atkTown.CanSupport(props["SupportMaxCap"])) {
                     return;
                 }
             }
