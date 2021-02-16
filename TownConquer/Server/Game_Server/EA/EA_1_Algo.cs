@@ -15,6 +15,7 @@ namespace Game_Server.EA {
         }
 
         private Individual_Simple TournamentSelection(List<Individual_Simple> population) {
+            
             List<Individual_Simple> parents = new List<Individual_Simple>();
             int populationSize = population.Count;
             while (parents.Count < 2) {

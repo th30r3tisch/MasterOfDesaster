@@ -22,20 +22,27 @@ namespace Game_Server {
         /// <summary>
         /// Writes the headlines to the file. Needs the same sequence than the WriteStats method
         /// </summary>
-        protected void PrepareFile(string[] propertynames) {
+        protected void PrepareFile() {
             using (var writer = new StreamWriter(_path))
             using (var csv = new CsvWriter(writer, _config)) {
                 csv.WriteField("Name");
                 csv.WriteField("Coord");
                 csv.WriteField("Winner");
                 csv.WriteField("Fitness");
-                csv.WriteField("TownLifeSum");
                 csv.WriteField("Score");
                 csv.WriteField("GameTime");
+                csv.WriteField(""); //seperator at the end of the line
+            }
+        }
+
+        protected void AddGeneColumns(string[] propertynames) {
+            using (var stream = File.Open(_path, FileMode.Append))
+            using (var writer = new StreamWriter(stream))
+            using (var csv = new CsvWriter(writer, _config)) {
                 foreach (string property in propertynames) {
                     csv.WriteField(property);
                 }
-                writer.Flush();
+                csv.WriteField(""); //seperator at the end of the line
             }
         }
     }

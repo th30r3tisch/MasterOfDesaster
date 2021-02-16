@@ -12,7 +12,7 @@ namespace Game_Server.KI {
 
         protected int tickLength;
         protected int protocollTime;
-        protected T i;
+        protected T indi;
 
         public KI_Base(Game game, int kiId, string name, Color color) {
             id = kiId;
@@ -29,7 +29,7 @@ namespace Game_Server.KI {
         /// <param name="i">individual</param>
         /// <returns>task with individual</returns>
         public Task<T> SendIntoGame(CancellationToken ct, T i) {
-            this.i = i;
+            indi = i;
             game.kis.Add(game.kis.Count, this);
             return Task.Run(() => PlayAsync(ct));
         }

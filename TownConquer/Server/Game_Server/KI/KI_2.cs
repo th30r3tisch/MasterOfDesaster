@@ -13,7 +13,7 @@ namespace Game_Server.KI {
         public KI_2(Game game, int id, string name, Color color) : base(game, id, name, color) { }
 
         protected override async Task<Individual_Advanced> PlayAsync(CancellationToken ct) {
-            i.startPos = player.towns[0].position;
+            indi.startPos = player.towns[0].position;
             var startTickCount = Environment.TickCount;
             int timePassed = 0;
             int townCount = 0;
@@ -31,7 +31,7 @@ namespace Game_Server.KI {
                 }
                 else {
                     townCount = player.towns.Count;
-                    i.score -= 5;
+                    indi.score -= 5;
                 }
                 
                 for (int i = player.towns.Count; i > 0; i--) {
@@ -47,22 +47,22 @@ namespace Game_Server.KI {
                     ProtocollStats(timePassed);
                 }
                 if (ct.IsCancellationRequested) {
-                    i.won = false;
-                    return i;
+                    indi.won = false;
+                    return indi;
                 }
             }
-            i.won = true;
+            indi.won = true;
             ProtocollStats(timePassed + Environment.TickCount - startTickCount);
-            return i;
+            return indi;
         }
 
         private void ProtocollStats(int timePassed) {
-            i.name = player.username;
-            i.timestamp.Add(timePassed);
+            indi.name = player.username;
+            indi.timestamp.Add(timePassed);
         }
 
         private void CategorizeTown(Town town) {
-            int categorizationRadius = i.gene.generalProperties["CategorisationRadius"];
+            int categorizationRadius = indi.gene.generalProperties["CategorisationRadius"];
             int friendlyTownNumber = 0;
             int hostileTownNumber = 0;
 
@@ -83,23 +83,23 @@ namespace Game_Server.KI {
             }
             float allTowns = friendlyTownNumber + hostileTownNumber;
             float friendlyPercent = friendlyTownNumber / allTowns;
-            float supRatio = i.gene.generalProperties["SupportTownRatio"] / 100f;
-            float atkRatio = i.gene.generalProperties["AtkTownRatio"] / 100f;
-            float defRatio = i.gene.generalProperties["DeffTownRatio"] / 100f;
+            float supRatio = indi.gene.generalProperties["SupportTownRatio"] / 100f;
+            float atkRatio = indi.gene.generalProperties["AtkTownRatio"] / 100f;
+            float defRatio = indi.gene.generalProperties["DeffTownRatio"] / 100f;
             if (friendlyPercent >= supRatio && allTowns > 1) {
                 town.townCategory = TownCategory.sup;
-                CheckKITownLifes(town, i.gene.supportProperties);
-                TrySupportTown(town, i.gene.supportProperties);
+                CheckKITownLifes(town, indi.gene.supportProperties);
+                TrySupportTown(town, indi.gene.supportProperties);
             }
             if (friendlyPercent <= atkRatio && allTowns > 1) {        
                 if (friendlyPercent <= defRatio) {
                     town.townCategory = TownCategory.deff;
-                    CheckKITownLifes(town, i.gene.defensiveProperties);
+                    CheckKITownLifes(town, indi.gene.defensiveProperties);
                 }
                 else {
                     town.townCategory = TownCategory.off;
-                    CheckKITownLifes(town, i.gene.attackProperties);
-                    TryAttackTown(town, i.gene.attackProperties);
+                    CheckKITownLifes(town, indi.gene.attackProperties);
+                    TryAttackTown(town, indi.gene.attackProperties);
                 }
             }
         }
@@ -119,7 +119,7 @@ namespace Game_Server.KI {
                     if (t.life <= 0) {
                         t.life = 0;
                         ConquerTown(player, t.position, DateTime.Now);
-                        i.score += 20;
+                        indi.score += 20;
                         return;
                     }
                     else if (t.life > props["SupportMaxCap"]) {

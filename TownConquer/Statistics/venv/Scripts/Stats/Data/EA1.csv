@@ -1,2 +1,1 @@
-Name;Coord;Winner;Fitness;TownLifeSum;Score;GameTime;InitialConquerRadius;MaxConquerRadius;RadiusExpansionStep;AttackMinLife;SupportRadius;SupportMaxCap;SupportMinCap;SupportTownRatio
-EA0;<3468, 5, 958>;False;-6;60;0;6600;InitialConquerRadius;MaxConquerRadius;RadiusExpansionStep;AttackMinLife;SupportRadius;SupportMaxCap;SupportMinCap;SupportTownRatio
+Name;Coord;Winner;Fitness;Score;GameTime;InitialConquerRadius;MaxConquerRadius;RadiusExpansionStep;AttackMinLife;

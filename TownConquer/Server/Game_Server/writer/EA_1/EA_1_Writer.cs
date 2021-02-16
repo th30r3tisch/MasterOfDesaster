@@ -9,7 +9,8 @@ namespace Game_Server.writer.EA_1 {
     class EA_1_Writer: StatsWriter<Individual_Simple> {
 
         public EA_1_Writer(string filename) : base(filename) {
-            PrepareFile(Enum.GetNames(typeof(PropertyNames_Simple)));
+            PrepareFile();
+            AddGeneColumns(Enum.GetNames(typeof(PropertyNames_Simple)));
         }
 
         public override void WriteStats(List<Individual_Simple> records) {
@@ -24,11 +25,10 @@ namespace Game_Server.writer.EA_1 {
                     csv.WriteField(record.startPos);
                     csv.WriteField(record.won);
                     csv.WriteField(record.fitness);
-                    csv.WriteField(record.townLifeSum);
                     csv.WriteField(record.score);
                     csv.WriteField(record.timestamp.Last());
-                    foreach (string key in record.gene.properties.Keys.ToList()) {
-                        csv.WriteField(key);
+                    foreach (int Values in record.gene.properties.Values.ToList()) {
+                        csv.WriteField(Values);
                     }
                     //_csv.WriteField(record.townDevelopment);
                 }

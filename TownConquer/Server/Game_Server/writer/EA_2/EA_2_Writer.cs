@@ -9,7 +9,25 @@ namespace Game_Server.writer.EA_2 {
     class EA_2_Writer: StatsWriter<Individual_Advanced> {
 
         public EA_2_Writer(string filename) : base(filename) {
-            PrepareFile(Enum.GetNames(typeof(PropertyNames_Advanced)));
+            PrepareFile();
+            AddGeneColumns(Enum.GetNames(typeof(PropertyNames_General)));
+            AddEASpecificColumns(Enum.GetNames(typeof(PropertyNames_Advanced)));
+        }
+
+        private void AddEASpecificColumns(string[] propertynames) {
+            using (var stream = File.Open(_path, FileMode.Append))
+            using (var writer = new StreamWriter(stream))
+            using (var csv = new CsvWriter(writer, _config)) {
+                foreach (string property in propertynames) {
+                    csv.WriteField("deff-" + property);
+                }
+                foreach (string property in propertynames) {
+                    csv.WriteField("off-" + property);
+                }
+                foreach (string property in propertynames) {
+                    csv.WriteField("supp-" + property);
+                }
+            }
         }
 
         public override void WriteStats(List<Individual_Advanced> records) {
@@ -24,9 +42,18 @@ namespace Game_Server.writer.EA_2 {
                     csv.WriteField(record.fitness);
                     csv.WriteField(record.score);
                     csv.WriteField(record.timestamp.Last());
-                    //foreach (string key in record.gene.properties.Keys.ToList()) {
-                    //    csv.WriteField(key);
-                    //}
+                    foreach (int value in record.gene.generalProperties.Values.ToList()) {
+                        csv.WriteField(value);
+                    }
+                    foreach (int value in record.gene.defensiveProperties.Values.ToList()) {
+                        csv.WriteField(value);
+                    }
+                    foreach (int value in record.gene.attackProperties.Values.ToList()) {
+                        csv.WriteField(value);
+                    }
+                    foreach (int value in record.gene.supportProperties.Values.ToList()) {
+                        csv.WriteField(value);
+                    }
                 }
                 writer.Flush();
             }
