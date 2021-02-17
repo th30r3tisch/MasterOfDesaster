@@ -42,7 +42,6 @@ namespace Game_Server {
                 foreach (string property in propertynames) {
                     csv.WriteField(property);
                 }
-                csv.WriteField(""); //seperator at the end of the line
             }
         }
     }

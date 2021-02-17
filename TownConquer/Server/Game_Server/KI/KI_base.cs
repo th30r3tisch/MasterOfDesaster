@@ -16,7 +16,7 @@ namespace Game_Server.KI {
 
         public KI_Base(Game game, int kiId, string name, Color color) {
             id = kiId;
-            tickLength = (int)(Constants.TOWN_GROTH_SECONDS * 1000 + 10);
+            tickLength = (int)(Constants.TOWN_GROTH_SECONDS * 10 + 10);
             protocollTime = tickLength * 5;
             this.game = game;
             SetupUser(name, color);
@@ -31,7 +31,8 @@ namespace Game_Server.KI {
         public Task<T> SendIntoGame(CancellationToken ct, T i) {
             indi = i;
             game.kis.Add(game.kis.Count, this);
-            return Task.Run(() => PlayAsync(ct));
+            //return Task.Run(() => PlayAsync(ct));
+            return PlayAsync(ct);
         }
 
         /// <summary>

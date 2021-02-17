@@ -14,7 +14,7 @@ namespace Game_Server.EA {
     abstract class EA_Base<T,K> where T: IIndividual where K: KI_Base<T> {
 
         protected const int _populationNumber = 200;
-        protected const int _noImprovementLimit = 100;
+        protected const int _noImprovementLimit = 70;
         protected const double _recombinationProbability = 0.7;
 
         protected readonly Random _r;
@@ -32,7 +32,7 @@ namespace Game_Server.EA {
         protected void Evolve(List<T> population, int counter) {
             if (counter < _noImprovementLimit) {
                 Console.WriteLine($"_________Evo {counter}________");
-                population = Evaluate(TrainKis(population));
+                population = Evaluate(TrainKis(population).Result);
                 _writer.WriteStats(population);
                 counter++;
                 Evolve(CreateOffspring(population), counter);
@@ -57,11 +57,12 @@ namespace Game_Server.EA {
         }
 
         /// <summary>
-        /// starts the games to evaluate the population of individuals
+        /// starts the games to evaluate the population of individuals all at the "same" time from
+        /// https://stackoverflow.com/a/65533998/5859685
         /// </summary>
         /// <param name="population">list of individuals</param>
         /// <returns>ConcurrentBag with results of each game and individual</returns>
-        protected ConcurrentBag<T> TrainKis(List<T> population) {
+        protected ConcurrentBag<T> TrainKis2(List<T> population) {
             ConcurrentBag<T> resultCollection = new ConcurrentBag<T>();
             ConcurrentBag<T> referenceCollection = new ConcurrentBag<T>();
 
@@ -75,7 +76,7 @@ namespace Game_Server.EA {
                 // K referenceKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0) });
                 K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { game, individual.number, "EA" + individual.number, Color.FromArgb(0, 0, 0) });
                 KI_Base<Individual_Simple> referenceKI = new KI_1(game, 999, "KI999", Color.FromArgb(255, 255, 255));
-                
+
                 Individual_Simple referenceIndividual = new Individual_Simple(999);
                 //Individual_Advanced referenceIndividual = new Individual_Advanced(999);
                 //T referenceIndividual = (T)Activator.CreateInstance(typeof(T), new object[] { individual.number });
@@ -93,6 +94,63 @@ namespace Game_Server.EA {
             }).ToArray();
 
             Task.WaitAll(tasks);
+
+            return resultCollection;
+        }
+
+        /// <summary>
+        /// starts the games to evaluate the population of individuals with limited number of tasks from
+        /// https://stackoverflow.com/a/10810730/5859685 and https://stackoverflow.com/a/65533998/5859685
+        /// </summary>
+        /// <param name="population"></param>
+        /// <returns></returns>
+        protected async Task<ConcurrentBag<T>> TrainKis(List<T> population) {
+            ConcurrentBag<T> resultCollection = new ConcurrentBag<T>();
+            ConcurrentBag<T> referenceCollection = new ConcurrentBag<T>();
+            var allTasks = new List<Task>();
+            var throttler = new SemaphoreSlim(initialCount: 16);
+            foreach (var individual in population) {
+                // do an async wait until we can schedule again
+                await throttler.WaitAsync();
+
+                // using Task.Run(...) to run the lambda in its own parallel
+                // flow on the threadpool
+                allTasks.Add(
+                    Task.Run(async () => {
+                        try {
+                            Game game = new Game(individual.number);
+
+                            CancellationTokenSource c = new CancellationTokenSource();
+                            CancellationToken token = c.Token;
+
+                            //KI_Base<Individual_Advanced> referenceKI = new KI_2(gm, 999, "KI999", Color.FromArgb(255, 255, 255));
+                            // K referenceKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0) });
+                            K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { game, individual.number, "EA" + individual.number, Color.FromArgb(0, 0, 0) });
+                            KI_Base<Individual_Simple> referenceKI = new KI_1(game, 999, "KI999", Color.FromArgb(255, 255, 255));
+
+                            Individual_Simple referenceIndividual = new Individual_Simple(999);
+                            //Individual_Advanced referenceIndividual = new Individual_Advanced(999);
+                            //T referenceIndividual = (T)Activator.CreateInstance(typeof(T), new object[] { individual.number });
+
+                            var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
+                            var t2 = eaKI.SendIntoGame(token, individual);
+
+                            await Task.WhenAny(t1, t2);
+                            c.Cancel();
+                            await Task.WhenAll(t1, t2);
+                            //var result1 = await t1;
+                            var result2 = await t2;
+                            //referenceCollection.Add(result1);
+                            resultCollection.Add(result2);
+                        }
+                        finally {
+                            throttler.Release();
+                        }
+                    }));
+            }
+
+            // won't get here until all urls have been put into tasks
+            await Task.WhenAll(allTasks);
 
             return resultCollection;
         }

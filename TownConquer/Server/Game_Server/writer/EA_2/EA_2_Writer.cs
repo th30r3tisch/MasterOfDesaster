@@ -10,8 +10,8 @@ namespace Game_Server.writer.EA_2 {
 
         public EA_2_Writer(string filename) : base(filename) {
             PrepareFile();
-            AddGeneColumns(Enum.GetNames(typeof(PropertyNames_General)));
             AddEASpecificColumns(Enum.GetNames(typeof(PropertyNames_Advanced)));
+            AddGeneColumns(Enum.GetNames(typeof(PropertyNames_General)));
         }
 
         private void AddEASpecificColumns(string[] propertynames) {
@@ -27,6 +27,7 @@ namespace Game_Server.writer.EA_2 {
                 foreach (string property in propertynames) {
                     csv.WriteField("supp-" + property);
                 }
+                csv.WriteField(""); //seperator at the end of the line
             }
         }
 

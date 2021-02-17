@@ -104,6 +104,7 @@ namespace Game_Server {
                 EA_1_Algo ea = new EA_1_Algo();
                 //EA_2_Algo ea2 = new EA_2_Algo();
             }
+            Console.Read();
 
             for (int i = 1; i <= maxPlayers; i++) {
                 games[-1].clients.Add(i, new Client(i, games[-1]));
