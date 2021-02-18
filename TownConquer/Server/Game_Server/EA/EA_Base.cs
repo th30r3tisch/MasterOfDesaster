@@ -87,10 +87,8 @@ namespace Game_Server.EA {
                 await Task.WhenAny(t1, t2);
                 c.Cancel();
                 await Task.WhenAll(t1, t2);
-                //var result1 = await t1;
-                var result2 = await t2;
-                //referenceCollection.Add(result1);
-                resultCollection.Add(result2);
+                resultCollection.Add(await t2);
+
             }).ToArray();
 
             Task.WaitAll(tasks);
@@ -107,8 +105,9 @@ namespace Game_Server.EA {
         protected async Task<ConcurrentBag<T>> TrainKis(List<T> population) {
             ConcurrentBag<T> resultCollection = new ConcurrentBag<T>();
             ConcurrentBag<T> referenceCollection = new ConcurrentBag<T>();
-            var allTasks = new List<Task>();
-            var throttler = new SemaphoreSlim(initialCount: 16);
+            List<Task> allTasks = new List<Task>();
+            SemaphoreSlim throttler = new SemaphoreSlim(initialCount: 16);
+
             foreach (var individual in population) {
                 // do an async wait until we can schedule again
                 await throttler.WaitAsync();
@@ -125,8 +124,9 @@ namespace Game_Server.EA {
 
                             //KI_Base<Individual_Advanced> referenceKI = new KI_2(gm, 999, "KI999", Color.FromArgb(255, 255, 255));
                             // K referenceKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0) });
-                            K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { game, individual.number, "EA" + individual.number, Color.FromArgb(0, 0, 0) });
+                            
                             KI_Base<Individual_Simple> referenceKI = new KI_1(game, 999, "KI999", Color.FromArgb(255, 255, 255));
+                            K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { game, individual.number, "EA" + individual.number, Color.FromArgb(0, 0, 0) });
 
                             Individual_Simple referenceIndividual = new Individual_Simple(999);
                             //Individual_Advanced referenceIndividual = new Individual_Advanced(999);
@@ -138,10 +138,7 @@ namespace Game_Server.EA {
                             await Task.WhenAny(t1, t2);
                             c.Cancel();
                             await Task.WhenAll(t1, t2);
-                            //var result1 = await t1;
-                            var result2 = await t2;
-                            //referenceCollection.Add(result1);
-                            resultCollection.Add(result2);
+                            resultCollection.Add(await t2);
                         }
                         finally {
                             throttler.Release();

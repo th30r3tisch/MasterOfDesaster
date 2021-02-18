@@ -4,10 +4,10 @@ namespace Game_Server.EA.Models.Simple {
         InitialConquerRadius,
         MaxConquerRadius,
         RadiusExpansionStep,
-        AttackMinLife, 
-        //SupportRadius,
-        //SupportMaxCap,
-        //SupportMinCap,
-        //SupportTownRatio
+        AttackMinLife,
+        SupportRadius,
+        SupportMaxCap,
+        SupportMinCap,
+        SupportTownRatio
     }
 }

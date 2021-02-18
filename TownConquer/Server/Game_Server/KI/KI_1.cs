@@ -36,18 +36,18 @@ namespace Game_Server.KI {
                 }
                 else {
                     townCount = player.towns.Count;
-                    indi.score -= 5;
+                    indi.score -= 20;
                 }
                 lock (game.gm.treeLock) {
                     for (int x = player.towns.Count; x > 0; x--) {
                         Town town = player.towns[x - 1];
                         CheckKITownLifes(town, indi.gene.properties);
-                        //if (HasSupportPermission(town)) {
-                        //    TrySupportTown(town);
-                        //}
-                        //else {
+                        if (HasSupportPermission(town)) {
+                            TrySupportTown(town);
+                        }
+                        else {
                             TryAttackTown(town);
-                        //}
+                        }
                     }
                 }
                 int timeSpan = Environment.TickCount - startTickCount;
@@ -83,11 +83,11 @@ namespace Game_Server.KI {
                     if (t.life <= 0) {
                         t.life = 0;
                         ConquerTown(player, t.position, DateTime.Now);
-                        indi.score += 20;
+                        indi.score += 5;
                     }
-                    //else if (t.life > props["SupportMaxCap"] && t.incomingSupporterTowns.Contains(town)) {
-                    //    RetreatFromTown(town.position, t.position, DateTime.Now);
-                    //}
+                    else if (t.life > props["SupportMaxCap"] && t.incomingSupporterTowns.Contains(town)) {
+                        RetreatFromTown(town.position, t.position, DateTime.Now);
+                    }
                 }
             }
         }
