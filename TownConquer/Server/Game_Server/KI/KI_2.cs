@@ -18,7 +18,7 @@ namespace Game_Server.KI {
             int timePassed = 0;
             int townCount = 0;
 
-            while (Constants.TOWN_NUMBER * 0.9 > player.towns.Count) { //  && player.towns.Count != 0
+            while (Constants.TOWN_NUMBER * 0.8 > player.towns.Count) { //  && player.towns.Count != 0
                 try {
                     await Task.Delay(tickLength);
                 }
@@ -33,10 +33,9 @@ namespace Game_Server.KI {
                     townCount = player.towns.Count;
                     indi.score -= 5;
                 }
-                
-                for (int i = player.towns.Count; i > 0; i--) {
-                    Town atkTown = player.towns[i - 1];
-                    lock (game.gm.treeLock) {
+                lock (game.gm.treeLock) {
+                    for (int i = player.towns.Count; i > 0; i--) {
+                        Town atkTown = player.towns[i - 1];
                         CategorizeTown(atkTown);
                     }
                 }
@@ -120,7 +119,6 @@ namespace Game_Server.KI {
                         t.life = 0;
                         ConquerTown(player, t.position, DateTime.Now);
                         indi.score += 20;
-                        return;
                     }
                     else if (t.life > props["SupportMaxCap"] && t.incomingSupporterTowns.Contains(town)) {
                         RetreatFromTown(town.position, t.position, DateTime.Now);

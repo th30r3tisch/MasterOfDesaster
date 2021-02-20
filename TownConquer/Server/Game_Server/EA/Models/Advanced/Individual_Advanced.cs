@@ -81,11 +81,11 @@ namespace Game_Server.EA.Models.Advanced {
                 case nameof(PropertyNames_Advanced.SupportMinCap):
                     return Math.Min(500, Math.Max(5, value));
                 case nameof(PropertyNames_General.SupportTownRatio):
-                    return Math.Min(99, Math.Max(0, value));
+                    return Math.Min(100, Math.Max(0, value));
                 case nameof(PropertyNames_General.DeffTownRatio):
-                    return Math.Min(99, Math.Max(0, value));
+                    return Math.Min(100, Math.Max(0, value));
                 case nameof(PropertyNames_General.AtkTownRatio):
-                    return Math.Min(99, Math.Max(0, value));
+                    return Math.Min(100, Math.Max(0, value));
                 case nameof(PropertyNames_General.CategorisationRadius):
                     return Math.Min(Constants.MAP_HEIGHT, Math.Max(Constants.TOWN_MIN_DISTANCE, value));
                 default:
@@ -113,7 +113,16 @@ namespace Game_Server.EA.Models.Advanced {
                 CreateProps<PropertyNames_Advanced>(r), 
                 CreateProps<PropertyNames_Advanced>(r), 
                 CreateProps<PropertyNames_Advanced>(r), 
-                CreateProps<PropertyNames_General>(r));
+                CreateGeneralProps<PropertyNames_General>(r));
+        }
+
+        private Dictionary<string, int> CreateGeneralProps<T>(Random r) {
+            return Genotype_Advanced.CreateProperties<T>(new List<int> {
+                r.Next(0, 100),
+                r.Next(0, 100),
+                r.Next(0, 100),
+                r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT)
+            });
         }
 
         /// <summary>

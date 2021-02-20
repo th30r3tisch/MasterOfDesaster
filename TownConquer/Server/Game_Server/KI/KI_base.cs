@@ -16,7 +16,7 @@ namespace Game_Server.KI {
 
         public KI_Base(Game game, int kiId, string name, Color color) {
             id = kiId;
-            tickLength = (int)(Constants.TOWN_GROTH_SECONDS * 10 + 10);
+            tickLength = (int)(Constants.TOWN_GROTH_SECONDS + 50);
             protocollTime = tickLength * 5;
             this.game = game;
             SetupUser(name, color);

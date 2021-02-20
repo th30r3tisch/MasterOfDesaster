@@ -44,9 +44,11 @@ namespace SharedLibrary.Models {
         /// <param name="atkTown">the origin of the action</param>
         public void RmTownActionReference(Town atkTown) {
             if (atkTown.owner == owner) {
+                Console.WriteLine($"SUPP--- {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position} REM");
                 RemoveSupporterTown(atkTown);
             }
             else {
+                Console.WriteLine($"ATK--- {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position} REM");
                 RemoveAttackTown(atkTown);
             }
             atkTown.RemoveOutgoingTown(this);
@@ -58,7 +60,7 @@ namespace SharedLibrary.Models {
         /// <param name="newPlayer">The player who conquered the town</param>
         public void UpdateOwner(Player newPlayer) {
             owner.towns.Remove(this);
-
+            Console.WriteLine($"CON {newPlayer.username}-{position}");
             creationTime = DateTime.Now;
             owner = newPlayer;
             owner.towns.Add(this);
@@ -71,15 +73,20 @@ namespace SharedLibrary.Models {
         public void AddTownActionReference(Town atkTown) {
             if (atkTown.owner == owner) {
                 if (!incomingSupporterTowns.Contains(atkTown)) {
+                    Console.WriteLine($"SUPP### {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position}");
                     incomingSupporterTowns.Add(atkTown);
                 }
             }
             else {
                 if (!incomingAttackerTowns.Contains(atkTown)) {
+                    Console.WriteLine($"ATK### {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position}");
                     incomingAttackerTowns.Add(atkTown);
                 }
             }
             atkTown.outgoingActionsToTowns.Add(this);
+            if (atkTown.outgoingActionsToTowns.Count > 2) {
+                Console.WriteLine($"DANGER************************************************************************************************");
+            }
         }
 
         /// <summary>

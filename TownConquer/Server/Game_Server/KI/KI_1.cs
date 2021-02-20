@@ -107,7 +107,6 @@ namespace Game_Server.KI {
         private void TryAttackTown(Town atkTown) {
             if (atkTown.CanAttack(indi.gene.properties["AttackMinLife"])) {
                 Town deffTown = GetPossibleAttackTarget(atkTown);
-                
                 if (deffTown != null) {
                     InteractWithTown(atkTown.position, deffTown.position, DateTime.Now);
                 }
@@ -161,7 +160,7 @@ namespace Game_Server.KI {
             QuadTree tree = game.tree;
             
             while (conquerRadius < indi.gene.properties["MaxConquerRadius"] && conquerRadius > 0) {
-                List <TreeNode> townsInRange;
+                List<TreeNode> townsInRange;
                 List<Town> enemyTowns = new List<Town>();
                 Random r = new Random();
                 townsInRange = tree.GetAllContentBetween(

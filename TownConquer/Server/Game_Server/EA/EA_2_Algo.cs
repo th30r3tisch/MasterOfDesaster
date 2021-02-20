@@ -16,6 +16,7 @@ namespace Game_Server.EA {
         }
 
         private Individual_Advanced TournamentSelection(List<Individual_Advanced> population) {
+
             List<Individual_Advanced> parents = new List<Individual_Advanced>();
             int populationSize = population.Count;
             while (parents.Count < 2) {
