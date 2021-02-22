@@ -204,7 +204,7 @@ namespace Game_Server {
         /// </summary>
         /// <param name="town">town to update</param>
         /// <param name="timeStamp">time when update happened</param>
-        public void UpdateTown(Town town, DateTime timeStamp) {
+        private void UpdateTown(Town town, DateTime timeStamp) {
             lock (treeLock) {
                 // removes all incoming atk troops and deletes references in both towns
                 UpdateInteractingTowns(town.incomingAttackerTowns, town, timeStamp);

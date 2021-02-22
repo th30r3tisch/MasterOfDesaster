@@ -8,7 +8,7 @@ namespace Game_Server.EA.Models.Simple {
     class Individual_Simple: Individual<Genotype_Simple> {
         
         public List<int> townNumberDevelopment;
-        public int townLifeSum = 0;
+        public double townLifeSum = 0;
 
         public Individual_Simple(int number) : base(number) {
             townNumberDevelopment = new List<int>();
@@ -24,8 +24,8 @@ namespace Game_Server.EA.Models.Simple {
         /// Creates static genes
         /// </summary>
         protected override void CreateGene() {
-            //gene = new Genotype_Simple(new List<int> { 590, 2853, 268, 5, 1000, 100, 20, 85 });
-            gene = new Genotype_Simple(new List<int> { 400, 2000, 100, 10, 1000, 100, 20, 85 });
+            //gene = new Genotype_Simple(new List<int> { 2853, 5, 1000, 100, 20, 85 });
+            gene = new Genotype_Simple(new List<int> { 2000, 10, 1000, 100, 20, 85 });
         }
 
         /// <summary>
@@ -35,12 +35,10 @@ namespace Game_Server.EA.Models.Simple {
         protected override void CreateGene(Random r) {
             gene = new Genotype_Simple(new List<int> {
                 r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
+                r.Next(5, 99),
                 r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
-                r.Next(-Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5),
-                r.Next(5, 100),
-                r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
-                r.Next(5, 1000),
-                r.Next(5, 1000),
+                r.Next(5, 99),
+                r.Next(5, 99),
                 r.Next(0, 100)
             });
         }
@@ -98,20 +96,16 @@ namespace Game_Server.EA.Models.Simple {
         /// <returns>a valid value</returns>
         protected override int ClampValue(int value, string key) {
             switch (key) {
-                case nameof(PropertyNames_Simple.InitialConquerRadius):
+                case nameof(PropertyNames_Simple.ConquerRadius):
                     return Math.Min(Constants.MAP_HEIGHT, Math.Max(Constants.TOWN_MIN_DISTANCE, value));
-                case nameof(PropertyNames_Simple.MaxConquerRadius):
-                    return Math.Min(Constants.MAP_HEIGHT, Math.Max(Constants.TOWN_MIN_DISTANCE, value));
-                case nameof(PropertyNames_Simple.RadiusExpansionStep):
-                    return Math.Min(Constants.MAP_HEIGHT, Math.Max(-Constants.MAP_HEIGHT, value));
                 case nameof(PropertyNames_Simple.AttackMinLife):
-                    return Math.Min(150, Math.Max(5, value));
+                    return Math.Min(100, Math.Max(5, value));
                 case nameof(PropertyNames_Simple.SupportRadius):
                     return Math.Min(Constants.MAP_HEIGHT, Math.Max(Constants.TOWN_MIN_DISTANCE, value));
                 case nameof(PropertyNames_Simple.SupportMaxCap):
-                    return Math.Min(1000, Math.Max(5, value));
+                    return Math.Min(100, Math.Max(5, value));
                 case nameof(PropertyNames_Simple.SupportMinCap):
-                    return Math.Min(500, Math.Max(5, value));
+                    return Math.Min(100, Math.Max(5, value));
                 case nameof(PropertyNames_Simple.SupportTownRatio):
                     return Math.Min(99, Math.Max(0, value));
                 default:

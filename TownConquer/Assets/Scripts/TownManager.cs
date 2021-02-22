@@ -6,7 +6,7 @@ public class TownManager : MonoBehaviour {
     public int id;
     public int ownerid;
     public string ownerName;
-    public float life;
+    public double life;
     public UTown town;
 
     private float _elapsed;

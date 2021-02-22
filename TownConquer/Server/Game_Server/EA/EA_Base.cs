@@ -32,7 +32,7 @@ namespace Game_Server.EA {
         protected void Evolve(List<T> population, int counter) {
             if (counter < _noImprovementLimit) {
                 Console.WriteLine($"_________Evo {counter}________");
-                population = Evaluate(TrainKis(population).Result);
+                population = Evaluate(TrainKis(population));
                 _writer.WriteStats(population);
                 counter++;
                 Evolve(CreateOffspring(population), counter);
@@ -62,7 +62,7 @@ namespace Game_Server.EA {
         /// </summary>
         /// <param name="population">list of individuals</param>
         /// <returns>ConcurrentBag with results of each game and individual</returns>
-        protected ConcurrentBag<T> TrainKis2(List<T> population) {
+        protected ConcurrentBag<T> TrainKis(List<T> population) {
             ConcurrentBag<T> resultCollection = new ConcurrentBag<T>();
             ConcurrentBag<T> referenceCollection = new ConcurrentBag<T>();
 
@@ -102,7 +102,7 @@ namespace Game_Server.EA {
         /// </summary>
         /// <param name="population"></param>
         /// <returns></returns>
-        protected async Task<ConcurrentBag<T>> TrainKis(List<T> population) {
+        protected async Task<ConcurrentBag<T>> TrainKis2(List<T> population) {
             ConcurrentBag<T> resultCollection = new ConcurrentBag<T>();
             ConcurrentBag<T> referenceCollection = new ConcurrentBag<T>();
             List<Task> allTasks = new List<Task>();

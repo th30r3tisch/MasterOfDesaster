@@ -6,13 +6,14 @@ namespace SharedLibrary.Models {
 
     public class Town : TreeNode {
         public Player owner;
-        public int life;
+        public double life;
         public DateTime creationTime;
         public TownCategory townCategory;
 
         public List<Town> incomingAttackerTowns = new List<Town>();
         public List<Town> incomingSupporterTowns = new List<Town>();
         public List<Town> outgoingActionsToTowns = new List<Town>();
+        public List<Town> townsInRange = new List<Town>();
 
         public Town(Vector3 spawnPos) {
             position = spawnPos;
@@ -44,11 +45,11 @@ namespace SharedLibrary.Models {
         /// <param name="atkTown">the origin of the action</param>
         public void RmTownActionReference(Town atkTown) {
             if (atkTown.owner == owner) {
-                Console.WriteLine($"SUPP--- {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position} REM");
+                //Console.WriteLine($"SUPP--- {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position} REM");
                 RemoveSupporterTown(atkTown);
             }
             else {
-                Console.WriteLine($"ATK--- {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position} REM");
+                //Console.WriteLine($"ATK--- {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position} REM");
                 RemoveAttackTown(atkTown);
             }
             atkTown.RemoveOutgoingTown(this);
@@ -60,7 +61,7 @@ namespace SharedLibrary.Models {
         /// <param name="newPlayer">The player who conquered the town</param>
         public void UpdateOwner(Player newPlayer) {
             owner.towns.Remove(this);
-            Console.WriteLine($"CON {newPlayer.username}-{position}");
+            //Console.WriteLine($"CON {newPlayer.username}-{position}");
             creationTime = DateTime.Now;
             owner = newPlayer;
             owner.towns.Add(this);
@@ -73,20 +74,17 @@ namespace SharedLibrary.Models {
         public void AddTownActionReference(Town atkTown) {
             if (atkTown.owner == owner) {
                 if (!incomingSupporterTowns.Contains(atkTown)) {
-                    Console.WriteLine($"SUPP### {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position}");
+                    //Console.WriteLine($"SUPP### {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position}");
                     incomingSupporterTowns.Add(atkTown);
                 }
             }
             else {
                 if (!incomingAttackerTowns.Contains(atkTown)) {
-                    Console.WriteLine($"ATK### {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position}");
+                    //Console.WriteLine($"ATK### {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position}");
                     incomingAttackerTowns.Add(atkTown);
                 }
             }
             atkTown.outgoingActionsToTowns.Add(this);
-            if (atkTown.outgoingActionsToTowns.Count > 2) {
-                Console.WriteLine($"DANGER************************************************************************************************");
-            }
         }
 
         /// <summary>
@@ -128,18 +126,19 @@ namespace SharedLibrary.Models {
         public void CalculateLife(DateTime currentTime) {
             TimeSpan span = currentTime.Subtract(creationTime);
             float timePassed = (float)span.TotalSeconds;
-            int firstLifeCalc = life;
+            double firstLifeCalc = life;
 
             if (owner.id != -1) {
-                int rawTownLife = (int)(timePassed / Constants.TOWN_GROTH_SECONDS);
-                int lostLifeByOutgoing = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * outgoingActionsToTowns.Count);
-                int gotLifeByIncoming = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * incomingSupporterTowns.Count);
+                float rawTownLife = (timePassed / Constants.TOWN_GROTH_SECONDS);
+                Console.WriteLine($"{position} - {rawTownLife}");
+                float lostLifeByOutgoing = (timePassed / Constants.TOWN_GROTH_SECONDS * outgoingActionsToTowns.Count);
+                float gotLifeByIncoming = (timePassed / Constants.TOWN_GROTH_SECONDS * incomingSupporterTowns.Count);
                 firstLifeCalc += rawTownLife - lostLifeByOutgoing + gotLifeByIncoming;
             }
-            int lostLifeByIncoming = (int)(timePassed / Constants.TOWN_GROTH_SECONDS * incomingAttackerTowns.Count);
+            float lostLifeByIncoming = (timePassed / Constants.TOWN_GROTH_SECONDS * incomingAttackerTowns.Count);
 
-            int finalNewLife = firstLifeCalc - lostLifeByIncoming;
-            life = finalNewLife;
+            double finalNewLife = firstLifeCalc - lostLifeByIncoming;
+            life = Math.Round(finalNewLife, 0);
             creationTime = currentTime;
         }
     }

@@ -103,8 +103,8 @@ namespace Game_Server {
                 //new KnapSack_EA();
                 EA_1_Algo ea = new EA_1_Algo();
                 //EA_2_Algo ea2 = new EA_2_Algo();
+                Console.Read();
             }
-            Console.Read();
 
             for (int i = 1; i <= maxPlayers; i++) {
                 games[-1].clients.Add(i, new Client(i, games[-1]));
