@@ -20,7 +20,7 @@ namespace Game_Server {
                 packet.Write(player.id);
                 packet.Write(player.username);
                 packet.Write(player.color);
-                packet.Write(player.creationTime.ToBinary());
+                packet.Write(player.creationTime);
                 packet.Write(seed);
                 packet.Write(town.position);
 
@@ -33,7 +33,7 @@ namespace Game_Server {
                 packet.Write(player.id);
                 packet.Write(player.username);
                 packet.Write(player.color);
-                packet.Write(player.creationTime.ToBinary());
+                packet.Write(player.creationTime);
                 packet.Write(townNumber);
                 foreach (Town _town in towns) {
                     packet.Write(_town.position);
@@ -58,10 +58,11 @@ namespace Game_Server {
             }
         }
 
-        public static void GrantedConquer(int toClient, Player player, Vector3 deffTown) {
+        public static void GrantedConquer(int toClient, Player player, Vector3 deffTown, long timestamp) {
             using (Packet packet = new Packet((int)ServerPackets.grantedConquer)) {
                 packet.Write(player.id);
                 packet.Write(deffTown);
+                packet.Write(timestamp);
                 SendTCPData(toClient, packet);
                 Console.WriteLine($"Conquer of {deffTown} is GRANTED.");
             }

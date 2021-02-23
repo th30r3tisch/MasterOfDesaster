@@ -46,7 +46,7 @@ public class GameManager : MonoBehaviour {
         Client.instance.enemies.Add(enemy);
     }
 
-    public void InitMap(int seed, Vector3 townPos, Player player, DateTime creationTime) {
+    public void InitMap(int seed, Vector3 townPos, Player player, long creationTime) {
         GameObject ground;
         _r = new System.Random(seed);
 
@@ -153,11 +153,11 @@ public class GameManager : MonoBehaviour {
         deffT.RmTownActionReference(atkT);
     }
 
-    public void ConquerTown(int conquererId, Vector3 conqueredTownCoord) {
+    public void ConquerTown(int conquererId, Vector3 conqueredTownCoord, long time) {
         UTown conqueredT = (UTown)_world.SearchTown(_world, ConversionManager.ToNumericVector(conqueredTownCoord));
         Player conquerer = GetPlayer(conquererId);
 
-        UpdateTownReferences(conqueredT, conquerer);
+        UpdateTownReferences(conqueredT, conquerer, time);
     }
 
     /// <summary>
@@ -177,7 +177,7 @@ public class GameManager : MonoBehaviour {
         return null;
     }
 
-    private void UpdateTownReferences(UTown conqueredT, Player conquerer) {
+    private void UpdateTownReferences(UTown conqueredT, Player conquerer, long time) {
         TownManager conqueredTm = conqueredT.go.GetComponent<TownManager>();
 
         // removes all attacking troops and deletes references in both towns
@@ -203,7 +203,7 @@ public class GameManager : MonoBehaviour {
 
         conqueredTm.ownerid = conquerer.id;
         conqueredTm.ownerName = conquerer.username;
-        conqueredT.UpdateOwner(conquerer);
+        conqueredT.UpdateOwner(conquerer, time);
         conqueredT.go.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(conquerer.color);
     }
 

@@ -9,9 +9,9 @@ namespace SharedLibrary.Models {
         public string username;
         public Color color;
         public List<Town> towns;
-        public DateTime creationTime;
+        public long creationTime;
 
-        public Player(int id, string username, Color color, DateTime creationTime) {
+        public Player(int id, string username, Color color, long creationTime) {
             this.id = id;
             this.username = username;
             this.color = color;

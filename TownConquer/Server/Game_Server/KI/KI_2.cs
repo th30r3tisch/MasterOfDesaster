@@ -14,13 +14,11 @@ namespace Game_Server.KI {
 
         protected override async Task<Individual_Advanced> PlayAsync(CancellationToken ct) {
             indi.startPos = player.towns[0].position;
-            var startTickCount = Environment.TickCount;
-            int timePassed = 0;
             int townCount = 0;
 
             while (Constants.TOWN_NUMBER * 0.8 > player.towns.Count) { //  && player.towns.Count != 0
                 try {
-                    await Task.Delay(tickLength);
+                    await Task.Delay(Constants.KI_TICK_RATE);
                 }
                 catch (Exception _ex) {
                     Console.WriteLine($"{player.username} error: {_ex}");
@@ -39,11 +37,10 @@ namespace Game_Server.KI {
                         CategorizeTown(atkTown);
                     }
                 }
-                int timeSpan = Environment.TickCount - startTickCount;
-                if (timeSpan > protocollTime) {
-                    startTickCount = Environment.TickCount;
-                    timePassed += protocollTime;
-                    ProtocollStats(timePassed);
+                long timeMem = game.gm.sw.ElapsedMilliseconds;
+                if (timeMem > protocollTime) {
+                    protocollTime += timeMem;
+                    ProtocollStats(timeMem);
                 }
                 if (ct.IsCancellationRequested) {
                     indi.won = false;
@@ -51,11 +48,11 @@ namespace Game_Server.KI {
                 }
             }
             indi.won = true;
-            ProtocollStats(timePassed + Environment.TickCount - startTickCount);
+            ProtocollStats(game.gm.sw.ElapsedMilliseconds);
             return indi;
         }
 
-        private void ProtocollStats(int timePassed) {
+        private void ProtocollStats(long timePassed) {
             indi.name = player.username;
             indi.timestamp.Add(timePassed);
         }
@@ -104,24 +101,24 @@ namespace Game_Server.KI {
         }
 
         protected override void CheckKITownLifes(Town town, Dictionary<string, int> props) {
-            town.CalculateLife(DateTime.Now);
+            town.CalculateLife(game.gm.sw.ElapsedMilliseconds, "add action atk");
             if (town.life <= 0) {
                 town.life = 0;
                 for (int i = town.outgoingActionsToTowns.Count; i > 0; i--) {
-                    RetreatFromTown(town.position, town.outgoingActionsToTowns[i - 1].position, DateTime.Now);
+                    RetreatFromTown(town.position, town.outgoingActionsToTowns[i - 1].position);
                 }
             }
             lock (game.gm.treeLock) {
                 for (int x = town.outgoingActionsToTowns.Count; x > 0; x--) {
                     Town t = town.outgoingActionsToTowns[x - 1];
-                    t.CalculateLife(DateTime.Now);
+                    t.CalculateLife(game.gm.sw.ElapsedMilliseconds, "add action atk");
                     if (t.life <= 0) {
                         t.life = 0;
-                        ConquerTown(player, t.position, DateTime.Now);
+                        ConquerTown(player, t.position);
                         indi.score += 20;
                     }
                     else if (t.life > props["SupportMaxCap"] && t.incomingSupporterTowns.Contains(town)) {
-                        RetreatFromTown(town.position, t.position, DateTime.Now);
+                        RetreatFromTown(town.position, t.position);
                     }
                 }
             }
@@ -131,7 +128,7 @@ namespace Game_Server.KI {
             List<Town> ownTowns = player.towns;
             foreach (Town supptown in ownTowns) {
                 if (game.gm.CanTownsInteract(supptown, atkTown) && supptown.NeedSupport(props["SupportMinCap"])) {
-                    InteractWithTown(atkTown.position, supptown.position, DateTime.Now);
+                    InteractWithTown(atkTown.position, supptown.position);
                 }
                 if (!atkTown.CanSupport(props["SupportMaxCap"])) {
                     return;
@@ -143,7 +140,7 @@ namespace Game_Server.KI {
             if (atkTown.CanAttack(props["AttackMinLife"])) {
                 Town deffTown = GetPossibleAttackTarget(atkTown, props);
                 if (deffTown != null) {
-                    InteractWithTown(atkTown.position, deffTown.position, DateTime.Now);
+                    InteractWithTown(atkTown.position, deffTown.position);
                 }
             }
         }

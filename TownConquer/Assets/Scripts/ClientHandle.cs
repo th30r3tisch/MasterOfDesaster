@@ -25,7 +25,7 @@ public class ClientHandle : MonoBehaviour
         int myId = packet.ReadInt();
         string username = packet.ReadString();
         System.Drawing.Color color = packet.ReadColor();
-        DateTime creationTime = DateTime.FromBinary(packet.ReadLong());
+        long creationTime = packet.ReadLong();
         Client.instance.me = new Player(myId, username, color, creationTime);
         int seed = packet.ReadInt();
 
@@ -40,7 +40,7 @@ public class ClientHandle : MonoBehaviour
         int enemyId = packet.ReadInt();
         string enemyname = packet.ReadString();
         System.Drawing.Color enemyColor = packet.ReadColor();
-        DateTime creationTime = DateTime.FromBinary(packet.ReadLong());
+        long creationTime = packet.ReadLong();
         int townNumber = packet.ReadInt();
         for (int i = 0; i < townNumber; i++) {
             System.Numerics.Vector3 v = packet.ReadVector3();
@@ -70,8 +70,9 @@ public class ClientHandle : MonoBehaviour
     public static void GrantedConquer(Packet packet) {
         int conquererId = packet.ReadInt();
         System.Numerics.Vector3 v2 = packet.ReadVector3();
+        long time = packet.ReadLong();
         Vector3 deffTown = new Vector3(v2.X, v2.Y, v2.Z);
-        GameManager.instance.ConquerTown(conquererId, deffTown);
+        GameManager.instance.ConquerTown(conquererId, deffTown, time);
     }
 
     public static void PlayerDisconnected(Packet packet) {

@@ -13,11 +13,11 @@ namespace Game_Server.EA.Models {
         public Vector3 startPos;
         public bool isElite { get; set; }
         public int score = 0;
-        public List<int> timestamp;
+        public List<long> timestamp;
 
         public Individual(int number) {
             this.number = number;
-            timestamp = new List<int>();
+            timestamp = new List<long>();
         }
 
         /// <summary>

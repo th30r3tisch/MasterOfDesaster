@@ -16,7 +16,7 @@ namespace Game_Server {
                 Console.WriteLine($"Player \" {username}\" (ID:{fromClient}) has assumed the wrong client ID ({clientId})!");
             }
 
-            client.SetupUser(username, color);
+            client.SetupUser(username, color, client.game.gm.sw.ElapsedMilliseconds);
             client.SendIntoGame();
         }
 
@@ -29,7 +29,7 @@ namespace Game_Server {
             Client client = Server.games[-1].clients[fromClient];
             Console.WriteLine($"{client.tcp.socket.Client.RemoteEndPoint} requested an attack at town {deffTown}.");
 
-            client.InteractWithTown(atkTown, deffTown, timeStamp);
+            client.InteractWithTown(atkTown, deffTown);
         }
 
         public static void RetreatRequest(int fromClient, Packet packet) {
@@ -41,7 +41,7 @@ namespace Game_Server {
             Client client = Server.games[-1].clients[fromClient];
             Console.WriteLine($"{client.tcp.socket.Client.RemoteEndPoint} requested an retreat of troops from town {deffTown}.");
 
-            client.RetreatFromTown(atkTown, deffTown, timeStamp);
+            client.RetreatFromTown(atkTown, deffTown);
         }
 
         public static void ConquerRequest(int fromClient, Packet packet) {
@@ -52,7 +52,7 @@ namespace Game_Server {
             Client client = Server.games[-1].clients[fromClient];
             Console.WriteLine($"{client.tcp.socket.Client.RemoteEndPoint} requested to conquer {deffTown}.");
 
-            client.ConquerTown(client.player, deffTown, timeStamp);
+            client.ConquerTown(client.player, deffTown);
         }
     }
 }

@@ -22,14 +22,12 @@ namespace Game_Server.KI {
         protected override async Task<Individual_Simple> PlayAsync(CancellationToken ct) {
             indi.startPos = player.towns[0].position;
             GetPossibleInteractionTarget(player.towns[0], indi.gene.properties["ConquerRadius"]);
-            var startTickCount = Environment.TickCount;
-            int timePassed = 0;
             int townCountOld = 0;
 
             while (Constants.TOWN_NUMBER * 0.9 > player.towns.Count) { //  && player.towns.Count != 0
 
                 try {
-                    await Task.Delay(tickLength);
+                    await Task.Delay(Constants.KI_TICK_RATE);
                 }
                 catch (Exception _ex) {
                     Console.WriteLine($"{player.username} error: {_ex}");
@@ -55,53 +53,43 @@ namespace Game_Server.KI {
                         }
                     }
                 }
-                int timeSpan = Environment.TickCount - startTickCount;
-                if (timeSpan > protocollTime) {
-                    startTickCount = Environment.TickCount;
-                    timePassed += protocollTime;
-                    ProtocollStats(timePassed);
+                long timeMem = game.gm.sw.ElapsedMilliseconds;
+                if (timeMem > protocollTime) {
+                    protocollTime += timeMem;
+                    ProtocollStats(timeMem);
                 }
                 if (ct.IsCancellationRequested) {
                     indi.won = false;
-                    Console.WriteLine($"{player.username} - LOST");
-                    if (reachableTowns.Count < player.towns.Count) {
-                        Console.WriteLine($"ALERT **********************************************************************");
-                    }
                     CalcTownLifeSum();
                     return indi;
                 }
             }
             indi.won = true;
-            Console.WriteLine($"{player.username} - WON");
-            if (reachableTowns.Count < player.towns.Count) {
-                Console.WriteLine($"ALERT **********************************************************************");
-            }
             CalcTownLifeSum();
-            ProtocollStats(timePassed + Environment.TickCount - startTickCount);
+            ProtocollStats(game.gm.sw.ElapsedMilliseconds);
             return indi;
         }
 
         protected override void CheckKITownLifes(Town town, Dictionary<string, int> props) {
-            town.CalculateLife(DateTime.Now);
+            town.CalculateLife(game.gm.sw.ElapsedMilliseconds, "own life");
             if (town.life <= 0) {
                 for (int i = town.outgoingActionsToTowns.Count; i > 0; i--) {
-                    RetreatFromTown(town.position, town.outgoingActionsToTowns[i - 1].position, DateTime.Now);
+                    RetreatFromTown(town.position, town.outgoingActionsToTowns[i - 1].position);
                 }
                 town.life = 0;
             }
 
             for (int x = town.outgoingActionsToTowns.Count; x > 0; x--) {
                 Town t = town.outgoingActionsToTowns[x - 1];
-                t.CalculateLife(DateTime.Now);
-                Console.WriteLine($"{t.position} - {t.life}");
+                t.CalculateLife(game.gm.sw.ElapsedMilliseconds, "life of outgoing");
                 if (t.life <= 0) {
-                    ConquerTown(player, t.position, DateTime.Now);
+                    //Console.WriteLine($"{player.username} - {game.id} - {town.position} -> {t.position} - CONQ");
+                    ConquerTown(player, t.position);
                     indi.score += 20;
-                    t.life = 0;
                     GetPossibleInteractionTarget(t, indi.gene.properties["ConquerRadius"]);
                 }
                 else if (t.life > props["SupportMaxCap"] && t.incomingSupporterTowns.Contains(town)) {
-                    RetreatFromTown(town.position, t.position, DateTime.Now);
+                    RetreatFromTown(town.position, t.position);
                 }
             }
         }
@@ -114,7 +102,10 @@ namespace Game_Server.KI {
                 }
                 if (town.owner.username.Equals(sourceTown.owner.username) &&
                     town.NeedSupport(indi.gene.properties["SupportMinCap"])) {
-                    InteractWithTown(sourceTown.position, town.position, DateTime.Now);
+                    InteractWithTown(sourceTown.position, town.position);
+                }
+                else {
+                    TryAttackTown(town);
                 }
             }
         }
@@ -126,7 +117,7 @@ namespace Game_Server.KI {
                     return;
                 }
                 if (!town.owner.username.Equals(sourceTown.owner.username)) {
-                    InteractWithTown(sourceTown.position, town.position, DateTime.Now);
+                    InteractWithTown(sourceTown.position, town.position);
                 }
             }
         }
@@ -180,17 +171,13 @@ namespace Game_Server.KI {
                         atkTown.townsInRange.Add(town);
                         if (!reachableTowns.Contains(town)) {
                             reachableTowns.Add(town);
-                            Console.WriteLine($"{player.username} - {reachableTowns.Count}");
                         }
-                    }
-                    else {
-                        Console.WriteLine($"{player.username} - NO INTERACTION");
                     }
                 }
             }
         }
 
-        private void ProtocollStats(int timePassed) {
+        private void ProtocollStats(long timePassed) {
             indi.name = player.username;
             indi.timestamp.Add(timePassed);
             indi.townNumberDevelopment.Add(player.towns.Count);

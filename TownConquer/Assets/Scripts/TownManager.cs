@@ -22,7 +22,7 @@ public class TownManager : MonoBehaviour {
 
     private void GrowLife() {
         _elapsed += Time.deltaTime;
-        if (_elapsed >= Constants.TOWN_GROTH_SECONDS) {
+        if (_elapsed >= Constants.KI_TICK_RATE) {
             _elapsed = 0;
             if (ownerid >= 0) {
                 life += 1;

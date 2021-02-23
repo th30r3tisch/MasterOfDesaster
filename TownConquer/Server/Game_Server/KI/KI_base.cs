@@ -10,16 +10,14 @@ using System.Threading.Tasks;
 namespace Game_Server.KI {
     abstract class KI_Base<T>: User where T: IIndividual  {
 
-        protected int tickLength;
-        protected int protocollTime;
+        protected long protocollTime; //millisec
         protected T indi;
 
         public KI_Base(Game game, int kiId, string name, Color color) {
             id = kiId;
-            tickLength = (int)(Constants.TOWN_GROTH_SECONDS * 1000 + 10);
-            protocollTime = tickLength * 5;
+            protocollTime = Constants.KI_TICK_RATE * 5;
             this.game = game;
-            SetupUser(name, color);
+            SetupUser(name, color, game.gm.sw.ElapsedMilliseconds);
         }
 
         /// <summary>

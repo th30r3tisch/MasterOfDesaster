@@ -28,7 +28,7 @@ public class GameUIManager : MonoBehaviour {
         Application.Quit();
     }
 
-    public void DisplayTownInfo(string name, double life, DateTime creation) {
+    public void DisplayTownInfo(string name, double life, long creation) {
         owner.text = name;
         this.life.text = life.ToString();
         ownedSince.text = creation.ToString("HH:mm");

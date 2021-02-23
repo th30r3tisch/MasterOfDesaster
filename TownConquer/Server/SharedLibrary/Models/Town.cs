@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Numerics;
 
 namespace SharedLibrary.Models {
@@ -7,7 +6,7 @@ namespace SharedLibrary.Models {
     public class Town : TreeNode {
         public Player owner;
         public double life;
-        public DateTime creationTime;
+        public long livingTime;
         public TownCategory townCategory;
 
         public List<Town> incomingAttackerTowns = new List<Town>();
@@ -45,11 +44,9 @@ namespace SharedLibrary.Models {
         /// <param name="atkTown">the origin of the action</param>
         public void RmTownActionReference(Town atkTown) {
             if (atkTown.owner == owner) {
-                //Console.WriteLine($"SUPP--- {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position} REM");
                 RemoveSupporterTown(atkTown);
             }
             else {
-                //Console.WriteLine($"ATK--- {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position} REM");
                 RemoveAttackTown(atkTown);
             }
             atkTown.RemoveOutgoingTown(this);
@@ -59,11 +56,11 @@ namespace SharedLibrary.Models {
         /// Updates the owner of a town when conquered
         /// </summary>
         /// <param name="newPlayer">The player who conquered the town</param>
-        public void UpdateOwner(Player newPlayer) {
+        public void UpdateOwner(Player newPlayer, long timestamp) {
             owner.towns.Remove(this);
-            //Console.WriteLine($"CON {newPlayer.username}-{position}");
-            creationTime = DateTime.Now;
+            livingTime = timestamp;
             owner = newPlayer;
+            life = 0;
             owner.towns.Add(this);
         }
 
@@ -74,13 +71,11 @@ namespace SharedLibrary.Models {
         public void AddTownActionReference(Town atkTown) {
             if (atkTown.owner == owner) {
                 if (!incomingSupporterTowns.Contains(atkTown)) {
-                    //Console.WriteLine($"SUPP### {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position}");
                     incomingSupporterTowns.Add(atkTown);
                 }
             }
             else {
                 if (!incomingAttackerTowns.Contains(atkTown)) {
-                    //Console.WriteLine($"ATK### {atkTown.owner.username}-{atkTown.position} with life {atkTown.life}-{position}");
                     incomingAttackerTowns.Add(atkTown);
                 }
             }
@@ -123,23 +118,24 @@ namespace SharedLibrary.Models {
             return false;
         }
 
-        public void CalculateLife(DateTime currentTime) {
-            TimeSpan span = currentTime.Subtract(creationTime);
-            float timePassed = (float)span.TotalSeconds;
-            double firstLifeCalc = life;
+        public void CalculateLife(long currentTime, string from) {
+            long timePassed = currentTime - livingTime;
 
-            if (owner.id != -1) {
-                float rawTownLife = (timePassed / Constants.TOWN_GROTH_SECONDS);
-                Console.WriteLine($"{position} - {rawTownLife}");
-                float lostLifeByOutgoing = (timePassed / Constants.TOWN_GROTH_SECONDS * outgoingActionsToTowns.Count);
-                float gotLifeByIncoming = (timePassed / Constants.TOWN_GROTH_SECONDS * incomingSupporterTowns.Count);
-                firstLifeCalc += rawTownLife - lostLifeByOutgoing + gotLifeByIncoming;
+            if (timePassed > Constants.KI_TICK_RATE) {
+                long timeOverflow = timePassed % Constants.KI_TICK_RATE;
+                int pastTickNumber = (int)timePassed / Constants.KI_TICK_RATE;
+                double firstLifeCalc = life;
+                //Console.WriteLine($"{timePassed} - {livingTime} - {owner.username} - {position} - {incomingAttackerTowns.Count} - {incomingSupporterTowns.Count} - {outgoingActionsToTowns.Count} - {life} - {from}");
+                if (owner.id != -1) {
+                    int lostLifeByOutgoing = pastTickNumber * outgoingActionsToTowns.Count;
+                    int gotLifeByIncoming = pastTickNumber * incomingSupporterTowns.Count;
+                    firstLifeCalc += pastTickNumber - lostLifeByOutgoing + gotLifeByIncoming;
+                }
+                int lostLifeByIncoming = pastTickNumber * incomingAttackerTowns.Count;
+
+                life = firstLifeCalc - lostLifeByIncoming;
+                livingTime = currentTime - timeOverflow;
             }
-            float lostLifeByIncoming = (timePassed / Constants.TOWN_GROTH_SECONDS * incomingAttackerTowns.Count);
-
-            double finalNewLife = firstLifeCalc - lostLifeByIncoming;
-            life = Math.Round(finalNewLife, 0);
-            creationTime = currentTime;
         }
     }
 }

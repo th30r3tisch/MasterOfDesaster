@@ -8,11 +8,13 @@ using Game_Server.KI;
 using System.Threading;
 using System.Threading.Tasks;
 using Game_Server.EA.Models.Simple;
+using System.Diagnostics;
 
 namespace Game_Server {
     class GameManager {
         public Game game;
-        
+        public Stopwatch sw;
+
         public readonly object treeLock = new object();
 
         public static void Update() {
@@ -21,13 +23,14 @@ namespace Game_Server {
 
         public GameManager(Game associatedGame) {
             game = associatedGame;
+            sw = Stopwatch.StartNew();
             GenereateInitialMap();
         }
 
         public void GenereateInitialMap() {
             game.InitData(
                 new QuadTree(1, new TreeBoundry(0, 0, Constants.MAP_WIDTH, Constants.MAP_HEIGHT)),
-                new Player(-1, "game", Color.FromArgb(150, 150, 150), DateTime.Now),
+                new Player(-1, "game" + game.id, Color.FromArgb(150, 150, 150), sw.ElapsedMilliseconds),
                 new Random(Constants.RANDOM_SEED)
                 );
 
@@ -63,7 +66,7 @@ namespace Game_Server {
                 }
             }
             t.owner = owner;
-            t.creationTime = owner.creationTime;
+            t.livingTime = owner.creationTime;
             owner.towns.Add(t);
             tree.Insert(t);
             return t;
@@ -163,39 +166,37 @@ namespace Game_Server {
             return game.r.Next(max - min + 1) + min;
         }
 
-        public void AddActionToTown(Vector3 atk, Vector3 deff, DateTime timeStamp) {
+        public void AddActionToTown(Vector3 atk, Vector3 deff) {
             
             QuadTree tree = game.tree;
             Town atkTown = tree.SearchTown(tree, atk);
             Town deffTown = tree.SearchTown(tree, deff);
             if (CanTownsInteract(atkTown, deffTown)) {
                 lock (treeLock) {
-                    atkTown.CalculateLife(timeStamp);
-                    deffTown.CalculateLife(timeStamp);
+                    atkTown.CalculateLife(sw.ElapsedMilliseconds, "add action atk");
+                    deffTown.CalculateLife(sw.ElapsedMilliseconds, "add action deff");
                     deffTown.AddTownActionReference(atkTown);
                 }
             }
         }
 
-        public void RemoveActionFromTown(Vector3 atk, Vector3 deff, DateTime timeStamp) {
+        public void RemoveActionFromTown(Vector3 atk, Vector3 deff) {
             QuadTree tree = game.tree;
             Town atkTown = tree.SearchTown(tree, atk);
             Town deffTown = tree.SearchTown(tree, deff);
             lock (treeLock) {
-                atkTown.CalculateLife(timeStamp);
-                deffTown.CalculateLife(timeStamp);
+                atkTown.CalculateLife(sw.ElapsedMilliseconds, "rem action atk");
+                deffTown.CalculateLife(sw.ElapsedMilliseconds, "rem action deff");
                 deffTown.RmTownActionReference(atkTown);
             }
         }
 
-        public void ConquerTown(Player player, Vector3 town, DateTime timeStamp) {
-            QuadTree tree = game.tree;
-            Town deffTown = tree.SearchTown(tree, town);
+        public void ConquerTown(Player player, Town deffTown) {
             lock (treeLock) {
-                deffTown.CalculateLife(timeStamp);
-                UpdateTown(deffTown, timeStamp);
+                deffTown.CalculateLife(sw.ElapsedMilliseconds, "conq");
+                UpdateTown(deffTown);
 
-                deffTown.UpdateOwner(player);
+                deffTown.UpdateOwner(player, sw.ElapsedMilliseconds);
             }
         }
 
@@ -203,25 +204,24 @@ namespace Game_Server {
         /// updates one town and all its references
         /// </summary>
         /// <param name="town">town to update</param>
-        /// <param name="timeStamp">time when update happened</param>
-        private void UpdateTown(Town town, DateTime timeStamp) {
+        private void UpdateTown(Town town) {
             lock (treeLock) {
                 // removes all incoming atk troops and deletes references in both towns
-                UpdateInteractingTowns(town.incomingAttackerTowns, town, timeStamp);
+                UpdateInteractingTowns(town.incomingAttackerTowns, town);
                 // removes all incoming support troops and deletes references in both towns
-                UpdateInteractingTowns(town.incomingSupporterTowns, town, timeStamp);
+                UpdateInteractingTowns(town.incomingSupporterTowns, town);
 
                 // removes all outgoing troops and deletes references in both towns
                 for (int i = town.outgoingActionsToTowns.Count; i > 0; i--) {
-                    town.outgoingActionsToTowns[i - 1].CalculateLife(timeStamp);
+                    town.outgoingActionsToTowns[i - 1].CalculateLife(sw.ElapsedMilliseconds, "update");
                     town.outgoingActionsToTowns[i - 1].RmTownActionReference(town);
                 }
             }
         }
 
-        private void UpdateInteractingTowns(List<Town> interactingTowns, Town town, DateTime timeStamp) {
+        private void UpdateInteractingTowns(List<Town> interactingTowns, Town town) {
             for (int i = interactingTowns.Count; i > 0; i--) {
-                interactingTowns[i - 1].CalculateLife(timeStamp);
+                interactingTowns[i - 1].CalculateLife(sw.ElapsedMilliseconds, "update");
                 town.RmTownActionReference(interactingTowns[i - 1]);
             }
         }

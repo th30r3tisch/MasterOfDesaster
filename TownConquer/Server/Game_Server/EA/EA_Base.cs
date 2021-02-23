@@ -32,7 +32,7 @@ namespace Game_Server.EA {
         protected void Evolve(List<T> population, int counter) {
             if (counter < _noImprovementLimit) {
                 Console.WriteLine($"_________Evo {counter}________");
-                population = Evaluate(TrainKis(population));
+                population = Evaluate(TrainKis(population).Result);
                 _writer.WriteStats(population);
                 counter++;
                 Evolve(CreateOffspring(population), counter);
@@ -62,7 +62,7 @@ namespace Game_Server.EA {
         /// </summary>
         /// <param name="population">list of individuals</param>
         /// <returns>ConcurrentBag with results of each game and individual</returns>
-        protected ConcurrentBag<T> TrainKis(List<T> population) {
+        protected ConcurrentBag<T> TrainKis2(List<T> population) {
             ConcurrentBag<T> resultCollection = new ConcurrentBag<T>();
             ConcurrentBag<T> referenceCollection = new ConcurrentBag<T>();
 
@@ -102,18 +102,16 @@ namespace Game_Server.EA {
         /// </summary>
         /// <param name="population"></param>
         /// <returns></returns>
-        protected async Task<ConcurrentBag<T>> TrainKis2(List<T> population) {
+        protected async Task<ConcurrentBag<T>> TrainKis(List<T> population) {
             ConcurrentBag<T> resultCollection = new ConcurrentBag<T>();
             ConcurrentBag<T> referenceCollection = new ConcurrentBag<T>();
             List<Task> allTasks = new List<Task>();
-            SemaphoreSlim throttler = new SemaphoreSlim(initialCount: 16);
+            SemaphoreSlim throttler = new SemaphoreSlim(initialCount: 8);
 
-            foreach (var individual in population) {
-                // do an async wait until we can schedule again
+            foreach (var individual in population) { 
+
                 await throttler.WaitAsync();
 
-                // using Task.Run(...) to run the lambda in its own parallel
-                // flow on the threadpool
                 allTasks.Add(
                     Task.Run(async () => {
                         try {
@@ -125,7 +123,7 @@ namespace Game_Server.EA {
                             //KI_Base<Individual_Advanced> referenceKI = new KI_2(gm, 999, "KI999", Color.FromArgb(255, 255, 255));
                             // K referenceKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0) });
                             
-                            KI_Base<Individual_Simple> referenceKI = new KI_1(game, 999, "KI999", Color.FromArgb(255, 255, 255));
+                            KI_Base<Individual_Simple> referenceKI = new KI_1(game, 999, "KI" + individual.number, Color.FromArgb(255, 255, 255));
                             K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { game, individual.number, "EA" + individual.number, Color.FromArgb(0, 0, 0) });
 
                             Individual_Simple referenceIndividual = new Individual_Simple(999);
