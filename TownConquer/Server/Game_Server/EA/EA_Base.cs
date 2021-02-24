@@ -63,6 +63,7 @@ namespace Game_Server.EA {
         /// <param name="population">list of individuals</param>
         /// <returns>ConcurrentBag with results of each game and individual</returns>
         protected ConcurrentBag<T> TrainKis2(List<T> population) {
+
             ConcurrentBag<T> resultCollection = new ConcurrentBag<T>();
             ConcurrentBag<T> referenceCollection = new ConcurrentBag<T>();
 
@@ -106,10 +107,9 @@ namespace Game_Server.EA {
             ConcurrentBag<T> resultCollection = new ConcurrentBag<T>();
             ConcurrentBag<T> referenceCollection = new ConcurrentBag<T>();
             List<Task> allTasks = new List<Task>();
-            SemaphoreSlim throttler = new SemaphoreSlim(initialCount: 8);
+            SemaphoreSlim throttler = new SemaphoreSlim(initialCount: 16);
 
-            foreach (var individual in population) { 
-
+            foreach (var individual in population) {
                 await throttler.WaitAsync();
 
                 allTasks.Add(
@@ -120,15 +120,10 @@ namespace Game_Server.EA {
                             CancellationTokenSource c = new CancellationTokenSource();
                             CancellationToken token = c.Token;
 
-                            //KI_Base<Individual_Advanced> referenceKI = new KI_2(gm, 999, "KI999", Color.FromArgb(255, 255, 255));
-                            // K referenceKI = (K)Activator.CreateInstance(typeof(K), new object[] { gm, 999, "REF" + individual.number, Color.FromArgb(0, 0, 0) });
                             
                             KI_Base<Individual_Simple> referenceKI = new KI_1(game, 999, "KI" + individual.number, Color.FromArgb(255, 255, 255));
                             K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { game, individual.number, "EA" + individual.number, Color.FromArgb(0, 0, 0) });
-
                             Individual_Simple referenceIndividual = new Individual_Simple(999);
-                            //Individual_Advanced referenceIndividual = new Individual_Advanced(999);
-                            //T referenceIndividual = (T)Activator.CreateInstance(typeof(T), new object[] { individual.number });
 
                             var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
                             var t2 = eaKI.SendIntoGame(token, individual);
@@ -141,7 +136,8 @@ namespace Game_Server.EA {
                         finally {
                             throttler.Release();
                         }
-                    }));
+                    })
+                );
             }
 
             // won't get here until all urls have been put into tasks

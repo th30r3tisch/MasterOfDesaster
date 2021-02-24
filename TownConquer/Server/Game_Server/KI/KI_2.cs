@@ -173,5 +173,10 @@ namespace Game_Server.KI {
             }
             return null;
         }
+
+        public override void Disconnect() {
+            indi.won = player.towns.Count >= Constants.TOWN_NUMBER * 0.9;
+            ProtocollStats(game.gm.sw.ElapsedMilliseconds);
+        }
     }
 }

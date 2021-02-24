@@ -21,10 +21,15 @@ namespace Game_Server.KI {
         /// <returns>task with individual</returns>
         protected override async Task<Individual_Simple> PlayAsync(CancellationToken ct) {
             indi.startPos = player.towns[0].position;
+                    
+            indi.townNumberDevelopment.Clear(); // sometimes individuals are not clean at start?
+            indi.timestamp.Clear(); // sometimes individuals are not clean at start?
+
             GetPossibleInteractionTarget(player.towns[0], indi.gene.properties["ConquerRadius"]);
             int townCountOld = 0;
+            
 
-            while (Constants.TOWN_NUMBER * 0.9 > player.towns.Count) { //  && player.towns.Count != 0
+            while (Constants.TOWN_NUMBER * 0.9 > player.towns.Count && player.towns.Count != 0) { //  
 
                 try {
                     await Task.Delay(Constants.KI_TICK_RATE);
@@ -45,28 +50,25 @@ namespace Game_Server.KI {
                     for (int x = townCountNew; x > 0; x--) {
                         Town town = player.towns[x - 1];
                         CheckKITownLifes(town, indi.gene.properties);
-                        if (HasSupportPermission(town)) {
-                            TrySupportTown(town);
-                        }
-                        else {
+                        //if (HasSupportPermission(town)) {
+                        //    TrySupportTown(town);
+                        //}
+                        //else {
                             TryAttackTown(town);
-                        }
+                        //}
                     }
                 }
                 long timeMem = game.gm.sw.ElapsedMilliseconds;
                 if (timeMem > protocollTime) {
                     protocollTime += timeMem;
-                    ProtocollStats(timeMem);
+                    ProtocollStats(timeMem, player.towns.Count);
                 }
                 if (ct.IsCancellationRequested) {
-                    indi.won = false;
-                    CalcTownLifeSum();
+                    Disconnect();
                     return indi;
                 }
             }
-            indi.won = true;
-            CalcTownLifeSum();
-            ProtocollStats(game.gm.sw.ElapsedMilliseconds);
+            Disconnect();
             return indi;
         }
 
@@ -177,10 +179,10 @@ namespace Game_Server.KI {
             }
         }
 
-        private void ProtocollStats(long timePassed) {
+        private void ProtocollStats(long timePassed, int townNum) {
             indi.name = player.username;
             indi.timestamp.Add(timePassed);
-            indi.townNumberDevelopment.Add(player.towns.Count);
+            indi.townNumberDevelopment.Add(townNum);
         }
 
         private void CalcTownLifeSum() {
@@ -189,6 +191,17 @@ namespace Game_Server.KI {
                 life += town.life;
             }
             indi.townLifeSum = life;
+        }
+
+        public override void Disconnect() {
+            if (game.kis[0] != this) {
+                indi.won = player.towns.Count > game.kis[0].player.towns.Count;
+            }
+            else {
+                indi.won = player.towns.Count > game.kis[1].player.towns.Count;
+            }
+            CalcTownLifeSum();
+            ProtocollStats(game.gm.sw.ElapsedMilliseconds, player.towns.Count);
         }
     }
 }

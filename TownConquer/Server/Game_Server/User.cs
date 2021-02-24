@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace Game_Server {
     abstract class User {
-        public Game game { get; set; }
+        public Game game;
         public Player player;
         public int id;
 

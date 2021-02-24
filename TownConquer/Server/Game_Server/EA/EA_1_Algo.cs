@@ -66,6 +66,7 @@ namespace Game_Server.EA {
                 individual.timestamp.Clear();
                 individual.score = 0;
                 individual.townLifeSum = 0;
+                individual.name = null;
             }
         }
 

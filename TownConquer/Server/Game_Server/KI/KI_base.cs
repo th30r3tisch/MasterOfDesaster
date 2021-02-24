@@ -15,9 +15,9 @@ namespace Game_Server.KI {
 
         public KI_Base(Game game, int kiId, string name, Color color) {
             id = kiId;
-            protocollTime = Constants.KI_TICK_RATE * 5;
+            protocollTime = Constants.KI_TICK_RATE * 2;
             this.game = game;
-            SetupUser(name, color, game.gm.sw.ElapsedMilliseconds);
+            SetupUser(name, color, this.game.gm.sw.ElapsedMilliseconds);
         }
 
         /// <summary>
@@ -41,8 +41,6 @@ namespace Game_Server.KI {
 
         protected abstract void CheckKITownLifes(Town town, Dictionary<string, int> props);
 
-        public override void Disconnect() {
-            throw new NotImplementedException();
-        }
+        public abstract override void Disconnect();
     }
 }
