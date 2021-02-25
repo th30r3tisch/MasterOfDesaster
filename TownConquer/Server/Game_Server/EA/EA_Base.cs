@@ -15,7 +15,7 @@ namespace Game_Server.EA {
 
         protected const int _populationNumber = 200;
         protected const int _noImprovementLimit = 70;
-        protected const double _recombinationProbability = 0.7;
+        protected const double _recombinationProbability = 0.3;
 
         protected readonly Random _r;
         protected StatsWriter<T> _writer;
@@ -120,9 +120,9 @@ namespace Game_Server.EA {
                             CancellationTokenSource c = new CancellationTokenSource();
                             CancellationToken token = c.Token;
 
-                            
-                            KI_Base<Individual_Simple> referenceKI = new KI_1(game, 999, "KI" + individual.number, Color.FromArgb(255, 255, 255));
                             K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { game, individual.number, "EA" + individual.number, Color.FromArgb(0, 0, 0) });
+                            KI_Base<Individual_Simple> referenceKI = new KI_1(game, 999, "KI" + individual.number, Color.FromArgb(255, 255, 255));
+                            
                             Individual_Simple referenceIndividual = new Individual_Simple(999);
 
                             var t1 = referenceKI.SendIntoGame(token, referenceIndividual);

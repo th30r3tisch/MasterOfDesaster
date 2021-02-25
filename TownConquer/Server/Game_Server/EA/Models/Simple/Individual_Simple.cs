@@ -76,10 +76,9 @@ namespace Game_Server.EA.Models.Simple {
         /// <param name="r">Pseudo-random number generator</param>
         /// <returns>The recombinated individual</returns>
         public Individual_Simple Recombinate(Individual_Simple partner, Random r) {
-            double u = r.NextDouble() + r.NextDouble(); // random number between 0 and 2
+            double u = r.NextDouble() * 1.5; // random number between 1 and 2
             var ownProps = gene.properties;
             var partnerProps = partner.gene.properties;
-
             foreach (string key in ownProps.Keys.ToList()) {
                 // Kind.Ai = u · Elter1.Ai + (1 - u) · Elter2.Ai
                 int value = (int)(u * ownProps[key] + (1 - u) * partnerProps[key]);

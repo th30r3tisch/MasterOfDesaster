@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 
 namespace Game_Server.EA {
-    class EA_1_Algo: EA_Base<Individual_Simple, KI_1> {
+    class EA_1_Algo : EA_Base<Individual_Simple, KI_1> {
         public delegate double GaussDelegate(double deviation);
 
         public EA_1_Algo() : base() {
@@ -15,7 +15,7 @@ namespace Game_Server.EA {
         }
 
         private Individual_Simple TournamentSelection(List<Individual_Simple> population) {
-            
+
             List<Individual_Simple> parents = new List<Individual_Simple>();
             int populationSize = population.Count;
             while (parents.Count < 2) {
@@ -32,16 +32,16 @@ namespace Game_Server.EA {
                 return parents[0];
             }
             else {
-                return parents[0].Recombinate(parents[1], _r);
+                return parents[1].Recombinate(parents[0], _r);
             }
         }
 
 
         protected override List<Individual_Simple> CreateOffspring(List<Individual_Simple> population) {
+            counter = 0;
             List<Individual_Simple> newPopulation = new List<Individual_Simple>();
             GaussDelegate gauss = new GaussDelegate(Gauss);
             Individual_Simple child;
-
             newPopulation.Add(GetElite(population));
 
             for (int i = 0; i < population.Count - 1; i++) {
