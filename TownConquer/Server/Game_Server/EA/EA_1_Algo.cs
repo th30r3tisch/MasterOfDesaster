@@ -38,7 +38,6 @@ namespace Game_Server.EA {
 
 
         protected override List<Individual_Simple> CreateOffspring(List<Individual_Simple> population) {
-            counter = 0;
             List<Individual_Simple> newPopulation = new List<Individual_Simple>();
             GaussDelegate gauss = new GaussDelegate(Gauss);
             Individual_Simple child;

@@ -50,12 +50,12 @@ namespace Game_Server.KI {
                     for (int x = townCountNew; x > 0; x--) {
                         Town town = player.towns[x - 1];
                         CheckKITownLifes(town, indi.gene.properties);
-                        //if (HasSupportPermission(town)) {
-                        //    TrySupportTown(town);
-                        //}
-                        //else {
+                        if (HasSupportPermission(town)) {
+                            TrySupportTown(town);
+                        }
+                        else {
                             TryAttackTown(town);
-                        //}
+                        }
                     }
                 }
                 long timeMem = game.gm.sw.ElapsedMilliseconds;
@@ -107,7 +107,7 @@ namespace Game_Server.KI {
                     InteractWithTown(sourceTown.position, town.position);
                 }
                 else {
-                    TryAttackTown(town);
+                    TryAttackTown(sourceTown);
                 }
             }
         }

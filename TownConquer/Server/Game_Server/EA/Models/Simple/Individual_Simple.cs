@@ -39,7 +39,7 @@ namespace Game_Server.EA.Models.Simple {
                 r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
                 r.Next(5, 99),
                 r.Next(5, 99),
-                r.Next(0, 100)
+                r.Next(0, 99)
             });
         }
 
