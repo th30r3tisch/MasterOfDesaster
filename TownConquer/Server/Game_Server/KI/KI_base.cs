@@ -33,6 +33,30 @@ namespace Game_Server.KI {
         }
 
         /// <summary>
+        /// searches neighbours of a town for a town
+        /// </summary>
+        /// <param name="atkTown">town possible interaction targets</param>
+        /// <param name="searchRadius">radius around town to search for targets</param>
+        protected void GetPossibleInteractionTarget(Town atkTown, int searchRadius) {
+            QuadTree tree = game.tree;
+            List<TreeNode> objectsInRange;
+
+            objectsInRange = tree.GetAllContentBetween(
+                (int)(atkTown.position.X - searchRadius),
+                (int)(atkTown.position.Z - searchRadius),
+                (int)(atkTown.position.X + searchRadius),
+                (int)(atkTown.position.Z + searchRadius));
+
+            for (int i = 0; i < objectsInRange.Count; i++) {
+                if (objectsInRange[i] is Town town) {
+                    if (game.gm.CanTownsInteract(town, atkTown)) {
+                        atkTown.townsInRange.Add(town);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// includes the play routine of the ki
         /// </summary>
         /// <param name="ct">CancellationToken</param>

@@ -10,9 +10,7 @@ using System.Threading.Tasks;
 namespace Game_Server.KI {
     class KI_1 : KI_Base<Individual_Simple> {
 
-        List<Town> reachableTowns = new List<Town>();
-
-        public KI_1(Game gm, int id, string name, Color color) : base(gm, id, name, color) { }
+        public KI_1(Game game, int id, string name, Color color) : base(game, id, name, color) { }
 
         /// <summary>
         /// includes the play routine of the ki
@@ -80,7 +78,6 @@ namespace Game_Server.KI {
                 }
                 town.life = 0;
             }
-
             for (int x = town.outgoingActionsToTowns.Count; x > 0; x--) {
                 Town t = town.outgoingActionsToTowns[x - 1];
                 t.CalculateLife(game.gm.sw.ElapsedMilliseconds, "life of outgoing");
@@ -150,33 +147,6 @@ namespace Game_Server.KI {
                 return true;
             }
             return false;
-        }
-
-        /// <summary>
-        /// searches neighbours of a town for a town
-        /// </summary>
-        /// <param name="atkTown">town possible interaction targets</param>
-        /// <param name="searchRadius">radius around town to search for targets</param>
-        private void GetPossibleInteractionTarget(Town atkTown, int searchRadius) {
-            QuadTree tree = game.tree;
-            List<TreeNode> objectsInRange;
-
-            objectsInRange = tree.GetAllContentBetween(
-                (int)(atkTown.position.X - searchRadius),
-                (int)(atkTown.position.Z - searchRadius),
-                (int)(atkTown.position.X + searchRadius),
-                (int)(atkTown.position.Z + searchRadius));
-
-            for (int i = 0; i < objectsInRange.Count; i++) {
-                if (objectsInRange[i] is Town town) {
-                    if (game.gm.CanTownsInteract(town, atkTown)) {
-                        atkTown.townsInRange.Add(town);
-                        if (!reachableTowns.Contains(town)) {
-                            reachableTowns.Add(town);
-                        }
-                    }
-                }
-            }
         }
 
         private void ProtocollStats(long timePassed, int townNum) {

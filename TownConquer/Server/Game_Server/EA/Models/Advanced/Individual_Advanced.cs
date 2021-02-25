@@ -50,7 +50,7 @@ namespace Game_Server.EA.Models.Advanced {
         }
 
         private void Recombinate(Dictionary<string, int> prop1, Dictionary<string, int> prop2, Random r) {
-            double u = r.NextDouble() + r.NextDouble(); // random number between 0 and 2
+            double u = r.NextDouble() * 1.5; // random number between 0 and 1.5
             foreach (string key in prop1.Keys.ToList()) {
                 // Kind.Ai = u · Elter1.Ai + (1 - u) · Elter2.Ai
                 int value = (int)(u * prop1[key] + (1 - u) * prop2[key]);
@@ -66,12 +66,8 @@ namespace Game_Server.EA.Models.Advanced {
         /// <returns>a valid value</returns>
         protected override int ClampValue(int value, string key) {
             switch (key) {
-                case nameof(PropertyNames_Advanced.InitialConquerRadius):
+                case nameof(PropertyNames_Advanced.ConquerRadius):
                     return Math.Min(Constants.MAP_HEIGHT, Math.Max(Constants.TOWN_MIN_DISTANCE, value));
-                case nameof(PropertyNames_Advanced.MaxConquerRadius):
-                    return Math.Min(Constants.MAP_HEIGHT, Math.Max(Constants.TOWN_MIN_DISTANCE, value));
-                case nameof(PropertyNames_Advanced.RadiusExpansionStep):
-                    return Math.Min(Constants.MAP_HEIGHT, Math.Max(-Constants.MAP_HEIGHT, value));
                 case nameof(PropertyNames_Advanced.AttackMinLife):
                     return Math.Min(150, Math.Max(5, value));
                 case nameof(PropertyNames_Advanced.SupportRadius):
@@ -97,9 +93,9 @@ namespace Game_Server.EA.Models.Advanced {
         /// Creates static genes
         /// </summary>
         protected override void CreateGene() {
-            Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 400, 2000, 100, 10, 1000, 100, 20 });
-            Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 400, 2000, 100, 10, 1000, 100, 20 });
-            Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 400, 2000, 100, 10, 1000, 100, 20 });
+            Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2000, 10, 1000, 100, 20 });
+            Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2000, 10, 1000, 100, 20 });
+            Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2000, 10, 1000, 100, 20 });
             Dictionary<string, int> genProps = Genotype_Advanced.CreateProperties<PropertyNames_General>(new List<int> { 85, 10, 50, 1500 });
             gene = new Genotype_Advanced(supProps, offProps, deffProps, genProps);
         }
@@ -132,8 +128,6 @@ namespace Game_Server.EA.Models.Advanced {
         private Dictionary<string, int> CreateProps<T>(Random r) {
             return Genotype_Advanced.CreateProperties<T>(new List<int> {
                 r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
-                r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
-                r.Next(-Constants.MAP_HEIGHT / 5, Constants.MAP_HEIGHT / 5),
                 r.Next(5, 100),
                 r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
                 r.Next(5, 1000),

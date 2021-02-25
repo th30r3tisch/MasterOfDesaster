@@ -7,7 +7,6 @@ using System.Collections.Generic;
 
 namespace Game_Server.EA {
     class EA_2_Algo: EA_Base<Individual_Advanced, KI_2> {
-
         public delegate double GaussDelegate(double deviation);
 
         public EA_2_Algo() : base() {
@@ -41,7 +40,6 @@ namespace Game_Server.EA {
             List<Individual_Advanced> newPopulation = new List<Individual_Advanced>();
             GaussDelegate gauss = new GaussDelegate(Gauss);
             Individual_Advanced child;
-
             newPopulation.Add(GetElite(population));
 
             for (int i = 0; i < population.Count - 1; i++) {
@@ -64,6 +62,7 @@ namespace Game_Server.EA {
                 individual.number = i;
                 individual.timestamp.Clear();
                 individual.score = 0;
+                individual.name = null;
             }
         }
 
