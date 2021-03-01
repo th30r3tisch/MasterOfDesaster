@@ -21,16 +21,6 @@ namespace Game_Server.EA.Models {
         }
 
         /// <summary>
-        /// Creates a deep copy of the individual
-        /// </summary>
-        /// <returns>The copy of the individual</returns>
-        public Individual<T> DeepCopy() {
-            Individual<T> other = (Individual<T>)MemberwiseClone();
-            other.gene = (T)gene.ShallowCopy();
-            return other;
-        }
-
-        /// <summary>
         /// Calculates the Fitness of the individual
         /// </summary>
         public abstract void CalcFitness();

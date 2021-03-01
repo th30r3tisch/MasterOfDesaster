@@ -19,8 +19,10 @@ namespace Game_Server.EA {
             List<Individual_Simple> parents = new List<Individual_Simple>();
             int populationSize = population.Count;
             while (parents.Count < 2) {
-                Individual_Simple contestantOne = population[_r.Next(0, populationSize)];
-                Individual_Simple contestantTwo = population[_r.Next(0, populationSize)];
+                int i1 = _r.Next(0, populationSize);
+                int i2 = _r.Next(0, populationSize);
+                Individual_Simple contestantOne = population[i1];
+                Individual_Simple contestantTwo = population[i2];
                 if (contestantOne.fitness > contestantTwo.fitness) {
                     parents.Add(contestantOne);
                 }
@@ -29,7 +31,7 @@ namespace Game_Server.EA {
                 }
             }
             if (_r.NextDouble() > _recombinationProbability) {
-                return parents[0];
+                return parents[0].CopyIndividual();
             }
             else {
                 return parents[1].Recombinate(parents[0], _r);
@@ -39,34 +41,17 @@ namespace Game_Server.EA {
 
         protected override List<Individual_Simple> CreateOffspring(List<Individual_Simple> population) {
             List<Individual_Simple> newPopulation = new List<Individual_Simple>();
-            GaussDelegate gauss = new GaussDelegate(Gauss);
             Individual_Simple child;
-            newPopulation.Add(GetElite(population));
-
-            for (int i = 0; i < population.Count - 1; i++) {
-                child = (Individual_Simple)TournamentSelection(population).DeepCopy();
+            GaussDelegate gauss = new GaussDelegate(Gauss);
+            newPopulation.Add(GetElite(population).CopyIndividual());
+            newPopulation[0].number = 0;
+            for (int i = 1; i < population.Count; i++) {
+                child = TournamentSelection(population);
                 child.Mutate(_r, gauss);
+                child.number = i;
                 newPopulation.Add(child);
             }
-
-            ResetNewPopulation(newPopulation);
             return newPopulation;
-        }
-
-        /// <summary>
-        /// resets all important values preparing the start of the new generation
-        /// </summary>
-        /// <param name="newPopulation">new generation</param>
-        private void ResetNewPopulation(List<Individual_Simple> newPopulation) {
-            for (int i = 0; i < newPopulation.Count; i++) {
-                Individual_Simple individual = newPopulation[i];
-                individual.number = i;
-                individual.townNumberDevelopment.Clear();
-                individual.timestamp.Clear();
-                individual.score = 0;
-                individual.townLifeSum = 0;
-                individual.name = null;
-            }
         }
 
         /// <summary>

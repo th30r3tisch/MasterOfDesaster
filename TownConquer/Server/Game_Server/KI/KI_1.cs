@@ -19,9 +19,6 @@ namespace Game_Server.KI {
         /// <returns>task with individual</returns>
         protected override async Task<Individual_Simple> PlayAsync(CancellationToken ct) {
             indi.startPos = player.towns[0].position;
-                    
-            indi.townNumberDevelopment.Clear(); // sometimes individuals are not clean at start?
-            indi.timestamp.Clear(); // sometimes individuals are not clean at start?
 
             GetPossibleInteractionTarget(player.towns[0], indi.gene.properties["ConquerRadius"]);
             int townCountOld = 0;

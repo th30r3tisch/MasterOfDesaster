@@ -43,7 +43,7 @@ namespace Game_Server.EA {
             newPopulation.Add(GetElite(population));
 
             for (int i = 0; i < population.Count - 1; i++) {
-                child = (Individual_Advanced)TournamentSelection(population).DeepCopy();
+                child = TournamentSelection(population);
                 child.PrepareMutate(_r, gauss);
                 newPopulation.Add(child);
             }

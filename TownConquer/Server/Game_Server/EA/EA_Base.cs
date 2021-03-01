@@ -120,9 +120,10 @@ namespace Game_Server.EA {
                             CancellationTokenSource c = new CancellationTokenSource();
                             CancellationToken token = c.Token;
 
-                            K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { game, individual.number, "EA" + individual.number, Color.FromArgb(0, 0, 0) });
-                            KI_Base<Individual_Simple> referenceKI = new KI_1(game, 999, "KI" + individual.number, Color.FromArgb(255, 255, 255));
                             
+                            KI_Base<Individual_Simple> referenceKI = new KI_1(game, 999, "KI" + individual.number, Color.FromArgb(255, 255, 255));
+                            K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { game, individual.number, "EA" + individual.number, Color.FromArgb(0, 0, 0) });
+
                             Individual_Simple referenceIndividual = new Individual_Simple(999);
 
                             var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
@@ -161,7 +162,6 @@ namespace Game_Server.EA {
                 }
             }
             eliteIndividual.isElite = true;
-
             return eliteIndividual;
         }
 

@@ -20,6 +20,11 @@ namespace Game_Server.EA.Models.Simple {
             CreateGene(r);
         }
 
+        public Individual_Simple(List<int> newGene, int number) : base(number) {
+            townNumberDevelopment = new List<int>();
+            gene = new Genotype_Simple(newGene);
+        }
+
         /// <summary>
         /// Creates static genes
         /// </summary>
@@ -76,15 +81,16 @@ namespace Game_Server.EA.Models.Simple {
         /// <param name="r">Pseudo-random number generator</param>
         /// <returns>The recombinated individual</returns>
         public Individual_Simple Recombinate(Individual_Simple partner, Random r) {
+            Individual_Simple child = CopyIndividual();
             double u = r.NextDouble() * 1.5; // random number between 1 and 1.5
-            var ownProps = gene.properties;
+            var childProps = child.gene.properties;
             var partnerProps = partner.gene.properties;
-            foreach (string key in ownProps.Keys.ToList()) {
+            foreach (string key in childProps.Keys.ToList()) {
                 // Kind.Ai = u · Elter1.Ai + (1 - u) · Elter2.Ai
-                int value = (int)(u * ownProps[key] + (1 - u) * partnerProps[key]);
-                ownProps[key] = ClampValue(value, key);
+                int value = (int)(u * childProps[key] + (1 - u) * partnerProps[key]);
+                childProps[key] = ClampValue(value, key);
             }
-            return this;
+            return child;
         }
 
         /// <summary>
@@ -110,6 +116,16 @@ namespace Game_Server.EA.Models.Simple {
                 default:
                     return value;
             }
+        }
+
+        /// <summary>
+        /// Creates a deep copy of the individual
+        /// </summary>
+        /// <returns>The copy of the individual</returns>
+        public Individual_Simple CopyIndividual() {
+            List<int> newGene = new List<int>(gene.properties.Values);
+            Individual_Simple newIndividual = new Individual_Simple(newGene, 0);
+            return newIndividual;
         }
     }
 }
