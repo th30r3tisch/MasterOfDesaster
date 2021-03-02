@@ -19,10 +19,8 @@ namespace Game_Server.EA {
             List<Individual_Simple> parents = new List<Individual_Simple>();
             int populationSize = population.Count;
             while (parents.Count < 2) {
-                int i1 = _r.Next(0, populationSize);
-                int i2 = _r.Next(0, populationSize);
-                Individual_Simple contestantOne = population[i1];
-                Individual_Simple contestantTwo = population[i2];
+                Individual_Simple contestantOne = population[_r.Next(0, populationSize)];
+                Individual_Simple contestantTwo = population[_r.Next(0, populationSize)];
                 if (contestantOne.fitness > contestantTwo.fitness) {
                     parents.Add(contestantOne);
                 }

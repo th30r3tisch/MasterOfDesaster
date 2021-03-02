@@ -43,9 +43,6 @@ namespace Game_Server.writer.EA_2 {
                     csv.WriteField(record.fitness);
                     csv.WriteField(record.score);
                     csv.WriteField(record.timestamp.Last());
-                    foreach (int value in record.gene.generalProperties.Values.ToList()) {
-                        csv.WriteField(value);
-                    }
                     foreach (int value in record.gene.defensiveProperties.Values.ToList()) {
                         csv.WriteField(value);
                     }
@@ -53,6 +50,9 @@ namespace Game_Server.writer.EA_2 {
                         csv.WriteField(value);
                     }
                     foreach (int value in record.gene.supportProperties.Values.ToList()) {
+                        csv.WriteField(value);
+                    }
+                    foreach (int value in record.gene.generalProperties.Values.ToList()) {
                         csv.WriteField(value);
                     }
                 }

@@ -43,5 +43,6 @@ namespace Game_Server.EA.Models {
         /// <param name="key">the belonging name of the value to clamp</param>
         /// <returns>a valid value</returns>
         protected abstract int ClampValue(int value, string key);
+
     }
 }

@@ -20,7 +20,9 @@ namespace Game_Server.KI {
         protected override async Task<Individual_Advanced> PlayAsync(CancellationToken ct) {
             indi.startPos = player.towns[0].position;
             int townCountOld = 0;
-            GetPossibleInteractionTarget(player.towns[0], indi.gene.attackProperties["ConquerRadius"]);
+
+            CategorizeTowns();
+            GetCategoryDependentTarget(player.towns[0]);
 
             while (Constants.TOWN_NUMBER * 0.9 > player.towns.Count && player.towns.Count != 0) { //  
                 try {
@@ -38,10 +40,11 @@ namespace Game_Server.KI {
                     else {
                         indi.score -= 5 * (townCountOld - townCountNew);
                         townCountOld = townCountNew;
+                        CategorizeTowns();
                     }
                     for (int i = player.towns.Count; i > 0; i--) {
                         Town atkTown = player.towns[i - 1];
-                        CategorizeTown(atkTown);
+                        DoAction(atkTown);
                     }
                 }
                 long timeMem = game.gm.sw.ElapsedMilliseconds;
@@ -58,9 +61,52 @@ namespace Game_Server.KI {
             return indi;
         }
 
+        private void GetCategoryDependentTarget(Town t) {
+            switch (t.townCategory) {
+                case TownCategory.sup:
+                    GetPossibleInteractionTarget(t, indi.gene.supportProperties["ConquerRadius"]);
+                    break;
+                case TownCategory.deff:
+                    GetPossibleInteractionTarget(t, indi.gene.defensiveProperties["ConquerRadius"]);
+                    break;
+                case TownCategory.off:
+                    GetPossibleInteractionTarget(t, indi.gene.attackProperties["ConquerRadius"]);
+                    break;
+                default:
+                    break;
+            }
+            
+        }
+
+        private void DoAction(Town t) {
+            switch (t.townCategory) {
+                case TownCategory.sup:
+                    CheckKITownLifes(t, indi.gene.supportProperties);
+                    TrySupportTown(t, indi.gene.supportProperties);
+                    break;
+                case TownCategory.deff:
+                    CheckKITownLifes(t, indi.gene.defensiveProperties);
+                    break;
+                case TownCategory.off:
+                    CheckKITownLifes(t, indi.gene.attackProperties);
+                    TryAttackTown(t, indi.gene.attackProperties);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         private void ProtocollStats(long timePassed) {
             indi.name = player.username;
             indi.timestamp.Add(timePassed);
+        }
+
+        private void CategorizeTowns() {
+            lock (game.gm.treeLock) {
+                foreach (Town town in player.towns) {
+                    CategorizeTown(town);
+                }
+            }
         }
 
         private void CategorizeTown(Town town) {
@@ -90,18 +136,13 @@ namespace Game_Server.KI {
             float defRatio = indi.gene.generalProperties["DeffTownRatio"] / 100f;
             if (friendlyPercent >= supRatio && allTowns > 1) {
                 town.townCategory = TownCategory.sup;
-                CheckKITownLifes(town, indi.gene.supportProperties);
-                TrySupportTown(town, indi.gene.supportProperties);
             }
             if (friendlyPercent <= atkRatio && allTowns > 1) {
                 if (friendlyPercent <= defRatio) {
                     town.townCategory = TownCategory.deff;
-                    CheckKITownLifes(town, indi.gene.defensiveProperties);
                 }
                 else {
                     town.townCategory = TownCategory.off;
-                    CheckKITownLifes(town, indi.gene.attackProperties);
-                    TryAttackTown(town, indi.gene.attackProperties);
                 }
             }
         }
@@ -120,7 +161,8 @@ namespace Game_Server.KI {
                 if (t.life <= 0) {
                     ConquerTown(player, t.position);
                     indi.score += 20;
-                    GetPossibleInteractionTarget(t, props["ConquerRadius"]);
+                    CategorizeTowns();
+                    GetCategoryDependentTarget(t);
                 }
                 else if (t.life > props["SupportMaxCap"] && t.incomingSupporterTowns.Contains(town)) {
                     RetreatFromTown(town.position, t.position);

@@ -29,7 +29,7 @@ namespace Game_Server.EA {
                 }
             }
             if (_r.NextDouble() > _recombinationProbability) {
-                return parents[0];
+                return parents[0].CopyIndividual();
             }
             else {
                 return parents[0].PrepareRecombination(parents[1], _r);
@@ -40,11 +40,13 @@ namespace Game_Server.EA {
             List<Individual_Advanced> newPopulation = new List<Individual_Advanced>();
             GaussDelegate gauss = new GaussDelegate(Gauss);
             Individual_Advanced child;
-            newPopulation.Add(GetElite(population));
+            newPopulation.Add(GetElite(population).CopyIndividual());
+            newPopulation[0].number = 0;
 
-            for (int i = 0; i < population.Count - 1; i++) {
+            for (int i = 1; i < population.Count; i++) {
                 child = TournamentSelection(population);
                 child.PrepareMutate(_r, gauss);
+                child.number = i;
                 newPopulation.Add(child);
             }
 

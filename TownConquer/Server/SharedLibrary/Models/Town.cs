@@ -130,7 +130,10 @@ namespace SharedLibrary.Models {
                 if (owner.id != -1) {
                     int lostLifeByOutgoing = pastTickNumber * outgoingActionsToTowns.Count;
                     int gotLifeByIncoming = pastTickNumber * incomingSupporterTowns.Count;
-                    firstLifeCalc += pastTickNumber - lostLifeByOutgoing + gotLifeByIncoming;
+                    if (incomingAttackerTowns.Count <= 0) { // just generate life when no attacks are incoming
+                        firstLifeCalc += pastTickNumber;
+                    }
+                    firstLifeCalc -= lostLifeByOutgoing + gotLifeByIncoming;
                 }
                 int lostLifeByIncoming = pastTickNumber * incomingAttackerTowns.Count;
 

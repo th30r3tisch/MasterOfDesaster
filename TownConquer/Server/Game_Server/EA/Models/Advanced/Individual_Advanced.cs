@@ -15,6 +15,14 @@ namespace Game_Server.EA.Models.Advanced {
             CreateGene(r);
         }
 
+        public Individual_Advanced(List<int> supGene, List<int> offGene, List<int> deffGene, List<int> generalGene, int number) : base(number) {
+            Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(deffGene);
+            Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(offGene);
+            Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(supGene);
+            Dictionary<string, int> genProps = Genotype_Advanced.CreateProperties<PropertyNames_General>(generalGene);
+            gene = new Genotype_Advanced(supProps, offProps, deffProps, genProps);
+        }
+
         /// <summary>
         /// Calculates the Fitness of the individual
         /// </summary>
@@ -42,11 +50,12 @@ namespace Game_Server.EA.Models.Advanced {
         }
 
         public Individual_Advanced PrepareRecombination(Individual_Advanced partner, Random r) {
-            Recombinate(gene.attackProperties, partner.gene.attackProperties, r);
-            Recombinate(gene.defensiveProperties, partner.gene.defensiveProperties, r);
-            Recombinate(gene.supportProperties, partner.gene.supportProperties, r);
-            Recombinate(gene.generalProperties, partner.gene.generalProperties, r);
-            return this;
+            Individual_Advanced child = CopyIndividual();
+            Recombinate(child.gene.attackProperties, partner.gene.attackProperties, r);
+            Recombinate(child.gene.defensiveProperties, partner.gene.defensiveProperties, r);
+            Recombinate(child.gene.supportProperties, partner.gene.supportProperties, r);
+            Recombinate(child.gene.generalProperties, partner.gene.generalProperties, r);
+            return child;
         }
 
         private void Recombinate(Dictionary<string, int> prop1, Dictionary<string, int> prop2, Random r) {
@@ -130,10 +139,22 @@ namespace Game_Server.EA.Models.Advanced {
                 r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
                 r.Next(5, 100),
                 r.Next(Constants.TOWN_MIN_DISTANCE, Constants.MAP_HEIGHT),
-                r.Next(5, 1000),
-                r.Next(5, 1000),
-                r.Next(0, 100)
+                r.Next(5, 100),
+                r.Next(5, 100)
             });
+        }
+
+        /// <summary>
+        /// Creates a deep copy of the individual
+        /// </summary>
+        /// <returns>The copy of the individual</returns>
+        public Individual_Advanced CopyIndividual() {
+            List<int> supGene = new List<int>(gene.supportProperties.Values);
+            List<int> offGene = new List<int>(gene.attackProperties.Values);
+            List<int> deffGene = new List<int>(gene.defensiveProperties.Values);
+            List<int> generalGene = new List<int>(gene.generalProperties.Values);
+            Individual_Advanced newIndividual = new Individual_Advanced(supGene, offGene, deffGene, generalGene, 0);
+            return newIndividual;
         }
     }
 }
