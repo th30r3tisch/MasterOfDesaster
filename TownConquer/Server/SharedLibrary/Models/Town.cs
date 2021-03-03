@@ -133,7 +133,7 @@ namespace SharedLibrary.Models {
                     if (incomingAttackerTowns.Count <= 0) { // just generate life when no attacks are incoming
                         firstLifeCalc += pastTickNumber;
                     }
-                    firstLifeCalc -= lostLifeByOutgoing + gotLifeByIncoming;
+                    firstLifeCalc += gotLifeByIncoming - lostLifeByOutgoing;
                 }
                 int lostLifeByIncoming = pastTickNumber * incomingAttackerTowns.Count;
 

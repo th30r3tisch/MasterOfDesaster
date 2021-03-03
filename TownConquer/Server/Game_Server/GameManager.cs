@@ -191,12 +191,12 @@ namespace Game_Server {
             }
         }
 
-        public void ConquerTown(Player player, Town deffTown) {
+        public void ConquerTown(User user, Town deffTown) {
             lock (treeLock) {
                 deffTown.CalculateLife(sw.ElapsedMilliseconds, "conq");
                 UpdateTown(deffTown);
-
-                deffTown.UpdateOwner(player, sw.ElapsedMilliseconds);
+                
+                deffTown.UpdateOwner(user.player, sw.ElapsedMilliseconds);
             }
         }
 

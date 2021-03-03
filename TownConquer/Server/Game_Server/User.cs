@@ -38,13 +38,13 @@ namespace Game_Server {
             }
         }
 
-        public void ConquerTown(Player conquerer, Vector3 deffTown) {
+        public void ConquerTown(Vector3 deffTown) {
             Town town = game.tree.SearchTown(game.tree, deffTown);
-            game.gm.ConquerTown(conquerer, town);
+            game.gm.ConquerTown(this, town);
             if (Constants.TRAININGS_MODE == false) {
                 foreach (Client client in game.clients.Values) {
                     if (client.player != null) {
-                        ServerSend.GrantedConquer(client.id, conquerer, town.position, town.livingTime);
+                        ServerSend.GrantedConquer(client.id, player, town.position, town.livingTime);
                     }
                 }
             }

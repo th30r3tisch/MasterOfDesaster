@@ -52,7 +52,7 @@ namespace Game_Server {
             Client client = Server.games[-1].clients[fromClient];
             Console.WriteLine($"{client.tcp.socket.Client.RemoteEndPoint} requested to conquer {deffTown}.");
 
-            client.ConquerTown(client.player, deffTown);
+            client.ConquerTown(deffTown);
         }
     }
 }

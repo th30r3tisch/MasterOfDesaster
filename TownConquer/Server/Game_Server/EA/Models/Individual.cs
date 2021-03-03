@@ -12,7 +12,6 @@ namespace Game_Server.EA.Models {
         public double fitness { get; set; }
         public Vector3 startPos;
         public bool isElite { get; set; }
-        public int score = 0;
         public List<long> timestamp;
 
         public Individual(int number) {

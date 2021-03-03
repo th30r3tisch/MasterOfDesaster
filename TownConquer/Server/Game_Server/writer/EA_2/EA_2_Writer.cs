@@ -18,6 +18,9 @@ namespace Game_Server.writer.EA_2 {
             using (var stream = File.Open(_path, FileMode.Append))
             using (var writer = new StreamWriter(stream))
             using (var csv = new CsvWriter(writer, _config)) {
+                csv.WriteField("deffScore");
+                csv.WriteField("suppScore");
+                csv.WriteField("townLifeDeviation");
                 foreach (string property in propertynames) {
                     csv.WriteField("deff-" + property);
                 }
@@ -41,8 +44,11 @@ namespace Game_Server.writer.EA_2 {
                     csv.WriteField(record.startPos);
                     csv.WriteField(record.won);
                     csv.WriteField(record.fitness);
-                    csv.WriteField(record.score);
                     csv.WriteField(record.timestamp.Last());
+                    csv.WriteField(record.atkScore);
+                    csv.WriteField(record.deffScore);
+                    csv.WriteField(record.suppScore);
+                    csv.WriteField(record.townLifeDeviation);
                     foreach (int value in record.gene.defensiveProperties.Values.ToList()) {
                         csv.WriteField(value);
                     }

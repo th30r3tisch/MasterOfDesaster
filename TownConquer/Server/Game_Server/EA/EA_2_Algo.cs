@@ -63,7 +63,10 @@ namespace Game_Server.EA {
                 Individual_Advanced individual = newPopulation[i];
                 individual.number = i;
                 individual.timestamp.Clear();
-                individual.score = 0;
+                individual.atkScore = 0;
+                individual.deffScore = 0;
+                individual.suppScore = 0;
+                individual.townLifeDeviation = 0;
                 individual.name = null;
             }
         }

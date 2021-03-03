@@ -7,6 +7,11 @@ using static Game_Server.EA.EA_2_Algo;
 namespace Game_Server.EA.Models.Advanced {
     class Individual_Advanced : Individual<Genotype_Advanced> {
 
+        public int atkScore;
+        public int deffScore;
+        public int suppScore;
+        public double townLifeDeviation;
+
         public Individual_Advanced(int number) : base( number) {
             CreateGene();
         }
@@ -27,7 +32,8 @@ namespace Game_Server.EA.Models.Advanced {
         /// Calculates the Fitness of the individual
         /// </summary>
         public override void CalcFitness() {
-            fitness = score - (timestamp.Last() / 1000);
+            suppScore = (int)(100 / (townLifeDeviation + 0.1));
+            fitness = atkScore + deffScore + suppScore;
         }
 
         public Individual_Advanced PrepareMutate(Random r, GaussDelegate gauss) {

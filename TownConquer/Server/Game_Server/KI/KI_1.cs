@@ -80,7 +80,7 @@ namespace Game_Server.KI {
                 t.CalculateLife(game.gm.sw.ElapsedMilliseconds, "life of outgoing");
                 if (t.life <= 0) {
                     //Console.WriteLine($"{player.username} - {game.id} - {town.position} -> {t.position} - CONQ");
-                    ConquerTown(player, t.position);
+                    ConquerTown(t.position);
                     indi.score += 20;
                     GetPossibleInteractionTarget(t, indi.gene.properties["ConquerRadius"]);
                 }
@@ -152,14 +152,6 @@ namespace Game_Server.KI {
             indi.townNumberDevelopment.Add(townNum);
         }
 
-        private void CalcTownLifeSum() {
-            double life = 0;
-            foreach (Town town in player.towns) {
-                life += town.life;
-            }
-            indi.townLifeSum = life;
-        }
-
         public override void Disconnect() {
             if (game.kis[0] != this) {
                 indi.won = player.towns.Count > game.kis[0].player.towns.Count;
@@ -167,7 +159,6 @@ namespace Game_Server.KI {
             else {
                 indi.won = player.towns.Count > game.kis[1].player.towns.Count;
             }
-            CalcTownLifeSum();
             ProtocollStats(game.gm.sw.ElapsedMilliseconds, player.towns.Count);
         }
     }

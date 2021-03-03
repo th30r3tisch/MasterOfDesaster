@@ -29,8 +29,8 @@ namespace Game_Server {
                 csv.WriteField("Coord");
                 csv.WriteField("Winner");
                 csv.WriteField("Fitness");
-                csv.WriteField("Score");
                 csv.WriteField("GameTime");
+                csv.WriteField("Score");
                 csv.WriteField(""); //seperator at the end of the line
             }
         }

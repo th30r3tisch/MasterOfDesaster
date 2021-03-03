@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 namespace Game_Server.KI {
     class KI_2 : KI_Base<Individual_Advanced> {
 
+        int townCountOld;
+
         public KI_2(Game game, int id, string name, Color color) : base(game, id, name, color) { }
 
         /// <summary>
@@ -19,7 +21,7 @@ namespace Game_Server.KI {
         /// <returns>task with individual</returns>
         protected override async Task<Individual_Advanced> PlayAsync(CancellationToken ct) {
             indi.startPos = player.towns[0].position;
-            int townCountOld = 0;
+            townCountOld = 0;
 
             CategorizeTowns();
             GetCategoryDependentTarget(player.towns[0]);
@@ -33,17 +35,9 @@ namespace Game_Server.KI {
                 }
 
                 lock (game.gm.treeLock) {
-                    int townCountNew = player.towns.Count;
-                    if (townCountOld <= townCountNew) {
-                        townCountOld = townCountNew;
-                    }
-                    else {
-                        indi.score -= 5 * (townCountOld - townCountNew);
-                        townCountOld = townCountNew;
-                        CategorizeTowns();
-                    }
                     for (int i = player.towns.Count; i > 0; i--) {
                         Town atkTown = player.towns[i - 1];
+                        CheckLostTowns();
                         DoAction(atkTown);
                     }
                 }
@@ -59,6 +53,18 @@ namespace Game_Server.KI {
             }
             Disconnect();
             return indi;
+        }
+
+        private void CheckLostTowns() {
+            int townCountNew = player.towns.Count;
+            if (townCountOld <= townCountNew) {
+                townCountOld = townCountNew;
+            }
+            else {
+                indi.deffScore -= 10 * (townCountOld - townCountNew);
+                townCountOld = townCountNew;
+                CategorizeTowns();
+            }
         }
 
         private void GetCategoryDependentTarget(Town t) {
@@ -159,8 +165,8 @@ namespace Game_Server.KI {
                 Town t = town.outgoingActionsToTowns[x - 1];
                 t.CalculateLife(game.gm.sw.ElapsedMilliseconds, "life of outgoing");
                 if (t.life <= 0) {
-                    ConquerTown(player, t.position);
-                    indi.score += 20;
+                    ConquerTown(t.position);
+                    indi.atkScore += 20;
                     CategorizeTowns();
                     GetCategoryDependentTarget(t);
                 }
@@ -168,7 +174,6 @@ namespace Game_Server.KI {
                     RetreatFromTown(town.position, t.position);
                 }
             }
-
         }
 
         private void TrySupportTown(Town sourceTown, Dictionary<string, int> props) {
@@ -199,6 +204,24 @@ namespace Game_Server.KI {
             }
         }
 
+        private void CalcTownLifeDeviation() {
+            List<Town> townlist = player.towns;
+            double life = 0;
+            double varianz = 0;
+            if (townlist.Count <= 1) {
+                indi.townLifeDeviation = 50;
+                return;
+            }
+            for (int x = townlist.Count; x > 0; x--) {
+                life += townlist[x - 1].life;
+            }
+            double meanLife = life / townlist.Count;
+            for (int x = townlist.Count; x > 0; x--) {
+                varianz += Math.Pow((townlist[x - 1].life - meanLife), 2);
+            }
+            indi.townLifeDeviation =  Math.Round(Math.Sqrt(varianz / townlist.Count), 2);
+        }
+
         public override void Disconnect() {
             if (game.kis[0] != this) {
                 indi.won = player.towns.Count > game.kis[0].player.towns.Count;
@@ -206,6 +229,7 @@ namespace Game_Server.KI {
             else {
                 indi.won = player.towns.Count > game.kis[1].player.towns.Count;
             }
+            CalcTownLifeDeviation();
             ProtocollStats(game.gm.sw.ElapsedMilliseconds);
         }
     }

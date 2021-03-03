@@ -25,8 +25,8 @@ namespace Game_Server.writer.EA_1 {
                     csv.WriteField(record.startPos);
                     csv.WriteField(record.won);
                     csv.WriteField(record.fitness);
-                    csv.WriteField(record.score);
                     csv.WriteField(record.timestamp.Last());
+                    csv.WriteField(record.score);
                     foreach (int Values in record.gene.properties.Values.ToList()) {
                         csv.WriteField(Values);
                     }
