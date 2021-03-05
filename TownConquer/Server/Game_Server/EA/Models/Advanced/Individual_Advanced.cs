@@ -11,6 +11,7 @@ namespace Game_Server.EA.Models.Advanced {
         public int deffScore;
         public int suppScore;
         public double townLifeDeviation;
+        public int dominance;
 
         public Individual_Advanced(int number) : base( number) {
             CreateGene();

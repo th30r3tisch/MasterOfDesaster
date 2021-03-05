@@ -40,6 +40,7 @@ namespace Game_Server.EA {
             List<Individual_Advanced> newPopulation = new List<Individual_Advanced>();
             GaussDelegate gauss = new GaussDelegate(Gauss);
             Individual_Advanced child;
+            CalculateDominance(population);
             newPopulation.Add(GetElite(population).CopyIndividual());
             newPopulation[0].number = 0;
 
@@ -68,6 +69,7 @@ namespace Game_Server.EA {
                 individual.suppScore = 0;
                 individual.townLifeDeviation = 0;
                 individual.name = null;
+                individual.dominance = 0;
             }
         }
 
@@ -81,6 +83,39 @@ namespace Game_Server.EA {
             Normal normalDist = new Normal(mean, deviation);
             double gaussNum = Math.Round(normalDist.Sample(), 1);
             return gaussNum;
+        }
+
+        private void CalculateDominance(List<Individual_Advanced> population) {
+            List<Individual_Advanced> iterationList = new List<Individual_Advanced>(population);
+            Individual_Advanced lastIndividual = null;
+            int level = 1;
+            while (iterationList.Count > 0) {
+                for (int i = iterationList.Count; i > 0; i--) {
+                    bool dominated = false;
+                    Individual_Advanced individualOne = iterationList[i - 1];
+                    for (int j = iterationList.Count; j > 0; j--) {
+                        Individual_Advanced individualTwo = iterationList[j - 1];
+                        if (individualOne.deffScore > individualTwo.deffScore && individualOne.atkScore > individualTwo.atkScore && individualOne.suppScore > individualTwo.suppScore) {
+                            dominated = true;
+                            individualOne.dominance += 1;
+                        }
+                    }
+                    if (dominated == false) {
+                        if (lastIndividual == null) {
+                            lastIndividual = individualOne;
+                        }
+                        else {
+                            if (individualOne.deffScore > lastIndividual.deffScore && individualOne.atkScore > lastIndividual.atkScore && individualOne.suppScore > lastIndividual.suppScore) {
+                                level += 1;
+                            }
+                            lastIndividual = individualOne;
+                        }
+                        individualOne.dominance = level;
+                        iterationList.Remove(individualOne);
+                    }
+                }
+            }
+            
         }
     }
 }
