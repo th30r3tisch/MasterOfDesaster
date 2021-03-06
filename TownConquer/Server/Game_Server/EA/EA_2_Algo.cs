@@ -89,28 +89,24 @@ namespace Game_Server.EA {
             List<Individual_Advanced> iterationList = new List<Individual_Advanced>(population);
             int level = 1;
             while (iterationList.Count > 0) {
-                for (int i = iterationList.Count; i > 0; i--) {
-                    Individual_Advanced individualOne = iterationList[i - 1];
-                    individualOne.dominated = false;
-                    for (int j = iterationList.Count; j > 0; j--) {
-                        Individual_Advanced individualTwo = iterationList[j - 1];
+                foreach (var individualOne in iterationList) {
+                    individualOne.dominates = false;
+                    foreach (var individualTwo in iterationList) {
                         if (individualOne.deffScore > individualTwo.deffScore && individualOne.atkScore > individualTwo.atkScore && individualOne.suppScore > individualTwo.suppScore) {
-                            individualOne.dominated = true;
+                            individualOne.dominates = true;
                             break;
                         }
                     }
                 }
                 for (int k = iterationList.Count; k > 0; k--) {
                     Individual_Advanced individual = iterationList[k - 1];
-                    if (!individual.dominated) {
+                    if (!individual.dominates) {
                         individual.dominance = level;
-                        Console.WriteLine(individual.dominance);
                         iterationList.Remove(individual);
                     }
                 }
                 level++;
-            }
-            
+            } 
         }
     }
 }

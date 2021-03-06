@@ -12,7 +12,7 @@ namespace Game_Server.EA.Models.Advanced {
         public int suppScore;
         public double townLifeDeviation;
         public int dominance;
-        public bool dominated;
+        public bool dominates;
 
         public Individual_Advanced(int number) : base( number) {
             CreateGene();
