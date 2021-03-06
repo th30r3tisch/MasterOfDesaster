@@ -87,33 +87,28 @@ namespace Game_Server.EA {
 
         private void CalculateDominance(List<Individual_Advanced> population) {
             List<Individual_Advanced> iterationList = new List<Individual_Advanced>(population);
-            Individual_Advanced lastIndividual = null;
             int level = 1;
             while (iterationList.Count > 0) {
                 for (int i = iterationList.Count; i > 0; i--) {
-                    bool dominated = false;
                     Individual_Advanced individualOne = iterationList[i - 1];
+                    individualOne.dominated = false;
                     for (int j = iterationList.Count; j > 0; j--) {
                         Individual_Advanced individualTwo = iterationList[j - 1];
                         if (individualOne.deffScore > individualTwo.deffScore && individualOne.atkScore > individualTwo.atkScore && individualOne.suppScore > individualTwo.suppScore) {
-                            dominated = true;
-                            individualOne.dominance += 1;
+                            individualOne.dominated = true;
+                            break;
                         }
-                    }
-                    if (dominated == false) {
-                        if (lastIndividual == null) {
-                            lastIndividual = individualOne;
-                        }
-                        else {
-                            if (individualOne.deffScore > lastIndividual.deffScore && individualOne.atkScore > lastIndividual.atkScore && individualOne.suppScore > lastIndividual.suppScore) {
-                                level += 1;
-                            }
-                            lastIndividual = individualOne;
-                        }
-                        individualOne.dominance = level;
-                        iterationList.Remove(individualOne);
                     }
                 }
+                for (int k = iterationList.Count; k > 0; k--) {
+                    Individual_Advanced individual = iterationList[k - 1];
+                    if (!individual.dominated) {
+                        individual.dominance = level;
+                        Console.WriteLine(individual.dominance);
+                        iterationList.Remove(individual);
+                    }
+                }
+                level++;
             }
             
         }
