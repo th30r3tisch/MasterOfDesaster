@@ -11,9 +11,11 @@ namespace Game_Server.EA.Models.Advanced {
         public int deffScore;
         public int suppScore;
         public double townLifeDeviation;
+
         public int dominanceLevel = 0;
         public List<Individual_Advanced> dominates = new List<Individual_Advanced>();
         public int dominatedByIndividuals;
+        public int crowdingDistance;
 
         public Individual_Advanced(int number) : base( number) {
             CreateGene();

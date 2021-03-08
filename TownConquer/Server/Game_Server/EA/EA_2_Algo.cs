@@ -4,6 +4,7 @@ using Game_Server.writer.EA_2;
 using MathNet.Numerics.Distributions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game_Server.EA {
     class EA_2_Algo : EA_Base<Individual_Advanced, KI_2> {
@@ -124,6 +125,52 @@ namespace Game_Server.EA {
                         }
                     }
                 }
+            }
+        }
+
+        private void CalculateCrowdedComparison(List<Individual_Advanced> population) {
+            List<Individual_Advanced> iterationList = new List<Individual_Advanced>(population);
+            int level = 1;
+            while (iterationList.Count > 0) {
+                List<Individual_Advanced> dominanceList = new List<Individual_Advanced>();
+                for (int i = iterationList.Count; i > 0; i--) {
+                    if (iterationList[i].dominanceLevel == level) {
+                        dominanceList.Add(iterationList[i]);
+                        iterationList.Remove(iterationList[i]);
+                    }
+                }
+                CalculateCrowdedComparisonDeff(dominanceList.OrderBy(o => o.deffScore).ToList());
+                CalculateCrowdedComparisonAtk(dominanceList.OrderBy(o => o.atkScore).ToList());
+                CalculateCrowdedComparisonOfSupp(dominanceList.OrderBy(o => o.suppScore).ToList());
+                level++;
+            }
+        }
+
+        private void CalculateCrowdedComparisonDeff(List<Individual_Advanced> sortedList) {
+            int minValue = sortedList[0].deffScore;
+            int maxValue = sortedList[sortedList.Count].deffScore;
+            sortedList[0].crowdingDistance = int.MaxValue;
+            sortedList[sortedList.Count].crowdingDistance = int.MaxValue;
+            for (int i = 1; i < sortedList.Count - 1; i++) {
+                sortedList[i].crowdingDistance += (sortedList[i + 1].deffScore - sortedList[i - 1].deffScore) / (maxValue - minValue);
+            }
+        }
+        private void CalculateCrowdedComparisonAtk(List<Individual_Advanced> sortedList) {
+            int minValue = sortedList[0].atkScore;
+            int maxValue = sortedList[sortedList.Count].atkScore;
+            sortedList[0].crowdingDistance = int.MaxValue;
+            sortedList[sortedList.Count].crowdingDistance = int.MaxValue;
+            for (int i = 1; i < sortedList.Count - 1; i++) {
+                sortedList[i].crowdingDistance += (sortedList[i + 1].atkScore - sortedList[i - 1].atkScore) / (maxValue - minValue);
+            }
+        }
+        private void CalculateCrowdedComparisonOfSupp(List<Individual_Advanced> sortedList) {
+            int minValue = sortedList[0].suppScore;
+            int maxValue = sortedList[sortedList.Count].suppScore;
+            sortedList[0].crowdingDistance = int.MaxValue;
+            sortedList[sortedList.Count].crowdingDistance = int.MaxValue;
+            for (int i = 1; i < sortedList.Count - 1; i++) {
+                sortedList[i].crowdingDistance += (sortedList[i + 1].suppScore - sortedList[i - 1].suppScore) / (maxValue - minValue);
             }
         }
     }
