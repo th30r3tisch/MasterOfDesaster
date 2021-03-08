@@ -33,7 +33,6 @@ namespace Game_Server.EA {
             if (counter < _noImprovementLimit) {
                 Console.WriteLine($"_________Evo {counter}________");
                 population = Evaluate(TrainKis(population).Result);
-                _writer.WriteStats(population);
                 counter++;
                 Evolve(CreateOffspring(population), counter);
             }

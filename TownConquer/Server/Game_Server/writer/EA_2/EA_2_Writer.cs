@@ -21,6 +21,7 @@ namespace Game_Server.writer.EA_2 {
                 csv.WriteField("deffScore");
                 csv.WriteField("suppScore");
                 csv.WriteField("townLifeDeviation");
+                csv.WriteField("dominanceLevel");
                 foreach (string property in propertynames) {
                     csv.WriteField("deff-" + property);
                 }
@@ -49,6 +50,7 @@ namespace Game_Server.writer.EA_2 {
                     csv.WriteField(record.deffScore);
                     csv.WriteField(record.suppScore);
                     csv.WriteField(record.townLifeDeviation);
+                    csv.WriteField(record.dominanceLevel);
                     foreach (int value in record.gene.defensiveProperties.Values.ToList()) {
                         csv.WriteField(value);
                     }
