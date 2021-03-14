@@ -13,7 +13,7 @@ namespace Game_Server.KI {
         int townCountOld;
 
         public KI_2(Game game, int id, string name, Color color) : base(game, id, name, color) { }
-
+        
         /// <summary>
         /// includes the play routine of the ki
         /// </summary>
@@ -22,7 +22,6 @@ namespace Game_Server.KI {
         protected override async Task<Individual_Advanced> PlayAsync(CancellationToken ct) {
             indi.startPos = player.towns[0].position;
             townCountOld = 0;
-
             CategorizeTowns();
             GetCategoryDependentTarget(player.towns[0]);
 
@@ -61,7 +60,7 @@ namespace Game_Server.KI {
                 townCountOld = townCountNew;
             }
             else {
-                indi.deffScore -= 10 * (townCountOld - townCountNew);
+                indi.deffScore += 10 * (townCountOld - townCountNew);
                 townCountOld = townCountNew;
                 CategorizeTowns();
             }
@@ -185,6 +184,7 @@ namespace Game_Server.KI {
                 if (town.owner.username.Equals(sourceTown.owner.username) &&
                     town.NeedSupport(props["SupportMinCap"])) {
                     InteractWithTown(sourceTown.position, town.position);
+                    indi.supportActions++;
                 }
                 else {
                     TryAttackTown(sourceTown, props);
@@ -200,6 +200,7 @@ namespace Game_Server.KI {
                 }
                 if (!town.owner.username.Equals(sourceTown.owner.username)) {
                     InteractWithTown(sourceTown.position, town.position);
+                    indi.attackActions++;
                 }
             }
         }

@@ -13,6 +13,8 @@ namespace Game_Server.EA.Models {
         public Vector3 startPos;
         public bool isElite { get; set; }
         public List<long> timestamp;
+        public int supportActions;
+        public int attackActions;
 
         public Individual(int number) {
             this.number = number;

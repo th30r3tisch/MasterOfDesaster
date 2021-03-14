@@ -7,15 +7,15 @@ using static Game_Server.EA.EA_2_Algo;
 namespace Game_Server.EA.Models.Advanced {
     class Individual_Advanced : Individual<Genotype_Advanced> {
 
-        public int atkScore;
-        public int deffScore;
-        public int suppScore;
+        public double atkScore;
+        public double deffScore;
+        public double suppScore;
         public double townLifeDeviation;
 
         public int dominanceLevel = 0;
         public List<Individual_Advanced> dominates = new List<Individual_Advanced>();
         public int dominatedByIndividuals;
-        public int crowdingDistance;
+        public double crowdingDistance;
 
         public Individual_Advanced(int number) : base( number) {
             CreateGene();
@@ -37,7 +37,17 @@ namespace Game_Server.EA.Models.Advanced {
         /// Calculates the Fitness of the individual
         /// </summary>
         public override void CalcFitness() {
-            suppScore = (int)(100 / (townLifeDeviation + 0.1));
+
+            if (won) {
+                suppScore = 100 / (townLifeDeviation + 0.1);
+                atkScore /= attackActions;
+                deffScore = 100 - deffScore;
+            }
+            else {
+                suppScore = 1 / (townLifeDeviation + 0.1);
+                atkScore = 1;
+                deffScore = -deffScore;
+            }
             fitness = atkScore + deffScore + suppScore;
         }
 

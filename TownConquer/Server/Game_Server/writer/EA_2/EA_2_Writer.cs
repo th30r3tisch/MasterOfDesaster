@@ -21,6 +21,8 @@ namespace Game_Server.writer.EA_2 {
                 csv.WriteField("deffScore");
                 csv.WriteField("suppScore");
                 csv.WriteField("townLifeDeviation");
+                csv.WriteField("supportActions");
+                csv.WriteField("attackActions");
                 csv.WriteField("dominanceLevel");
                 foreach (string property in propertynames) {
                     csv.WriteField("deff-" + property);
@@ -36,12 +38,13 @@ namespace Game_Server.writer.EA_2 {
         }
 
         public override void WriteStats(List<Individual_Advanced> records) {
+            int counter = 0;
             using (var stream = File.Open(_path, FileMode.Append))
             using (var writer = new StreamWriter(stream))
             using (var csv = new CsvWriter(writer, _config)) {
                 foreach (var record in records) {
                     csv.NextRecord();
-                    csv.WriteField(record.name);
+                    csv.WriteField("KI_" + counter);
                     csv.WriteField(record.startPos);
                     csv.WriteField(record.won);
                     csv.WriteField(record.fitness);
@@ -50,6 +53,8 @@ namespace Game_Server.writer.EA_2 {
                     csv.WriteField(record.deffScore);
                     csv.WriteField(record.suppScore);
                     csv.WriteField(record.townLifeDeviation);
+                    csv.WriteField(record.supportActions);
+                    csv.WriteField(record.attackActions);
                     csv.WriteField(record.dominanceLevel);
                     foreach (int value in record.gene.defensiveProperties.Values.ToList()) {
                         csv.WriteField(value);
@@ -63,6 +68,7 @@ namespace Game_Server.writer.EA_2 {
                     foreach (int value in record.gene.generalProperties.Values.ToList()) {
                         csv.WriteField(value);
                     }
+                    counter++;
                 }
                 writer.Flush();
             }
