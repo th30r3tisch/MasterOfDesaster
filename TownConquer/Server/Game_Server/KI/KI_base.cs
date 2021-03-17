@@ -63,8 +63,6 @@ namespace Game_Server.KI {
         /// <returns>task with individual</returns>
         protected abstract Task<T> PlayAsync(CancellationToken ct);
 
-        protected abstract void CheckKITownLifes(Town town, Dictionary<string, int> props);
-
         public abstract override void Disconnect();
     }
 }

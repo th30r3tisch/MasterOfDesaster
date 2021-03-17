@@ -67,7 +67,7 @@ namespace Game_Server.KI {
             return indi;
         }
 
-        protected override void CheckKITownLifes(Town town, Dictionary<string, int> props) {
+        protected void CheckKITownLifes(Town town, Dictionary<string, int> props) {
             town.CalculateLife(game.gm.sw.ElapsedMilliseconds, "own life");
             if (town.life <= 0) {
                 for (int i = town.outgoingActionsToTowns.Count; i > 0; i--) {

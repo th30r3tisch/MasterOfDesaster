@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Game_Server.writer.EA_2 {
-    class EA_2_Writer: StatsWriter<Individual_Advanced> {
+namespace Game_Server.writer {
+    class EA_3_Writer: StatsWriter<Individual_Time_Advanced> {
 
-        public EA_2_Writer(string filename) : base(filename) {
+        public EA_3_Writer(string filename) : base(filename) {
             PrepareFile();
             AddEASpecificColumns(Enum.GetNames(typeof(PropertyNames_Advanced)));
             AddGeneColumns(Enum.GetNames(typeof(PropertyNames_General)));
@@ -25,19 +25,28 @@ namespace Game_Server.writer.EA_2 {
                 csv.WriteField("attackActions");
                 csv.WriteField("dominanceLevel");
                 foreach (string property in propertynames) {
-                    csv.WriteField("deff-" + property);
+                    csv.WriteField("deff1-" + property);
                 }
                 foreach (string property in propertynames) {
-                    csv.WriteField("off-" + property);
+                    csv.WriteField("off1-" + property);
                 }
                 foreach (string property in propertynames) {
-                    csv.WriteField("supp-" + property);
+                    csv.WriteField("supp1-" + property);
+                }
+                foreach (string property in propertynames) {
+                    csv.WriteField("deff2-" + property);
+                }
+                foreach (string property in propertynames) {
+                    csv.WriteField("off2-" + property);
+                }
+                foreach (string property in propertynames) {
+                    csv.WriteField("supp2-" + property);
                 }
                 csv.WriteField(""); //seperator at the end of the line
             }
         }
 
-        public override void WriteStats(List<Individual_Advanced> records) {
+        public override void WriteStats(List<Individual_Time_Advanced> records) {
             int counter = 0;
             using (var stream = File.Open(_path, FileMode.Append))
             using (var writer = new StreamWriter(stream))
@@ -63,6 +72,15 @@ namespace Game_Server.writer.EA_2 {
                         csv.WriteField(value);
                     }
                     foreach (int value in record.gene.supportProperties.Values.ToList()) {
+                        csv.WriteField(value);
+                    }
+                    foreach (int value in record.geneEndTime.defensiveProperties.Values.ToList()) {
+                        csv.WriteField(value);
+                    }
+                    foreach (int value in record.geneEndTime.attackProperties.Values.ToList()) {
+                        csv.WriteField(value);
+                    }
+                    foreach (int value in record.geneEndTime.supportProperties.Values.ToList()) {
                         csv.WriteField(value);
                     }
                     foreach (int value in record.gene.generalProperties.Values.ToList()) {

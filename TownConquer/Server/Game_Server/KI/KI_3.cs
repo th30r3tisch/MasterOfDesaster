@@ -8,24 +8,27 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Game_Server.KI {
-    class KI_2 : KI_Base<Individual_Advanced> {
+    class KI_3 : KI_Base<Individual_Time_Advanced> {
 
-        int townCountOld;
+        private int _townCountOld;
+        private double _townNumberToWin;
 
-        public KI_2(Game game, int id, string name, Color color) : base(game, id, name, color) { }
+        public KI_3(Game game, int id, string name, Color color) : base(game, id, name, color) {
+            _townNumberToWin = Constants.TOWN_NUMBER * 0.9;
+        }
         
         /// <summary>
         /// includes the play routine of the ki
         /// </summary>
         /// <param name="ct">CancellationToken</param>
         /// <returns>task with individual</returns>
-        protected override async Task<Individual_Advanced> PlayAsync(CancellationToken ct) {
+        protected override async Task<Individual_Time_Advanced> PlayAsync(CancellationToken ct) {
             indi.startPos = player.towns[0].position;
-            townCountOld = 0;
+            _townCountOld = 0;
             CategorizeTowns();
             GetCategoryDependentTarget(player.towns[0]);
 
-            while (Constants.TOWN_NUMBER * 0.9 > player.towns.Count && player.towns.Count != 0) { //  
+            while (_townNumberToWin > player.towns.Count && player.towns.Count != 0) { //  
                 try {
                     await Task.Delay(Constants.KI_TICK_RATE);
                 }
@@ -56,12 +59,12 @@ namespace Game_Server.KI {
 
         private void CheckLostTowns() {
             int townCountNew = player.towns.Count;
-            if (townCountOld <= townCountNew) {
-                townCountOld = townCountNew;
+            if (_townCountOld <= townCountNew) {
+                _townCountOld = townCountNew;
             }
             else {
-                indi.deffScore += 10 * (townCountOld - townCountNew);
-                townCountOld = townCountNew;
+                indi.deffScore += 10 * (_townCountOld - townCountNew);
+                _townCountOld = townCountNew;
                 CategorizeTowns();
             }
         }
@@ -69,13 +72,13 @@ namespace Game_Server.KI {
         private void GetCategoryDependentTarget(Town t) {
             switch (t.townCategory) {
                 case TownCategory.sup:
-                    GetPossibleInteractionTarget(t, indi.gene.supportProperties["ConquerRadius"]);
+                    GetPossibleInteractionTarget(t, LinearInterpolation(indi.gene.supportProperties["ConquerRadius"], indi.geneEndTime.supportProperties["ConquerRadius"]));
                     break;
                 case TownCategory.deff:
-                    GetPossibleInteractionTarget(t, indi.gene.defensiveProperties["ConquerRadius"]);
+                    GetPossibleInteractionTarget(t, LinearInterpolation(indi.gene.defensiveProperties["ConquerRadius"], indi.geneEndTime.defensiveProperties["ConquerRadius"]));
                     break;
                 case TownCategory.off:
-                    GetPossibleInteractionTarget(t, indi.gene.attackProperties["ConquerRadius"]);
+                    GetPossibleInteractionTarget(t, LinearInterpolation(indi.gene.attackProperties["ConquerRadius"], indi.geneEndTime.attackProperties["ConquerRadius"]));
                     break;
                 default:
                     break;
@@ -86,15 +89,15 @@ namespace Game_Server.KI {
         private void DoAction(Town t) {
             switch (t.townCategory) {
                 case TownCategory.sup:
-                    CheckKITownLifes(t, indi.gene.supportProperties);
-                    TrySupportTown(t, indi.gene.supportProperties);
+                    CheckKITownLifes(t, indi.gene.supportProperties, indi.geneEndTime.supportProperties);
+                    TrySupportTown(t, indi.gene.supportProperties, indi.geneEndTime.supportProperties);
                     break;
                 case TownCategory.deff:
-                    CheckKITownLifes(t, indi.gene.defensiveProperties);
+                    CheckKITownLifes(t, indi.gene.defensiveProperties, indi.geneEndTime.defensiveProperties);
                     break;
                 case TownCategory.off:
-                    CheckKITownLifes(t, indi.gene.attackProperties);
-                    TryAttackTown(t, indi.gene.attackProperties);
+                    CheckKITownLifes(t, indi.gene.attackProperties, indi.geneEndTime.supportProperties);
+                    TryAttackTown(t, indi.gene.attackProperties, indi.geneEndTime.supportProperties);
                     break;
                 default:
                     break;
@@ -115,7 +118,7 @@ namespace Game_Server.KI {
         }
 
         private void CategorizeTown(Town town) {
-            int categorizationRadius = indi.gene.generalProperties["CategorisationRadius"];
+            int categorizationRadius = LinearInterpolation(indi.gene.generalProperties["CategorisationRadius"], indi.geneEndTime.generalProperties["CategorisationRadius"]);
             int friendlyTownNumber = 0;
             int hostileTownNumber = 0;
 
@@ -136,9 +139,9 @@ namespace Game_Server.KI {
             }
             float allTowns = friendlyTownNumber + hostileTownNumber;
             float friendlyPercent = friendlyTownNumber / allTowns;
-            float supRatio = indi.gene.generalProperties["SupportTownRatio"] / 100f;
-            float atkRatio = indi.gene.generalProperties["AtkTownRatio"] / 100f;
-            float defRatio = indi.gene.generalProperties["DeffTownRatio"] / 100f;
+            float supRatio = LinearInterpolation(indi.gene.generalProperties["SupportTownRatio"], indi.geneEndTime.generalProperties["SupportTownRatio"]) / 100f;
+            float atkRatio = LinearInterpolation(indi.gene.generalProperties["AtkTownRatio"], indi.geneEndTime.generalProperties["AtkTownRatio"]) / 100f;
+            float defRatio = LinearInterpolation(indi.gene.generalProperties["DeffTownRatio"], indi.geneEndTime.generalProperties["DeffTownRatio"]) / 100f;
             if (friendlyPercent >= supRatio && allTowns > 1) {
                 town.townCategory = TownCategory.sup;
             }
@@ -152,7 +155,7 @@ namespace Game_Server.KI {
             }
         }
 
-        protected void CheckKITownLifes(Town town, Dictionary<string, int> props) {
+        protected void CheckKITownLifes(Town town, Dictionary<string, int> props1, Dictionary<string, int> props2) {
             town.CalculateLife(game.gm.sw.ElapsedMilliseconds, "own life");
             if (town.life <= 0) {
                 for (int i = town.outgoingActionsToTowns.Count; i > 0; i--) {
@@ -169,33 +172,33 @@ namespace Game_Server.KI {
                     CategorizeTowns();
                     GetCategoryDependentTarget(t);
                 }
-                else if (t.life > props["SupportMaxCap"] && t.incomingSupporterTowns.Contains(town)) {
+                else if (t.life > LinearInterpolation(props1["SupportMaxCap"], props2["SupportMaxCap"]) && t.incomingSupporterTowns.Contains(town)) {
                     RetreatFromTown(town.position, t.position);
                 }
             }
         }
 
-        private void TrySupportTown(Town sourceTown, Dictionary<string, int> props) {
+        private void TrySupportTown(Town sourceTown, Dictionary<string, int> props1, Dictionary<string, int> props2) {
             if (sourceTown.townsInRange.Count <= 0) return;
             foreach (Town town in sourceTown.townsInRange) {
-                if (!sourceTown.CanSupport(props["SupportMaxCap"])) {
+                if (!sourceTown.CanSupport(LinearInterpolation(props1["SupportMaxCap"], props2["SupportMaxCap"]))) {
                     return;
                 }
                 if (town.owner.username.Equals(sourceTown.owner.username) &&
-                    town.NeedSupport(props["SupportMinCap"])) {
+                    town.NeedSupport(LinearInterpolation(props1["SupportMinCap"], props2["SupportMinCap"]))) {
                     InteractWithTown(sourceTown.position, town.position);
                     indi.supportActions++;
                 }
                 else {
-                    TryAttackTown(sourceTown, props);
+                    TryAttackTown(sourceTown, props1, props2);
                 }
             }
         }
 
-        private void TryAttackTown(Town sourceTown, Dictionary<string, int> props) {
+        private void TryAttackTown(Town sourceTown, Dictionary<string, int> props1, Dictionary<string, int> props2) {
             if (sourceTown.townsInRange.Count <= 0) return;
             foreach (Town town in sourceTown.townsInRange) {
-                if (!sourceTown.CanAttack(props["AttackMinLife"])) {
+                if (!sourceTown.CanAttack(LinearInterpolation(props1["AttackMinLife"], props2["AttackMinLife"]))) {
                     return;
                 }
                 if (!town.owner.username.Equals(sourceTown.owner.username)) {
@@ -232,6 +235,10 @@ namespace Game_Server.KI {
             }
             CalcTownLifeDeviation();
             ProtocollStats(game.gm.sw.ElapsedMilliseconds);
+        }
+
+        private int LinearInterpolation(int startValue, int endValue) {
+            return startValue + (endValue - startValue) / (Constants.TOWN_NUMBER / player.towns.Count);
         }
     }
 }

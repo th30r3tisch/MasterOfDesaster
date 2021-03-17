@@ -2,35 +2,41 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Game_Server.EA.EA_2_Algo;
+using static Game_Server.EA.EA_3_Algo;
 
 namespace Game_Server.EA.Models.Advanced {
-    class Individual_Advanced : Individual<Genotype_Advanced> {
+    class Individual_Time_Advanced : Individual<Genotype_Advanced> {
 
         public double atkScore;
         public double deffScore;
         public double suppScore;
         public double townLifeDeviation;
+        public Genotype_Advanced geneEndTime;
 
         public int dominanceLevel = 0;
-        public List<Individual_Advanced> dominates = new List<Individual_Advanced>();
+        public List<Individual_Time_Advanced> dominates = new List<Individual_Time_Advanced>();
         public int dominatedByIndividuals;
         public double crowdingDistance;
 
-        public Individual_Advanced(int number) : base( number) {
+        public Individual_Time_Advanced(int number) : base( number) {
             CreateGene();
         }
 
-        public Individual_Advanced(Random r, int number) : base(number) {
+        public Individual_Time_Advanced(Random r, int number) : base(number) {
             CreateGene(r);
         }
 
-        public Individual_Advanced(List<int> supGene, List<int> offGene, List<int> deffGene, List<int> generalGene, int number) : base(number) {
+        public Individual_Time_Advanced(List<int> supGene, List<int> offGene, List<int> deffGene, List<int> generalGene, List<int> supGene2, List<int> offGene2, List<int> deffGene2, List<int> generalGene2, int number) : base(number) {
             Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(deffGene);
             Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(offGene);
             Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(supGene);
             Dictionary<string, int> genProps = Genotype_Advanced.CreateProperties<PropertyNames_General>(generalGene);
+            Dictionary<string, int> deffProps2 = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(deffGene2);
+            Dictionary<string, int> offProps2 = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(offGene2);
+            Dictionary<string, int> supProps2 = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(supGene2);
+            Dictionary<string, int> genProps2 = Genotype_Advanced.CreateProperties<PropertyNames_General>(generalGene2);
             gene = new Genotype_Advanced(supProps, offProps, deffProps, genProps);
+            geneEndTime = new Genotype_Advanced(supProps2, offProps2, deffProps2, genProps2);
         }
 
         /// <summary>
@@ -51,11 +57,15 @@ namespace Game_Server.EA.Models.Advanced {
             fitness = atkScore + deffScore + suppScore;
         }
 
-        public Individual_Advanced PrepareMutate(Random r, GaussDelegate gauss) {
+        public Individual_Time_Advanced PrepareMutate(Random r, GaussDelegate gauss) {
             Mutate(r, gauss, gene.attackProperties);
             Mutate(r, gauss, gene.defensiveProperties);
             Mutate(r, gauss, gene.supportProperties);
             Mutate(r, gauss, gene.generalProperties);
+            Mutate(r, gauss, geneEndTime.attackProperties);
+            Mutate(r, gauss, geneEndTime.defensiveProperties);
+            Mutate(r, gauss, geneEndTime.supportProperties);
+            Mutate(r, gauss, geneEndTime.generalProperties);
             return this;
         }
 
@@ -70,12 +80,16 @@ namespace Game_Server.EA.Models.Advanced {
             }
         }
 
-        public Individual_Advanced PrepareRecombination(Individual_Advanced partner, Random r) {
-            Individual_Advanced child = CopyIndividual();
+        public Individual_Time_Advanced PrepareRecombination(Individual_Time_Advanced partner, Random r) {
+            Individual_Time_Advanced child = CopyIndividual();
             Recombinate(child.gene.attackProperties, partner.gene.attackProperties, r);
             Recombinate(child.gene.defensiveProperties, partner.gene.defensiveProperties, r);
             Recombinate(child.gene.supportProperties, partner.gene.supportProperties, r);
             Recombinate(child.gene.generalProperties, partner.gene.generalProperties, r);
+            Recombinate(child.geneEndTime.attackProperties, partner.gene.attackProperties, r);
+            Recombinate(child.geneEndTime.defensiveProperties, partner.gene.defensiveProperties, r);
+            Recombinate(child.geneEndTime.supportProperties, partner.gene.supportProperties, r);
+            Recombinate(child.geneEndTime.generalProperties, partner.gene.generalProperties, r);
             return child;
         }
 
@@ -123,15 +137,12 @@ namespace Game_Server.EA.Models.Advanced {
         /// Creates static genes
         /// </summary>
         protected override void CreateGene() {
-            //Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2000, 10, 1000, 100, 20 });
-            //Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2000, 10, 1000, 100, 20 });
-            //Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2000, 10, 1000, 100, 20 });
-            //Dictionary<string, int> genProps = Genotype_Advanced.CreateProperties<PropertyNames_General>(new List<int> { 85, 10, 50, 1500 });
-            Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2762, 71, 327, 92, 36 });
-            Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 3214, 15, 2252, 67, 64 });
-            Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2699, 5, 2486, 5, 5 });
-            Dictionary<string, int> genProps = Genotype_Advanced.CreateProperties<PropertyNames_General>(new List<int> { 38, 1, 49, 2694 });
+            Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2000, 10, 1000, 100, 20 });
+            Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2000, 10, 1000, 100, 20 });
+            Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2000, 10, 1000, 100, 20 });
+            Dictionary<string, int> genProps = Genotype_Advanced.CreateProperties<PropertyNames_General>(new List<int> { 85, 10, 50, 1500 });
             gene = new Genotype_Advanced(supProps, offProps, deffProps, genProps);
+            geneEndTime = new Genotype_Advanced(supProps, offProps, deffProps, genProps);
         }
 
         /// <summary>
@@ -143,6 +154,11 @@ namespace Game_Server.EA.Models.Advanced {
                 CreateProps<PropertyNames_Advanced>(r), 
                 CreateProps<PropertyNames_Advanced>(r), 
                 CreateProps<PropertyNames_Advanced>(r), 
+                CreateGeneralProps<PropertyNames_General>(r));
+            geneEndTime = new Genotype_Advanced(
+                CreateProps<PropertyNames_Advanced>(r),
+                CreateProps<PropertyNames_Advanced>(r),
+                CreateProps<PropertyNames_Advanced>(r),
                 CreateGeneralProps<PropertyNames_General>(r));
         }
 
@@ -173,12 +189,16 @@ namespace Game_Server.EA.Models.Advanced {
         /// Creates a deep copy of the individual
         /// </summary>
         /// <returns>The copy of the individual</returns>
-        public Individual_Advanced CopyIndividual() {
+        public Individual_Time_Advanced CopyIndividual() {
             List<int> supGene = new List<int>(gene.supportProperties.Values);
             List<int> offGene = new List<int>(gene.attackProperties.Values);
             List<int> deffGene = new List<int>(gene.defensiveProperties.Values);
             List<int> generalGene = new List<int>(gene.generalProperties.Values);
-            Individual_Advanced newIndividual = new Individual_Advanced(supGene, offGene, deffGene, generalGene, 0);
+            List<int> supGene2 = new List<int>(geneEndTime.supportProperties.Values);
+            List<int> offGene2 = new List<int>(geneEndTime.attackProperties.Values);
+            List<int> deffGene2 = new List<int>(geneEndTime.defensiveProperties.Values);
+            List<int> generalGene2 = new List<int>(geneEndTime.generalProperties.Values);
+            Individual_Time_Advanced newIndividual = new Individual_Time_Advanced(supGene, offGene, deffGene, generalGene, supGene2, offGene2, deffGene2, generalGene2, 0);
             return newIndividual;
         }
     }

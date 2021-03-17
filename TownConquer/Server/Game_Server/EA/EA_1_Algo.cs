@@ -1,6 +1,6 @@
 ﻿using Game_Server.EA.Models.Simple;
 using Game_Server.KI;
-using Game_Server.writer.EA_1;
+using Game_Server.writer;
 using MathNet.Numerics.Distributions;
 using System;
 using System.Collections.Generic;

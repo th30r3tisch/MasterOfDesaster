@@ -8,17 +8,17 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Game_Server.EA {
-    class EA_2_Algo : EA_Base<Individual_Advanced, KI_2> {
+    class EA_3_Algo : EA_Base<Individual_Time_Advanced, KI_3> {
         public delegate double GaussDelegate(double deviation);
-        private List<Individual_Advanced> _archive;
+        private List<Individual_Time_Advanced> _archive;
 
-        public EA_2_Algo() : base() {
-            _writer = new EA_2_Writer("EA2");
-            _archive = new List<Individual_Advanced>();
+        public EA_3_Algo() : base() {
+            _writer = new EA_3_Writer("EA3");
+            _archive = new List<Individual_Time_Advanced>();
             Evolve(CreatePopulation(), 0);
         }
 
-        protected override List<Individual_Advanced> CreateOffspring(List<Individual_Advanced> population) {
+        protected override List<Individual_Time_Advanced> CreateOffspring(List<Individual_Time_Advanced> population) {
             return CreateDominationBasedOffspring(population);
             //return CreateFitnessBasedOffspring(population);
         }
@@ -28,9 +28,9 @@ namespace Game_Server.EA {
         /// resets all important values preparing the start of the new generation
         /// </summary>
         /// <param name="newPopulation">new generation</param>
-        private void ResetNewPopulation(List<Individual_Advanced> newPopulation) {
+        private void ResetNewPopulation(List<Individual_Time_Advanced> newPopulation) {
             for (int i = 0; i < newPopulation.Count; i++) {
-                Individual_Advanced individual = newPopulation[i];
+                Individual_Time_Advanced individual = newPopulation[i];
                 individual.number = i;
                 individual.timestamp.Clear();
                 individual.atkScore = 0;
@@ -57,12 +57,12 @@ namespace Game_Server.EA {
 
         #region Fitness based methods
 
-        private List<Individual_Advanced> CreateFitnessBasedOffspring(List<Individual_Advanced> population) {
+        private List<Individual_Time_Advanced> CreateFitnessBasedOffspring(List<Individual_Time_Advanced> population) {
             _writer.WriteStats(population);
 
-            List<Individual_Advanced> newPopulation = new List<Individual_Advanced>();
+            List<Individual_Time_Advanced> newPopulation = new List<Individual_Time_Advanced>();
             GaussDelegate gauss = new GaussDelegate(Gauss);
-            Individual_Advanced child;
+            Individual_Time_Advanced child;
             newPopulation.Add(GetElite(population).CopyIndividual());
             newPopulation[0].number = 0;
 
@@ -77,13 +77,13 @@ namespace Game_Server.EA {
             return newPopulation;
         }
 
-        private Individual_Advanced TournamentSelection(List<Individual_Advanced> population) {
+        private Individual_Time_Advanced TournamentSelection(List<Individual_Time_Advanced> population) {
 
-            List<Individual_Advanced> parents = new List<Individual_Advanced>();
+            List<Individual_Time_Advanced> parents = new List<Individual_Time_Advanced>();
             int populationSize = population.Count;
             while (parents.Count < 2) {
-                Individual_Advanced contestantOne = population[_r.Next(0, populationSize)];
-                Individual_Advanced contestantTwo = population[_r.Next(0, populationSize)];
+                Individual_Time_Advanced contestantOne = population[_r.Next(0, populationSize)];
+                Individual_Time_Advanced contestantTwo = population[_r.Next(0, populationSize)];
                 if (contestantOne.fitness > contestantTwo.fitness) {
                     parents.Add(contestantOne);
                 }
@@ -102,7 +102,7 @@ namespace Game_Server.EA {
         #endregion
         #region Domination based methods
 
-        private List<Individual_Advanced> CreateDominationBasedOffspring(List<Individual_Advanced> population) {
+        private List<Individual_Time_Advanced> CreateDominationBasedOffspring(List<Individual_Time_Advanced> population) {
             _archive.AddRange(population);
             CalculateDominance(_archive);
             CalculateCrowdedComparison(_archive);
@@ -111,7 +111,7 @@ namespace Game_Server.EA {
             population.Clear();
 
             GaussDelegate gauss = new GaussDelegate(Gauss);
-            Individual_Advanced child;
+            Individual_Time_Advanced child;
 
             for (int i = 0; i < _populationNumber; i++) {
                 child = DominationTournamentSelection(_archive);
@@ -123,13 +123,13 @@ namespace Game_Server.EA {
             return population;
         }
 
-        private Individual_Advanced DominationTournamentSelection(List<Individual_Advanced> population) {
+        private Individual_Time_Advanced DominationTournamentSelection(List<Individual_Time_Advanced> population) {
 
-            List<Individual_Advanced> parents = new List<Individual_Advanced>();
+            List<Individual_Time_Advanced> parents = new List<Individual_Time_Advanced>();
             int populationSize = population.Count;
             while (parents.Count < 2) {
-                Individual_Advanced contestantOne = population[_r.Next(0, populationSize)];
-                Individual_Advanced contestantTwo = population[_r.Next(0, populationSize)];
+                Individual_Time_Advanced contestantOne = population[_r.Next(0, populationSize)];
+                Individual_Time_Advanced contestantTwo = population[_r.Next(0, populationSize)];
                 if (contestantOne.dominanceLevel > contestantTwo.dominanceLevel) {
                     parents.Add(contestantOne);
                 }
@@ -153,8 +153,8 @@ namespace Game_Server.EA {
             }
         }
 
-        private void CalculateDominance(List<Individual_Advanced> population) {
-            List<Individual_Advanced> iterationList = new List<Individual_Advanced>(population);
+        private void CalculateDominance(List<Individual_Time_Advanced> population) {
+            List<Individual_Time_Advanced> iterationList = new List<Individual_Time_Advanced>(population);
             int level = 1;
             foreach (var i1 in iterationList) {
                 foreach (var i2 in iterationList) {
@@ -172,14 +172,14 @@ namespace Game_Server.EA {
             while (iterationList.Count > 0) {
                 level++;
                 for (int i = iterationList.Count; i > 0; i--) {
-                    Individual_Advanced individual = iterationList[i - 1];
+                    Individual_Time_Advanced individual = iterationList[i - 1];
                     if (individual.dominanceLevel == level - 1) {
                         for (int j = individual.dominates.Count; j >= 0; j--) {
                             if (individual.dominates.Count == 0) {
                                 iterationList.Remove(individual);
                             }
                             else {
-                                Individual_Advanced dominatedI = individual.dominates[j - 1];
+                                Individual_Time_Advanced dominatedI = individual.dominates[j - 1];
                                 dominatedI.dominatedByIndividuals -= 1;
                                 if (dominatedI.dominatedByIndividuals == 0) {
                                     dominatedI.dominanceLevel = level;
@@ -192,11 +192,11 @@ namespace Game_Server.EA {
             }
         }
 
-        private void CalculateCrowdedComparison(List<Individual_Advanced> population) {
-            List<Individual_Advanced> sortedPopulation = new List<Individual_Advanced>();
+        private void CalculateCrowdedComparison(List<Individual_Time_Advanced> population) {
+            List<Individual_Time_Advanced> sortedPopulation = new List<Individual_Time_Advanced>();
             int level = 1;
             while (population.Count > 0) {
-                List<Individual_Advanced> dominanceList = new List<Individual_Advanced>();
+                List<Individual_Time_Advanced> dominanceList = new List<Individual_Time_Advanced>();
                 for (int i = population.Count; i > 0; i--) {
                     if (population[i - 1].dominanceLevel == level) {
                         dominanceList.Add(population[i - 1]);
@@ -212,7 +212,7 @@ namespace Game_Server.EA {
             _archive = sortedPopulation;
         }
 
-        private void CalculateCrowdedComparisonDeff(List<Individual_Advanced> sortedList) {
+        private void CalculateCrowdedComparisonDeff(List<Individual_Time_Advanced> sortedList) {
             double minValue = sortedList[0].deffScore;
             double maxValue = sortedList[sortedList.Count - 1].deffScore;
             sortedList[0].crowdingDistance = 10;
@@ -223,7 +223,7 @@ namespace Game_Server.EA {
                 sortedList[i].crowdingDistance +=  t1 / t2;
             }
         }
-        private void CalculateCrowdedComparisonAtk(List<Individual_Advanced> sortedList) {
+        private void CalculateCrowdedComparisonAtk(List<Individual_Time_Advanced> sortedList) {
             double minValue = sortedList[0].atkScore;
             double maxValue = sortedList[sortedList.Count - 1].atkScore;
             sortedList[0].crowdingDistance = 10;
@@ -234,7 +234,7 @@ namespace Game_Server.EA {
                 sortedList[i].crowdingDistance += t1 / t2;
             }
         }
-        private void CalculateCrowdedComparisonOfSupp(List<Individual_Advanced> sortedList) {
+        private void CalculateCrowdedComparisonOfSupp(List<Individual_Time_Advanced> sortedList) {
             double minValue = sortedList[0].suppScore;
             double maxValue = sortedList[sortedList.Count - 1].suppScore;
             sortedList[0].crowdingDistance = 10;

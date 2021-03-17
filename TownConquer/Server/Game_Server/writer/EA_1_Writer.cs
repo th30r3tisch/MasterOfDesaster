@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Game_Server.writer.EA_1 {
+namespace Game_Server.writer {
     class EA_1_Writer: StatsWriter<Individual_Simple> {
 
         public EA_1_Writer(string filename) : base(filename) {
