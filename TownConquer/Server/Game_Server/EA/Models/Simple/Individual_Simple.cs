@@ -30,8 +30,8 @@ namespace Game_Server.EA.Models.Simple {
         /// Creates static genes
         /// </summary>
         protected override void CreateGene() {
-            //gene = new Genotype_Simple(new List<int> { 2853, 5, 1000, 100, 20, 85 });
-            gene = new Genotype_Simple(new List<int> { 2000, 10, 1000, 100, 20, 85 });
+            gene = new Genotype_Simple(new List<int> { 2853, 5, 1000, 100, 20, 85 });
+            //gene = new Genotype_Simple(new List<int> { 2000, 10, 1000, 100, 20, 85 });
         }
 
         /// <summary>

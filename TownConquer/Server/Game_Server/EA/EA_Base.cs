@@ -15,7 +15,7 @@ namespace Game_Server.EA {
 
         protected const int _populationNumber = 200;
         protected const int _noImprovementLimit = 70;
-        protected const double _recombinationProbability = 0.3;
+        protected const double _recombinationProbability = 0.5;
 
         protected readonly Random _r;
         protected StatsWriter<T> _writer;

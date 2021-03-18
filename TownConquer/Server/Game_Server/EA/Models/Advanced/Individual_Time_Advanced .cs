@@ -45,13 +45,13 @@ namespace Game_Server.EA.Models.Advanced {
         public override void CalcFitness() {
 
             if (won) {
-                suppScore = 100 / (townLifeDeviation + 0.1);
-                atkScore /= attackActions;
+                suppScore = (100 / (townLifeDeviation + 0.1)) + 100;
+                atkScore = (atkScore / attackActions) + 100;
                 deffScore = 100 - deffScore;
             }
             else {
-                suppScore = 1 / (townLifeDeviation + 0.1);
-                atkScore = 1;
+                suppScore = Math.Min(supportActions, 50);
+                atkScore = Math.Min(attackActions, 50);
                 deffScore = -deffScore;
             }
             fitness = atkScore + deffScore + suppScore;

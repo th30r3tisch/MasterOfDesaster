@@ -4,6 +4,7 @@ using SharedLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -180,7 +181,8 @@ namespace Game_Server.KI {
 
         private void TrySupportTown(Town sourceTown, Dictionary<string, int> props1, Dictionary<string, int> props2) {
             if (sourceTown.townsInRange.Count <= 0) return;
-            foreach (Town town in sourceTown.townsInRange) {
+            List<Town> sortedTowns =  sourceTown.townsInRange.OrderBy(o => o.life).ToList();
+            foreach (Town town in sortedTowns) {
                 if (!sourceTown.CanSupport(LinearInterpolation(props1["SupportMaxCap"], props2["SupportMaxCap"]))) {
                     return;
                 }
@@ -198,6 +200,7 @@ namespace Game_Server.KI {
         private void TryAttackTown(Town sourceTown, Dictionary<string, int> props1, Dictionary<string, int> props2) {
             if (sourceTown.townsInRange.Count <= 0) return;
             foreach (Town town in sourceTown.townsInRange) {
+                Console.WriteLine($"{player.username} | {props1["AttackMinLife"]}-{props2["AttackMinLife"]}-{LinearInterpolation(props1["AttackMinLife"], props2["AttackMinLife"])}");
                 if (!sourceTown.CanAttack(LinearInterpolation(props1["AttackMinLife"], props2["AttackMinLife"]))) {
                     return;
                 }
@@ -238,7 +241,7 @@ namespace Game_Server.KI {
         }
 
         private int LinearInterpolation(int startValue, int endValue) {
-            return startValue + (endValue - startValue) / (Constants.TOWN_NUMBER / player.towns.Count);
+            return (int)(startValue + (endValue - startValue) / (Constants.TOWN_NUMBER / (player.towns.Count + 0.1)));
         }
     }
 }

@@ -203,7 +203,7 @@ namespace Game_Server.EA {
                         population.Remove(population[i - 1]);
                     }
                 }
-                CalculateCrowdedComparisonDeff(dominanceList.OrderByDescending(o => o.deffScore).ToList());
+                CalculateCrowdedComparisonDeff(dominanceList.OrderBy(o => o.deffScore).ToList());
                 CalculateCrowdedComparisonAtk(dominanceList.OrderBy(o => o.atkScore).ToList());
                 CalculateCrowdedComparisonOfSupp(dominanceList.OrderBy(o => o.suppScore).ToList());
                 sortedPopulation.AddRange(dominanceList.OrderByDescending(o => o.crowdingDistance).ToList());
