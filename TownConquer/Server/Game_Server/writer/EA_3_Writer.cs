@@ -33,6 +33,10 @@ namespace Game_Server.writer {
                 foreach (string property in propertynames) {
                     csv.WriteField("supp1-" + property);
                 }
+                csv.WriteField("SupportTownRatio1");
+                csv.WriteField("DeffTownRatio1");
+                csv.WriteField("AtkTownRatio1");
+                csv.WriteField("CategorisationRadius1");
                 foreach (string property in propertynames) {
                     csv.WriteField("deff2-" + property);
                 }
@@ -74,6 +78,9 @@ namespace Game_Server.writer {
                     foreach (int value in record.gene.supportProperties.Values.ToList()) {
                         csv.WriteField(value);
                     }
+                    foreach (int value in record.gene.generalProperties.Values.ToList()) {
+                        csv.WriteField(value);
+                    }
                     foreach (int value in record.geneEndTime.defensiveProperties.Values.ToList()) {
                         csv.WriteField(value);
                     }
@@ -83,7 +90,7 @@ namespace Game_Server.writer {
                     foreach (int value in record.geneEndTime.supportProperties.Values.ToList()) {
                         csv.WriteField(value);
                     }
-                    foreach (int value in record.gene.generalProperties.Values.ToList()) {
+                    foreach (int value in record.geneEndTime.generalProperties.Values.ToList()) {
                         csv.WriteField(value);
                     }
                     counter++;

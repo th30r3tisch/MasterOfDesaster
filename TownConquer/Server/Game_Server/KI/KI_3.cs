@@ -97,8 +97,8 @@ namespace Game_Server.KI {
                     CheckKITownLifes(t, indi.gene.defensiveProperties, indi.geneEndTime.defensiveProperties);
                     break;
                 case TownCategory.off:
-                    CheckKITownLifes(t, indi.gene.attackProperties, indi.geneEndTime.supportProperties);
-                    TryAttackTown(t, indi.gene.attackProperties, indi.geneEndTime.supportProperties);
+                    CheckKITownLifes(t, indi.gene.attackProperties, indi.geneEndTime.attackProperties);
+                    TryAttackTown(t, indi.gene.attackProperties, indi.geneEndTime.attackProperties);
                     break;
                 default:
                     break;

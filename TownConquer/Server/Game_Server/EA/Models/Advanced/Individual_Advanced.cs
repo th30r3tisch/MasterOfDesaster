@@ -127,10 +127,10 @@ namespace Game_Server.EA.Models.Advanced {
             //Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2000, 10, 1000, 100, 20 });
             //Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2000, 10, 1000, 100, 20 });
             //Dictionary<string, int> genProps = Genotype_Advanced.CreateProperties<PropertyNames_General>(new List<int> { 85, 10, 50, 1500 });
-            Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2762, 71, 327, 92, 36 });
-            Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 3214, 5, 2252, 67, 64 });
-            Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2699, 5, 2486, 5, 5 });
-            Dictionary<string, int> genProps = Genotype_Advanced.CreateProperties<PropertyNames_General>(new List<int> { 38, 1, 49, 2694 });
+            Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 1223, 83, 1673, 64, 46 });
+            Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 3744, 5, 2923, 46, 85 });
+            Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 996, 16, 1782, 46, 78 });
+            Dictionary<string, int> genProps = Genotype_Advanced.CreateProperties<PropertyNames_General>(new List<int> { 69, 68, 66, 100 });
             gene = new Genotype_Advanced(supProps, offProps, deffProps, genProps);
         }
 

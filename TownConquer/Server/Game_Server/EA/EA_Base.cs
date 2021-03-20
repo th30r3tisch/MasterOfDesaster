@@ -49,7 +49,8 @@ namespace Game_Server.EA {
             List<T> population = new List<T>();
             int populationCount = 0;
             while (populationCount < _populationNumber) {
-                population.Add((T)Activator.CreateInstance(typeof(T), new object[] {_r, populationCount}));
+                population.Add((T)Activator.CreateInstance(typeof(T), new object[] { _r, populationCount }));
+                //population.Add((T)Activator.CreateInstance(typeof(T), new object[] { populationCount }));
                 populationCount++;
             }
             return population;
