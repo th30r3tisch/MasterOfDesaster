@@ -13,7 +13,7 @@ namespace Game_Server.EA {
         private List<Individual_Advanced> _archive;
 
         public EA_2_Algo() : base() {
-            _writer = new EA_2_Writer("EA2");
+            _writer = new EA_2_Writer("FINAL");
             _archive = new List<Individual_Advanced>();
             Evolve(CreatePopulation(), 0);
         }

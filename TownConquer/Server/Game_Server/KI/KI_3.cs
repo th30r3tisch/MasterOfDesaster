@@ -200,7 +200,6 @@ namespace Game_Server.KI {
         private void TryAttackTown(Town sourceTown, Dictionary<string, int> props1, Dictionary<string, int> props2) {
             if (sourceTown.townsInRange.Count <= 0) return;
             foreach (Town town in sourceTown.townsInRange) {
-                Console.WriteLine($"{player.username} | {props1["AttackMinLife"]}-{props2["AttackMinLife"]}-{LinearInterpolation(props1["AttackMinLife"], props2["AttackMinLife"])}");
                 if (!sourceTown.CanAttack(LinearInterpolation(props1["AttackMinLife"], props2["AttackMinLife"]))) {
                     return;
                 }

@@ -4,6 +4,13 @@ using System.Drawing;
 using System.Numerics;
 using System.Text;
 
+/// <summary>
+/// BASIERT AUF DEM CODE VON TOM WEILAND SIEHE:
+/// Weiland, Tom, 8 Dec 2019, https://github.com/tom-weiland/tcp-udp-networking/blob/tutorial-part5/GameServer/GameServer/Packet.cs [23.03.2021]
+/// Der Code wurde bearbeitet und Anpassungen vorgenommen.
+/// Dieser Code spielt im Rahmen der Arbeit nur eine geringe Rolle.
+/// </summary>
+
 namespace SharedLibrary {
     /// <summary>Sent from server to client.</summary>
     public enum ServerPackets {

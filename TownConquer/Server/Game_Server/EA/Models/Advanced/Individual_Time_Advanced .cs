@@ -138,11 +138,11 @@ namespace Game_Server.EA.Models.Advanced {
         /// </summary>
         protected override void CreateGene() {
             Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 2077, 63, 953, 66, 10 });
-            Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 3647, 17, 1704, 85, 71 });
+            Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 3647, 6, 1704, 85, 71 });
             Dictionary<string, int> supProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 1189, 72, 1908, 45, 53 });
             Dictionary<string, int> genProps = Genotype_Advanced.CreateProperties<PropertyNames_General>(new List<int> { 34, 3, 68, 646 });
             Dictionary<string, int> deffProps1 = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 1528, 51, 1154, 71, 12 });
-            Dictionary<string, int> offProps1 = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 3305, 5, 1921, 65, 74 });
+            Dictionary<string, int> offProps1 = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 3305, 12, 1921, 65, 74 });
             Dictionary<string, int> supProps1 = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(new List<int> { 1569, 85, 3582, 65, 84 });
             Dictionary<string, int> genProps1 = Genotype_Advanced.CreateProperties<PropertyNames_General>(new List<int> { 30, 61, 42, 625 });
             gene = new Genotype_Advanced(supProps, offProps, deffProps, genProps);

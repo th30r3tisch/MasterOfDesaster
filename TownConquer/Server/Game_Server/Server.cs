@@ -5,6 +5,13 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 
+/// <summary>
+/// BASIERT AUF DEM CODE VON TOM WEILAND SIEHE:
+/// Weiland, Tom, 8 Dec 2019, https://github.com/tom-weiland/tcp-udp-networking/blob/tutorial-part5/GameServer/GameServer/Server.cs [23.03.2021]
+/// Der Code wurde bearbeitet und Anpassungen vorgenommen.
+/// Dieser Code spielt im Rahmen der Arbeit nur eine geringe Rolle.
+/// </summary>
+
 namespace Game_Server {
     class Server {
 

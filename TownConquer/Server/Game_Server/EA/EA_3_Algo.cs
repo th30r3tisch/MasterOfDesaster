@@ -13,7 +13,7 @@ namespace Game_Server.EA {
         private List<Individual_Time_Advanced> _archive;
 
         public EA_3_Algo() : base() {
-            _writer = new EA_3_Writer("EA3");
+            _writer = new EA_3_Writer("FINAL");
             _archive = new List<Individual_Time_Advanced>();
             Evolve(CreatePopulation(), 0);
         }
@@ -174,19 +174,15 @@ namespace Game_Server.EA {
                 for (int i = iterationList.Count; i > 0; i--) {
                     Individual_Time_Advanced individual = iterationList[i - 1];
                     if (individual.dominanceLevel == level - 1) {
-                        for (int j = individual.dominates.Count; j >= 0; j--) {
-                            if (individual.dominates.Count == 0) {
-                                iterationList.Remove(individual);
+                        while (individual.dominates.Count > 0) {
+                            Individual_Time_Advanced dominatedI = individual.dominates[0];
+                            dominatedI.dominatedByIndividuals -= 1;
+                            if (dominatedI.dominatedByIndividuals == 0) {
+                                dominatedI.dominanceLevel = level;
                             }
-                            else {
-                                Individual_Time_Advanced dominatedI = individual.dominates[j - 1];
-                                dominatedI.dominatedByIndividuals -= 1;
-                                if (dominatedI.dominatedByIndividuals == 0) {
-                                    dominatedI.dominanceLevel = level;
-                                }
-                                individual.dominates.Remove(dominatedI);
-                            }
+                            individual.dominates.Remove(dominatedI);
                         }
+                        iterationList.Remove(individual);
                     }
                 }
             }
@@ -220,7 +216,7 @@ namespace Game_Server.EA {
             for (int i = 1; i < sortedList.Count - 1; i++) {
                 double t1 = (sortedList[i + 1].deffScore - sortedList[i - 1].deffScore);
                 double t2 = (maxValue - minValue);
-                sortedList[i].crowdingDistance +=  t1 / t2;
+                sortedList[i].crowdingDistance += t1 / t2;
             }
         }
         private void CalculateCrowdedComparisonAtk(List<Individual_Time_Advanced> sortedList) {

@@ -1,6 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
+/// <summary>
+/// BASIERT AUF DEM CODE VON TOM WEILAND SIEHE:
+/// Weiland, Tom, 27 Oct 2019, https://github.com/tom-weiland/tcp-udp-networking/blob/tutorial-part5/GameServer/GameServer/ThreadManager.cs [23.03.2021]
+/// Dieser Code spielt im Rahmen der Arbeit nur eine geringe Rolle.
+/// </summary>
+
 namespace Game_Server {
     public class ThreadManager {
         private static readonly List<Action> _executeOnMainThread = new List<Action>();

@@ -6,6 +6,13 @@ using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
 
+/// <summary>
+/// BASIERT AUF DEM CODE VON TOM WEILAND SIEHE:
+/// Weiland, Tom, 22 Dec 2019, https://github.com/tom-weiland/tcp-udp-networking/blob/682f3fe3dd0b9a7d74e13896eabbfa48d3c95e20/GameClient/Assets/Scripts/Client.cs [23.03.2021]
+/// Der Code wurde bearbeitet und Anpassungen vorgenommen.
+/// Dieser Code spielt im Rahmen der Arbeit nur eine geringe Rolle.
+/// </summary>
+
 public class Client : MonoBehaviour
 {
     public static Client instance;
