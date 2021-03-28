@@ -1,12 +1,10 @@
 ﻿using Game_Server.EA.Models;
 using Game_Server.EA.Models.Advanced;
-using Game_Server.EA.Models.Simple;
 using Game_Server.KI;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -57,11 +55,16 @@ namespace Game_Server.EA {
         }
 
         /// <summary>
+        /// BASIERT AUF DEM CODE VON Theodor Zoulias und Theo Yaung SIEHE:
+        /// Yaung, Theo, 30 May 2012, https://stackoverflow.com/a/10810730/5859685 [23.03.2021]
+        /// Zoulias, Theodor, 1 Jan 2021, https://stackoverflow.com/a/65533998/5859685 [23.03.2021]
+        /// Der Code wurde bearbeitet und Anpassungen vorgenommen.
+        /// Dieser Code spielt im Rahmen der Arbeit nur eine große Rolle.
+        /// 
         /// starts the games to evaluate the population of individuals with limited number of tasks from
-        /// https://stackoverflow.com/a/10810730/5859685 and https://stackoverflow.com/a/65533998/5859685
         /// </summary>
-        /// <param name="population"></param>
-        /// <returns></returns>
+        /// <param name="population">all individuals of one generation</param>
+        /// <returns>individuals filled with data from playing games</returns>
         protected async Task<ConcurrentBag<T>> TrainKis(List<T> population) {
             ConcurrentBag<T> resultCollection = new ConcurrentBag<T>();
             ConcurrentBag<T> referenceCollection = new ConcurrentBag<T>();
@@ -100,7 +103,6 @@ namespace Game_Server.EA {
                 );
             }
 
-            // won't get here until all urls have been put into tasks
             await Task.WhenAll(allTasks);
 
             return resultCollection;

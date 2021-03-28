@@ -172,7 +172,6 @@ namespace Game_Server {
 
         public void SendIntoGame() {
             Server.games[-1].gm.CreateKis();
-            //SetupUser("theo", Color.FromArgb(1,100,0,0));
             ServerSend.CreateWorld(id, Server.games[-1].clients[id].player, Constants.RANDOM_SEED, Server.games[-1].clients[id].player.towns[0]); // create the world for new player
 
             foreach (Client client in Server.games[-1].clients.Values) {

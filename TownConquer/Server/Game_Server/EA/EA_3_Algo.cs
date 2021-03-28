@@ -24,7 +24,6 @@ namespace Game_Server.EA {
         }
 
         /// <summary>
-        /// may be removed because unnecessary
         /// resets all important values preparing the start of the new generation
         /// </summary>
         /// <param name="newPopulation">new generation</param>

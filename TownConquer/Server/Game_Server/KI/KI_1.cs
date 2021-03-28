@@ -67,6 +67,11 @@ namespace Game_Server.KI {
             return indi;
         }
 
+        /// <summary>
+        /// checks if the town or its interacting towns are below 0 life and starts actions according to townlife
+        /// </summary>
+        /// <param name="town">the town to check for life points</param>
+        /// <param name="props">gene properties</param>
         protected void CheckKITownLifes(Town town, Dictionary<string, int> props) {
             town.CalculateLife(game.gm.sw.ElapsedMilliseconds, "own life");
             if (town.life <= 0) {
@@ -79,7 +84,6 @@ namespace Game_Server.KI {
                 Town t = town.outgoingActionsToTowns[x - 1];
                 t.CalculateLife(game.gm.sw.ElapsedMilliseconds, "life of outgoing");
                 if (t.life <= 0) {
-                    //Console.WriteLine($"{player.username} - {game.id} - {town.position} -> {t.position} - CONQ");
                     ConquerTown(t.position);
                     indi.score += 20;
                     GetPossibleInteractionTarget(t, indi.gene.properties["ConquerRadius"]);
@@ -90,6 +94,10 @@ namespace Game_Server.KI {
             }
         }
 
+        /// <summary>
+        /// tries to support a town. if no support possible it tries to attack instead
+        /// </summary>
+        /// <param name="sourceTown">town that wants to support</param>
         private void TrySupportTown(Town sourceTown) {
             if (sourceTown.townsInRange.Count <= 0) return;
             foreach (Town town in sourceTown.townsInRange) {
@@ -106,6 +114,10 @@ namespace Game_Server.KI {
             }
         }
 
+        /// <summary>
+        /// tries to attack a town
+        /// </summary>
+        /// <param name="sourceTown">town that wants to attack</param>
         private void TryAttackTown(Town sourceTown) {
             if (sourceTown.townsInRange.Count <= 0) return;
             foreach (Town town in sourceTown.townsInRange) {
@@ -146,12 +158,20 @@ namespace Game_Server.KI {
             return false;
         }
 
+        /// <summary>
+        /// loggs the data during the game
+        /// </summary>
+        /// <param name="timePassed">time stamp of the log action</param>
+        /// <param name="townNum">town number at the time of the log action</param>
         private void ProtocollStats(long timePassed, int townNum) {
             indi.name = player.username;
             indi.timestamp.Add(timePassed);
             indi.townNumberDevelopment.Add(townNum);
         }
 
+        /// <summary>
+        /// finalizes the logged data after game is over
+        /// </summary>
         public override void Disconnect() {
             if (game.kis[0] != this) {
                 indi.won = player.towns.Count > game.kis[0].player.towns.Count;

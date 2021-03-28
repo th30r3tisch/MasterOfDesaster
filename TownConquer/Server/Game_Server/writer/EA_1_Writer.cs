@@ -13,6 +13,10 @@ namespace Game_Server.writer {
             AddGeneColumns(Enum.GetNames(typeof(PropertyNames_Simple)));
         }
 
+        /// <summary>
+        /// writes the data into the csv file
+        /// </summary>
+        /// <param name="records">logged data</param>
         public override void WriteStats(List<Individual_Simple> records) {
             Individual_Simple longestRecord = PrepareStats(records);
             using (var stream = File.Open(_path, FileMode.Append))

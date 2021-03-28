@@ -14,6 +14,10 @@ namespace Game_Server.writer {
             AddGeneColumns(Enum.GetNames(typeof(PropertyNames_General)));
         }
 
+        /// <summary>
+        /// adds headings specific to the second ea
+        /// </summary>
+        /// <param name="propertynames">names of the properties from the gene</param>
         private void AddEASpecificColumns(string[] propertynames) {
             using (var stream = File.Open(_path, FileMode.Append))
             using (var writer = new StreamWriter(stream))
@@ -37,6 +41,10 @@ namespace Game_Server.writer {
             }
         }
 
+        /// <summary>
+        /// writes the data into the csv file
+        /// </summary>
+        /// <param name="records">logged data</param>
         public override void WriteStats(List<Individual_Advanced> records) {
             int counter = 0;
             using (var stream = File.Open(_path, FileMode.Append))

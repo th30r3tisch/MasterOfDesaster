@@ -35,6 +35,10 @@ namespace Game_Server {
             }
         }
 
+        /// <summary>
+        /// adds headings of properties from general genes
+        /// </summary>
+        /// <param name="propertynames">names of the properties from the gene</param>
         protected void AddGeneColumns(string[] propertynames) {
             using (var stream = File.Open(_path, FileMode.Append))
             using (var writer = new StreamWriter(stream))

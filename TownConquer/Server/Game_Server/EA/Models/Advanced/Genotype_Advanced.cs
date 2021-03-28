@@ -17,7 +17,12 @@ namespace Game_Server.EA.Models.Advanced {
         }
 
         /// <summary>
-        /// little trick from https://www.codeproject.com/Tips/244647/Passing-Enum-type-as-a-parameter to pass enum type
+        /// BASIERT AUF DEM CODE VON Ed Hellyer SIEHE: 
+        /// Hellyer, Ed, 23 Aug 2011, https://www.codeproject.com/Tips/244647/Passing-Enum-type-as-a-parameter [23.03.2021]
+        /// Der Code wurde bearbeitet und Anpassungen vorgenommen.
+        /// Dieser Code spielt im Rahmen der Arbeit nur eine mittlere Rolle.
+        /// 
+        /// creates property pairs for the gene consisting of the name and the value of the property
         /// </summary>
         /// <typeparam name="T">type of the enum</typeparam>
         /// <param name="propertyValues">list of values for the properties</param>

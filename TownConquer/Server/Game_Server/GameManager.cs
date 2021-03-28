@@ -85,6 +85,12 @@ namespace Game_Server {
             }
         }
 
+        /// <summary>
+        /// checks whether two towns can be connected without intersecting an obstacle
+        /// </summary>
+        /// <param name="atkTown">town one</param>
+        /// <param name="deffTown">town two</param>
+        /// <returns>if connection intersects with an obstacle</returns>
         public bool IsIntersecting(Vector3 atkTown, Vector3 deffTown) {
             QuadTree tree = game.tree;
             List<TreeNode> intersectionObjs = new List<TreeNode>();
@@ -139,7 +145,11 @@ namespace Game_Server {
             return false;
         }
 
-        // https://github.com/setchi/Unity-LineSegmentsIntersection
+        /// <summary>
+        /// BASIERT AUF DEM CODE VON setchi SIEHE:
+        /// setchi, 14 Aug 2019, https://github.com/setchi/Unity-LineSegmentsIntersection/blob/5c85d43b39fff52dd9903756516d00a41822252e/Assets/LineSegmentIntersection/Scripts/Math2d.cs [23.03.2021]
+        /// Dieser Code spielt im Rahmen der Arbeit nur eine geringe Rolle.
+        /// </summary>
         private bool LineSegmentsIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4) {
             Vector2 intersection = Vector2.Zero;
 
@@ -226,6 +236,12 @@ namespace Game_Server {
             }
         }
 
+        /// <summary>
+        /// checks whether two towns can interact
+        /// </summary>
+        /// <param name="townOne">town one</param>
+        /// <param name="townTwo">town two</param>
+        /// <returns>if towns can interact</returns>
         public bool CanTownsInteract(Town townOne, Town townTwo) {
             if (!townOne.outgoingActionsToTowns.Contains(townTwo) &&
                 !townTwo.outgoingActionsToTowns.Contains(townOne) &&
@@ -242,11 +258,9 @@ namespace Game_Server {
 
             KI_Base<Individual_Simple> ki1 = new KI_1(game, 999, "KI999", Color.FromArgb(255, 255, 255));
             KI_Base<Individual_Simple> ki2 = new KI_1(game, 998, "KI998", Color.FromArgb(0, 0, 0));
-            //KI_Base<Individual_Advanced> ki2 = new KI_2(this, 998, "KI998", Color.FromArgb(0, 0, 0));
 
             Individual_Simple referenceIndividual = new Individual_Simple(999);
             Individual_Simple referenceIndividual2 = new Individual_Simple(998);
-            //Individual_Advanced referenceIndividual2 = new Individual_Advanced(999);
 
             var t1 = ki1.SendIntoGame(token, referenceIndividual);
             var t2 = ki2.SendIntoGame(token, referenceIndividual2);

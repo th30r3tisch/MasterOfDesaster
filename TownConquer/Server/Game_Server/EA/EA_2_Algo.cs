@@ -2,7 +2,6 @@
 using Game_Server.KI;
 using Game_Server.writer;
 using MathNet.Numerics.Distributions;
-using SharedLibrary;
 using System;
 using System.Collections.Generic;
 using System.Linq;

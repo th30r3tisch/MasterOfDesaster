@@ -58,6 +58,9 @@ namespace Game_Server.KI {
             return indi;
         }
 
+        /// <summary>
+        /// checks how many towns are lost
+        /// </summary>
         private void CheckLostTowns() {
             int townCountNew = player.towns.Count;
             if (_townCountOld <= townCountNew) {
@@ -70,6 +73,10 @@ namespace Game_Server.KI {
             }
         }
 
+        /// <summary>
+        /// gets the possible targets of a city according to its category
+        /// </summary>
+        /// <param name="t">city which needs targets</param>
         private void GetCategoryDependentTarget(Town t) {
             switch (t.townCategory) {
                 case TownCategory.sup:
@@ -87,6 +94,10 @@ namespace Game_Server.KI {
             
         }
 
+        /// <summary>
+        /// executes actions according to the category of a town
+        /// </summary>
+        /// <param name="t">town which should do an action</param>
         private void DoAction(Town t) {
             switch (t.townCategory) {
                 case TownCategory.sup:
@@ -105,11 +116,18 @@ namespace Game_Server.KI {
             }
         }
 
+        /// <summary>
+        /// loggs the data during the game
+        /// </summary>
+        /// <param name="timePassed">time stamp of the log action</param>
         private void ProtocollStats(long timePassed) {
             indi.name = player.username;
             indi.timestamp.Add(timePassed);
         }
 
+        /// <summary>
+        /// categorizes all towns
+        /// </summary>
         private void CategorizeTowns() {
             lock (game.gm.treeLock) {
                 foreach (Town town in player.towns) {
@@ -118,6 +136,10 @@ namespace Game_Server.KI {
             }
         }
 
+        /// <summary>
+        /// categorizes one town
+        /// </summary>
+        /// <param name="town">town to categorize</param>
         private void CategorizeTown(Town town) {
             int categorizationRadius = LinearInterpolation(indi.gene.generalProperties["CategorisationRadius"], indi.geneEndTime.generalProperties["CategorisationRadius"]);
             int friendlyTownNumber = 0;
@@ -156,6 +178,12 @@ namespace Game_Server.KI {
             }
         }
 
+        /// <summary>
+        /// checks if the town or its interacting towns are below 0 life and starts actions according to townlife
+        /// </summary>
+        /// <param name="town">the town to check for life points</param>
+        /// <param name="props1">start gene properties</param>
+        /// <param name="props2">end gene properties</param>
         protected void CheckKITownLifes(Town town, Dictionary<string, int> props1, Dictionary<string, int> props2) {
             town.CalculateLife(game.gm.sw.ElapsedMilliseconds, "own life");
             if (town.life <= 0) {
@@ -179,6 +207,12 @@ namespace Game_Server.KI {
             }
         }
 
+        /// <summary>
+        /// tries to support a town. if no support possible it tries to attack instead
+        /// </summary>
+        /// <param name="sourceTown">town that wants to support</param>
+        /// <param name="props1">start gene properties</param>
+        /// <param name="props2">end gene properties</param>
         private void TrySupportTown(Town sourceTown, Dictionary<string, int> props1, Dictionary<string, int> props2) {
             if (sourceTown.townsInRange.Count <= 0) return;
             List<Town> sortedTowns =  sourceTown.townsInRange.OrderBy(o => o.life).ToList();
@@ -197,6 +231,12 @@ namespace Game_Server.KI {
             }
         }
 
+        /// <summary>
+        /// tries to attack a town
+        /// </summary>
+        /// <param name="sourceTown">town that wants to attack</param>
+        /// <param name="props1">start gene properties</param>
+        /// <param name="props2">end gene properties</param>
         private void TryAttackTown(Town sourceTown, Dictionary<string, int> props1, Dictionary<string, int> props2) {
             if (sourceTown.townsInRange.Count <= 0) return;
             foreach (Town town in sourceTown.townsInRange) {
@@ -228,6 +268,9 @@ namespace Game_Server.KI {
             indi.townLifeDeviation =  Math.Round(Math.Sqrt(varianz / townlist.Count), 2);
         }
 
+        /// <summary>
+        /// finalizes the logged data after game is over
+        /// </summary>
         public override void Disconnect() {
             if (game.kis[0] != this) {
                 indi.won = player.towns.Count > game.kis[0].player.towns.Count;

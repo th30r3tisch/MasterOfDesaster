@@ -11,16 +11,30 @@ namespace Game_Server.EA.Models.Simple {
         public double townLifeSum = 0;
         public int score = 0;
 
+        /// <summary>
+        /// creates an individual with static properties
+        /// </summary>
+        /// <param name="number">number of the individual</param>
         public Individual_Simple(int number) : base(number) {
             townNumberDevelopment = new List<int>();
             CreateGene();
         }
 
+        /// <summary>
+        /// creates an individual with random properties
+        /// </summary>
+        /// <param name="r">random number generator</param>
+        /// <param name="number">number of the individual</param>
         public Individual_Simple(Random r, int number) : base(number) {
             townNumberDevelopment = new List<int>();
             CreateGene(r);
         }
 
+        /// <summary>
+        /// Creates a new individual with static properties
+        /// </summary>
+        /// <param name="newGene">property values of the gene</param>
+        /// <param name="number">number of the individual</param>
         public Individual_Simple(List<int> newGene, int number) : base(number) {
             townNumberDevelopment = new List<int>();
             gene = new Genotype_Simple(newGene);

@@ -17,14 +17,31 @@ namespace Game_Server.EA.Models.Advanced {
         public int dominatedByIndividuals;
         public double crowdingDistance;
 
+        /// <summary>
+        /// creates an individual with static properties
+        /// </summary>
+        /// <param name="number">number of the individual</param>
         public Individual_Advanced(int number) : base( number) {
             CreateGene();
         }
 
+        /// <summary>
+        /// creates an individual with random properties
+        /// </summary>
+        /// <param name="r">random number generator</param>
+        /// <param name="number">number of the individual</param>
         public Individual_Advanced(Random r, int number) : base(number) {
             CreateGene(r);
         }
 
+        /// <summary>
+        /// Creates a new individual with static properties
+        /// </summary>
+        /// <param name="supGene">support property values of the gene</param>
+        /// <param name="offGene">offensive property values of the gene</param>
+        /// <param name="deffGene">defensive property values of the gene</param>
+        /// <param name="generalGene">general property values of the gene</param>
+        /// <param name="number">number of the individual</param>
         public Individual_Advanced(List<int> supGene, List<int> offGene, List<int> deffGene, List<int> generalGene, int number) : base(number) {
             Dictionary<string, int> deffProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(deffGene);
             Dictionary<string, int> offProps = Genotype_Advanced.CreateProperties<PropertyNames_Advanced>(offGene);
@@ -51,6 +68,12 @@ namespace Game_Server.EA.Models.Advanced {
             fitness = atkScore + deffScore + suppScore;
         }
 
+        /// <summary>
+        /// prepares the mutation for all genes of the individual
+        /// </summary>
+        /// <param name="r">random number generator</param>
+        /// <param name="gauss">delegate to calculate gauss</param>
+        /// <returns>the mutated individual</returns>
         public Individual_Advanced PrepareMutate(Random r, GaussDelegate gauss) {
             Mutate(r, gauss, gene.attackProperties);
             Mutate(r, gauss, gene.defensiveProperties);
@@ -59,6 +82,12 @@ namespace Game_Server.EA.Models.Advanced {
             return this;
         }
 
+        /// <summary>
+        /// mutates a gene of an individual
+        /// </summary>
+        /// <param name="r">random number generator</param>
+        /// <param name="gauss">delegate to calculate gauss</param>
+        /// <param name="props">properties of the gene to mutate</param>
         private void Mutate(Random r, GaussDelegate gauss, Dictionary<string, int> props) {
             double mutationProbability = 1 / props.Count();
             foreach (string key in props.Keys.ToList()) {
@@ -70,6 +99,12 @@ namespace Game_Server.EA.Models.Advanced {
             }
         }
 
+        /// <summary>
+        /// prepares the recombination for all genes of the individual
+        /// </summary>
+        /// <param name="r">random number generator</param>
+        /// <param name="partner">individual to recombinate with</param>
+        /// <returns>the child individual</returns>
         public Individual_Advanced PrepareRecombination(Individual_Advanced partner, Random r) {
             Individual_Advanced child = CopyIndividual();
             Recombinate(child.gene.attackProperties, partner.gene.attackProperties, r);
@@ -79,6 +114,12 @@ namespace Game_Server.EA.Models.Advanced {
             return child;
         }
 
+        /// <summary>
+        /// recombinates two individuals
+        /// </summary>
+        /// <param name="r">random number generator</param>
+        /// <param name="prop1">properties of the gene from parent one</param>
+        /// <param name="prop2">properties of the gene from parent two</param>
         private void Recombinate(Dictionary<string, int> prop1, Dictionary<string, int> prop2, Random r) {
             double u = r.NextDouble() * 1.5; // random number between 0 and 1.5
             foreach (string key in prop1.Keys.ToList()) {
@@ -146,6 +187,10 @@ namespace Game_Server.EA.Models.Advanced {
                 CreateGeneralProps<PropertyNames_General>(r));
         }
 
+        /// <summary>
+        /// Creates random general properties
+        /// </summary>
+        /// <param name="r">Pseudo-random number generator</param>
         private Dictionary<string, int> CreateGeneralProps<T>(Random r) {
             return Genotype_Advanced.CreateProperties<T>(new List<int> {
                 r.Next(0, 100),
