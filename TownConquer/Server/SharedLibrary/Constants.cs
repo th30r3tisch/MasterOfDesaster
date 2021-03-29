@@ -18,8 +18,8 @@ namespace SharedLibrary {
         public const int OBSTACLE_MAX_LENGTH = 400;
         public const int ATTACK_LINE_WIDTH = 10;
         public const int RANDOM_SEED = 1;
-        public const int KI_TICK_RATE = 1000; // in ms
+        public const int KI_TICK_RATE = 10; // in ms
 
-        public const bool TRAININGS_MODE = false;
+        public const bool TRAININGS_MODE = true;
     }
 }
