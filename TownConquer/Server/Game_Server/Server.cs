@@ -107,7 +107,6 @@ namespace Game_Server {
             games.Add(-1, new Game(-1));
 
             if (Constants.TRAININGS_MODE == true) {
-                //new KnapSack_EA();
                 //EA_1_Algo ea = new EA_1_Algo();
                 //EA_2_Algo ea2 = new EA_2_Algo();
                 EA_3_Algo ea3 = new EA_3_Algo();

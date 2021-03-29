@@ -10,7 +10,7 @@ namespace Game_Server.EA {
         public delegate double GaussDelegate(double deviation);
 
         public EA_1_Algo() : base() {
-            _writer = new EA_1_Writer("EA1");
+            _writer = new EA_1_Writer("FINAL");
             Evolve(CreatePopulation(), 0);
         }
 
@@ -41,6 +41,7 @@ namespace Game_Server.EA {
             List<Individual_Simple> newPopulation = new List<Individual_Simple>();
             Individual_Simple child;
             GaussDelegate gauss = new GaussDelegate(Gauss);
+            _writer.WriteStats(population);
             newPopulation.Add(GetElite(population).CopyIndividual());
             newPopulation[0].number = 0;
             for (int i = 1; i < population.Count; i++) {

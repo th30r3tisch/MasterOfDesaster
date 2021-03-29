@@ -1,5 +1,6 @@
 ﻿using Game_Server.EA.Models;
 using Game_Server.EA.Models.Advanced;
+using Game_Server.EA.Models.Simple;
 using Game_Server.KI;
 using System;
 using System.Collections.Concurrent;
@@ -47,8 +48,7 @@ namespace Game_Server.EA {
             List<T> population = new List<T>();
             int populationCount = 0;
             while (populationCount < _populationNumber) {
-                //population.Add((T)Activator.CreateInstance(typeof(T), new object[] { _r, populationCount }));
-                population.Add((T)Activator.CreateInstance(typeof(T), new object[] { populationCount }));
+                population.Add((T)Activator.CreateInstance(typeof(T), new object[] { _r, populationCount }));
                 populationCount++;
             }
             return population;
@@ -83,10 +83,10 @@ namespace Game_Server.EA {
                             CancellationToken token = c.Token;
 
                             K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { game, individual.number, "EA" + individual.number, Color.FromArgb(0, 0, 0) });
-                            KI_Base<Individual_Advanced> referenceKI = new KI_2(game, 999, "KI" + individual.number, Color.FromArgb(255, 255, 255));
+                            KI_Base<Individual_Simple> referenceKI = new KI_1(game, 999, "KI" + individual.number, Color.FromArgb(255, 255, 255));
                             //K eaKI = (K)Activator.CreateInstance(typeof(K), new object[] { game, individual.number, "EA" + individual.number, Color.FromArgb(0, 0, 0) });
 
-                            Individual_Advanced referenceIndividual = new Individual_Advanced(999);
+                            Individual_Simple referenceIndividual = new Individual_Simple(999);
 
                             var t1 = referenceKI.SendIntoGame(token, referenceIndividual);
                             var t2 = eaKI.SendIntoGame(token, individual);

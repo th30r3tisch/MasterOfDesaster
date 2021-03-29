@@ -8,18 +8,18 @@ namespace SharedLibrary {
 
         public const int TOWN_INITIAL_LIFE = 10;
         public const int OBSTACLE_WIDTH = 20;
-        public const int OBSTACLE_NUMBER = 160;
-        public const int TOWN_NUMBER = 320;
-        public const int MAP_HEIGHT = 15000;
-        public const int MAP_WIDTH = 15000;
+        public const int OBSTACLE_NUMBER = 10;
+        public const int TOWN_NUMBER = 20;
+        public const int MAP_HEIGHT = 4000;
+        public const int MAP_WIDTH = 4000;
         public const int DISTANCE_TO_EDGES = 100;
         public const int TOWN_MIN_DISTANCE = 100;
         public const int OBSTACLE_MIN_LENGTH = 50;
         public const int OBSTACLE_MAX_LENGTH = 400;
         public const int ATTACK_LINE_WIDTH = 10;
-        public const int RANDOM_SEED = 6;
-        public const int KI_TICK_RATE = 10; // in ms
+        public const int RANDOM_SEED = 1;
+        public const int KI_TICK_RATE = 1000; // in ms
 
-        public const bool TRAININGS_MODE = true;
+        public const bool TRAININGS_MODE = false;
     }
 }

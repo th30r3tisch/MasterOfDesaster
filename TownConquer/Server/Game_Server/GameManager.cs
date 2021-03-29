@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Game_Server.EA.Models.Simple;
 using System.Diagnostics;
+using Game_Server.EA.Models.Advanced;
 
 namespace Game_Server {
     class GameManager {
@@ -183,8 +184,8 @@ namespace Game_Server {
             Town deffTown = tree.SearchTown(tree, deff);
             if (CanTownsInteract(atkTown, deffTown)) {
                 lock (treeLock) {
-                    atkTown.CalculateLife(sw.ElapsedMilliseconds, "add action atk");
-                    deffTown.CalculateLife(sw.ElapsedMilliseconds, "add action deff");
+                    atkTown.CalculateLife(sw.ElapsedMilliseconds);
+                    deffTown.CalculateLife(sw.ElapsedMilliseconds);
                     deffTown.AddTownActionReference(atkTown);
                 }
             }
@@ -195,15 +196,15 @@ namespace Game_Server {
             Town atkTown = tree.SearchTown(tree, atk);
             Town deffTown = tree.SearchTown(tree, deff);
             lock (treeLock) {
-                atkTown.CalculateLife(sw.ElapsedMilliseconds, "rem action atk");
-                deffTown.CalculateLife(sw.ElapsedMilliseconds, "rem action deff");
+                atkTown.CalculateLife(sw.ElapsedMilliseconds);
+                deffTown.CalculateLife(sw.ElapsedMilliseconds);
                 deffTown.RmTownActionReference(atkTown);
             }
         }
 
         public void ConquerTown(User user, Town deffTown) {
             lock (treeLock) {
-                deffTown.CalculateLife(sw.ElapsedMilliseconds, "conq");
+                deffTown.CalculateLife(sw.ElapsedMilliseconds);
                 UpdateTown(deffTown);
                 
                 deffTown.UpdateOwner(user.player, sw.ElapsedMilliseconds);
@@ -223,7 +224,7 @@ namespace Game_Server {
 
                 // removes all outgoing troops and deletes references in both towns
                 for (int i = town.outgoingActionsToTowns.Count; i > 0; i--) {
-                    town.outgoingActionsToTowns[i - 1].CalculateLife(sw.ElapsedMilliseconds, "update");
+                    town.outgoingActionsToTowns[i - 1].CalculateLife(sw.ElapsedMilliseconds);
                     town.outgoingActionsToTowns[i - 1].RmTownActionReference(town);
                 }
             }
@@ -231,7 +232,7 @@ namespace Game_Server {
 
         private void UpdateInteractingTowns(List<Town> interactingTowns, Town town) {
             for (int i = interactingTowns.Count; i > 0; i--) {
-                interactingTowns[i - 1].CalculateLife(sw.ElapsedMilliseconds, "update");
+                interactingTowns[i - 1].CalculateLife(sw.ElapsedMilliseconds);
                 town.RmTownActionReference(interactingTowns[i - 1]);
             }
         }
@@ -257,10 +258,10 @@ namespace Game_Server {
             var token = c.Token;
 
             KI_Base<Individual_Simple> ki1 = new KI_1(game, 999, "KI999", Color.FromArgb(255, 255, 255));
-            KI_Base<Individual_Simple> ki2 = new KI_1(game, 998, "KI998", Color.FromArgb(0, 0, 0));
+            KI_Base<Individual_Advanced> ki2 = new KI_2(game, 998, "KI998", Color.FromArgb(0, 0, 0));
 
             Individual_Simple referenceIndividual = new Individual_Simple(999);
-            Individual_Simple referenceIndividual2 = new Individual_Simple(998);
+            Individual_Advanced referenceIndividual2 = new Individual_Advanced(998);
 
             var t1 = ki1.SendIntoGame(token, referenceIndividual);
             var t2 = ki2.SendIntoGame(token, referenceIndividual2);

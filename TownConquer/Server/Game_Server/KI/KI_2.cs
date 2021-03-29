@@ -180,7 +180,7 @@ namespace Game_Server.KI {
         /// <param name="town">the town to check for life points</param>
         /// <param name="props">gene properties</param>
         protected void CheckKITownLifes(Town town, Dictionary<string, int> props) {
-            town.CalculateLife(game.gm.sw.ElapsedMilliseconds, "own life");
+            town.CalculateLife(game.gm.sw.ElapsedMilliseconds);
             if (town.life <= 0) {
                 for (int i = town.outgoingActionsToTowns.Count; i > 0; i--) {
                     RetreatFromTown(town.position, town.outgoingActionsToTowns[i - 1].position);
@@ -189,7 +189,7 @@ namespace Game_Server.KI {
             }
             for (int x = town.outgoingActionsToTowns.Count; x > 0; x--) {
                 Town t = town.outgoingActionsToTowns[x - 1];
-                t.CalculateLife(game.gm.sw.ElapsedMilliseconds, "life of outgoing");
+                t.CalculateLife(game.gm.sw.ElapsedMilliseconds);
                 if (t.life <= 0) {
                     ConquerTown(t.position);
                     indi.atkScore += 20;

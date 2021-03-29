@@ -12,8 +12,11 @@ public class TownManager : MonoBehaviour {
     private float _elapsed;
     private GameUIManager _ui;
 
+    public System.Diagnostics.Stopwatch sw;
+
     private void Start() {
         _ui = GameObject.Find("UI").GetComponentInChildren<GameUIManager>();
+        sw = System.Diagnostics.Stopwatch.StartNew();
     }
 
     void Update() {
@@ -21,21 +24,16 @@ public class TownManager : MonoBehaviour {
     }
 
     private void GrowLife() {
-        _elapsed += Time.deltaTime;
-        if (_elapsed >= Constants.KI_TICK_RATE) {
-            _elapsed = 0;
-            if (ownerid >= 0) {
-                life += 1;
+        town.CalculateLife(sw.ElapsedMilliseconds);
+        life = town.life;
+
+        if (life < 0) {
+            life = 0;
+            if (town.incomingAttackerTowns.Count > 0) {
+                ConquerTownRequest();
             }
-            life += town.incomingSupporterTowns.Count - town.incomingAttackerTowns.Count - town.outgoingActionsToTowns.Count;
-            if (life < 0) {
-                life = 0;
-                if (town.incomingAttackerTowns.Count > 0) {
-                    ConquerTownRequest();
-                }
-                else {
-                    RequestRetreatOfAllTroops();
-                }
+            else {
+                RequestRetreatOfAllTroops();
             }
         }
     }
@@ -43,7 +41,7 @@ public class TownManager : MonoBehaviour {
     public void RequestRetreatOfAllTroops() {
         foreach (GameObject target in town.outgoingActions) {
             ClientSend.RetreatRequest(
-                gameObject.transform.position, 
+                gameObject.transform.position,
                 ConversionManager.ToUnityVector(target.GetComponent<AttackManager>().end.position));
         }
     }
@@ -70,7 +68,7 @@ public class TownManager : MonoBehaviour {
 
     private void OnMouseEnter() {
         GetComponent<Outline>().OutlineWidth = 3;
-        _ui.DisplayTownInfo(ownerName, life, town.creationTime);
+        _ui.DisplayTownInfo(ownerName, life, town.livingTime);
     }
 
     private void OnMouseExit() {

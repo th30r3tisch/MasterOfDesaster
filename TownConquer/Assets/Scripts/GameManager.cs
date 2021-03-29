@@ -104,10 +104,11 @@ public class GameManager : MonoBehaviour {
         town.GetComponent<TownManager>().ownerid = player.id;
         town.GetComponent<TownManager>().life = t.life;
         town.GetComponent<TownManager>().town = t;
+        town.GetComponent<TownManager>().town = t;
         town.GetComponent<Renderer>().material.color = ConversionManager.DrawingToColor32(player.color);
 
         t.go = town;
-        t.creationTime = player.creationTime;
+        t.livingTime = player.creationTime;
         player.towns.Add(t);
         _world.Insert(t);
     }

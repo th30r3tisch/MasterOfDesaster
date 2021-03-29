@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Numerics;
 
 namespace SharedLibrary.Models {
@@ -119,14 +118,13 @@ namespace SharedLibrary.Models {
             return false;
         }
 
-        public void CalculateLife(long currentTime, string from) {
+        public void CalculateLife(long currentTime) {
             long timePassed = currentTime - livingTime;
 
             if (timePassed > Constants.KI_TICK_RATE) {
                 long timeOverflow = timePassed % Constants.KI_TICK_RATE;
                 int pastTickNumber = (int)timePassed / Constants.KI_TICK_RATE;
                 double firstLifeCalc = life;
-                //Console.WriteLine($"{timePassed} - {livingTime} - {owner.username} - {position} - {incomingAttackerTowns.Count} - {incomingSupporterTowns.Count} - {outgoingActionsToTowns.Count} - {life} - {from}");
                 if (owner.id != -1) {
                     int lostLifeByOutgoing = pastTickNumber * outgoingActionsToTowns.Count;
                     int gotLifeByIncoming = pastTickNumber * incomingSupporterTowns.Count;
